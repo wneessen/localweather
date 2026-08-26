@@ -36,6 +36,9 @@ func start() error {
 	if err != nil {
 		return fmt.Errorf("failed to read/parse config: %w", err)
 	}
+	if err = conf.Validate(); err != nil {
+		return fmt.Errorf("failed to validate config: %w", err)
+	}
 
 	// Initialize logger
 	logger := log.New(conf)

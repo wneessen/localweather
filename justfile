@@ -4,6 +4,9 @@ log_dir   := root / ".dev"
 ## Some exports for convenice
 export APP_URL := "http://127.0.0.1:10001"
 
+## App-specific development environment
+export LOCALWEATHER_LOG_LEVEL := "debug"
+
 [private]
 default:
     @just --list --unsorted

@@ -3,12 +3,23 @@ package config
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/kkyr/fig"
 )
 
 type Config struct {
+	Geobus struct {
+		CoordinatesFile        string `fig:"coordinates_file"`
+		CitynameFile           string `fig:"cityname_file"`
+		DisableGeoIP           bool   `fig:"disable_geoip"`
+		DisableGeoAPI          bool   `fig:"disable_geoapi"`
+		DisableCoordinatesFile bool   `fig:"disable_coordinates_file"`
+		DisableCitynameFile    bool   `fig:"disable_cityname_file"`
+		DisableICHNAEA         bool   `fig:"disable_ichnaea"`
+		DisableGPSD            bool   `fig:"disable_gpsd"`
+	} `fig:"geobus"`
 	Log struct {
 		Format string   `fig:"format" default:"json"`
 		Output string   `fig:"output" default:"stdout"`
@@ -40,6 +51,17 @@ func New(path, file string) (*Config, error) {
 	}
 
 	return &config, nil
+}
+
+// Validate checks and updates the Config object to ensure required fields are set, assigning defaults if necessary.
+func (c *Config) Validate() error {
+	switch {
+	case c.Geobus.CoordinatesFile == "":
+		home, _ := os.UserHomeDir()
+		c.Geobus.CoordinatesFile = filepath.Join(home, ".config", "localweather", "coordinates")
+	}
+
+	return nil
 }
 
 // ListenAddr constructs and returns the server address by combining the server's address and port from
