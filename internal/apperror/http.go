@@ -24,15 +24,15 @@ func (*InvalidUserTypeError) Error() string {
 	return "invalid user type"
 }
 
-type InvalidRequestParameters struct{}
+type InvalidRequestParametersError struct{}
 
-func (*InvalidRequestParameters) Error() string {
+func (*InvalidRequestParametersError) Error() string {
 	return "invalid request parameters"
 }
 
 var (
 	ErrInvalidAuthToken         = new(AuthTokenInvalidError)
-	ErrInvalidRequestParameters = new(InvalidRequestParameters)
+	ErrInvalidRequestParameters = new(InvalidRequestParametersError)
 	ErrUserNotAuthorized        = new(UserNotAuthorizedError)
 	ErrUserTypeNotValid         = new(InvalidUserTypeError)
 	ErrUnexpected               = new(UnexpectedError)
