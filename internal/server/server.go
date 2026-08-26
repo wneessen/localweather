@@ -2,11 +2,13 @@ package server
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"time"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/go-co-op/gocron/v2"
 
 	"github.com/wneessen/localweather/internal/config"
 	"github.com/wneessen/localweather/internal/log"
@@ -18,16 +20,16 @@ type Server struct {
 	log      *log.Logger
 	httpserv *http.Server
 	mux      chi.Router
+	cron     gocron.Scheduler
 	/*queries  *model.Queries
 	pool     *pgxpool.Pool
-	cron     gocron.Scheduler
 	*/
 }
 
 type Params struct {
-	Log *log.Logger
+	Log  *log.Logger
+	Cron gocron.Scheduler
 	/*
-		Cron    gocron.Scheduler
 		Queries *model.Queries
 		PgxPool *pgxpool.Pool
 
@@ -43,6 +45,7 @@ func New(params Params, conf *config.Config) *Server {
 		conf: conf,
 		log:  params.Log,
 		mux:  chi.NewMux(),
+		cron: params.Cron,
 	}
 	server.httpserv = &http.Server{
 		Addr:              conf.ListenAddr(),
@@ -59,18 +62,16 @@ func New(params Params, conf *config.Config) *Server {
 func (s *Server) Start(ctx context.Context) error {
 	s.log.Info("starting localweather service")
 
-	/*
-		s.log.Info("starting cron scheduler")
-		if err := s.cronjobs(ctx); err != nil {
-			return fmt.Errorf("failed to set up cron jobs: %w", err)
-		}
+	s.log.Info("starting cron scheduler")
+	if err := s.cronjobs(ctx); err != nil {
+		return fmt.Errorf("failed to set up cron jobs: %w", err)
+	}
 
-		s.log.Info("starting http backend", "listen_addr", s.conf.ListenAddr())
-		s.httpRoutes(ctx)
-		if err := s.httpserv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			return fmt.Errorf("failed to start http server: %w", err)
-		}
-	*/
+	s.log.Info("starting http backend", "listen_addr", s.conf.ListenAddr())
+	//s.httpRoutes(ctx)
+	if err := s.httpserv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+		return fmt.Errorf("failed to start http server: %w", err)
+	}
 
 	return nil
 }
@@ -85,16 +86,13 @@ func (s *Server) Stop() error {
 		return fmt.Errorf("failed to stop http server: %w", err)
 	}
 
-	/*
-		s.log.Info("stopping scheduler")
-		if err := s.cron.StopJobs(); err != nil {
-			return fmt.Errorf("failed to stop scheduler jobs: %w", err)
-		}
-		if err := s.cron.Shutdown(); err != nil {
-			return fmt.Errorf("failed to shut down scheduler: %w", err)
-		}
-
-	*/
+	s.log.Info("stopping scheduler")
+	if err := s.cron.StopJobs(); err != nil {
+		return fmt.Errorf("failed to stop scheduler jobs: %w", err)
+	}
+	if err := s.cron.Shutdown(); err != nil {
+		return fmt.Errorf("failed to shut down scheduler: %w", err)
+	}
 
 	s.log.Info("localweather service gracefully stopped")
 	return nil

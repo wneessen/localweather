@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"syscall"
 
+	"github.com/go-co-op/gocron/v2"
 	"golang.org/x/sync/errgroup"
 
 	"github.com/wneessen/localweather/internal/config"
@@ -65,18 +66,18 @@ func start() error {
 			return fmt.Errorf("failed to open database: %w", err)
 		}
 		queries := model.New(dbConn)
-
-		// Cron task scheduler
-		cron, err := gocron.NewScheduler()
-		if err != nil {
-			return fmt.Errorf("failed to initialize cron scheduler: %w", err)
-		}
-
 	*/
+
+	// Cron task scheduler
+	cron, err := gocron.NewScheduler()
+	if err != nil {
+		return fmt.Errorf("failed to initialize cron scheduler: %w", err)
+	}
 
 	// Create a new http.Server instance
 	s := server.New(server.Params{
-		Log: logger,
+		Cron: cron,
+		Log:  logger,
 	}, conf)
 
 	// Use an errgroup to wait for separate goroutines which can error
