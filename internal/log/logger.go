@@ -5,17 +5,20 @@ import (
 	"os"
 	"strings"
 
-	"github.com/wneessen/listenstats/internal/config"
+	"github.com/wneessen/localweather/internal/config"
 )
 
+// Logger is a wrapper around slog.Logger that provides extended logging functionality for the application.
 type Logger struct {
 	*slog.Logger
 }
 
+// New creates a new Logger instance based on the provided configuration.
 func New(conf *config.Config) *Logger {
 	return NewWithReplaceAttr(conf, nil)
 }
 
+// NewWithReplaceAttr creates a new Logger instance with a configuration and an optional attribute replacement function.
 func NewWithReplaceAttr(conf *config.Config, replaceAttr func(groups []string, a slog.Attr) slog.Attr) *Logger {
 	var logger *slog.Logger
 	if conf == nil {
@@ -49,6 +52,7 @@ func NewWithReplaceAttr(conf *config.Config, replaceAttr func(groups []string, a
 	return &Logger{logger}
 }
 
+// ErrAttr creates a slog.Attr with the key "error" and the given error value.
 func ErrAttr(err error) slog.Attr {
 	return slog.Any("error", err)
 }
