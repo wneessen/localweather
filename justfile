@@ -1,6 +1,9 @@
 root      := justfile_directory()
 log_dir   := root / ".dev"
 
+## Some exports for convenice
+export APP_URL := "http://127.0.0.1:10001"
+
 [private]
 default:
     @just --list --unsorted
