@@ -1,0 +1,51 @@
+## SPDX-FileCopyrightText: Winni Neessen <wn@neessen.dev>
+##
+## SPDX-License-Identifier: MIT
+
+version = '2'
+
+[run]
+go = '1.27'
+tests = true
+
+[linters]
+enable = [
+  'containedctx',
+  'contextcheck',
+  'decorder',
+  'errname',
+  'errorlint',
+  'gosec',
+  'staticcheck',
+  'whitespace'
+]
+
+[linters.exclusions]
+generated = 'lax'
+presets = [
+  'comments',
+  'common-false-positives',
+  'legacy',
+  'std-error-handling'
+]
+paths = [
+  'examples',
+  'third_party$',
+  'builtin$',
+  'examples$'
+]
+
+[formatters]
+enable = [
+  'gofmt',
+  'gofumpt'
+]
+
+[formatters.exclusions]
+generated = 'lax'
+paths = [
+  'examples',
+  'third_party$',
+  'builtin$',
+  'examples$'
+]
