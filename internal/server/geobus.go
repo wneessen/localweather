@@ -43,7 +43,7 @@ func (s *Server) geobusProviderList() ([]geobus.Provider, error) {
 	var provider []geobus.Provider
 
 	if !s.conf.Geobus.DisableCoordinatesFile {
-		provider = append(provider, coordinates_file.NewLocationFileProvider(s.conf.Geobus.CoordinatesFile))
+		provider = append(provider, coordinates_file.NewCoordinatesFileProvider(s.conf.Geobus.CoordinatesFile))
 	}
 
 	if !s.conf.Geobus.DisableGeoIP {

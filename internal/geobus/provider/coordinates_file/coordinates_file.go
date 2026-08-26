@@ -23,11 +23,11 @@ const (
 	pollTime = time.Minute * 5
 )
 
-// CoordinatesFileProvider reads geolocation data from a file and emits updates via a stream.
+// Provider reads geolocation data from a file and emits updates via a stream.
 // It periodically reads a specified file, parses its data, and updates geolocation results based on changes.
 // Each result includes details about the location, accuracy, confidence, and timestamp of the data.
 // Results are subject to a time-to-live (TTL) duration, ensuring outdated data is discarded.
-type CoordinatesFileProvider struct {
+type Provider struct {
 	name     string
 	path     string
 	period   time.Duration
@@ -35,10 +35,10 @@ type CoordinatesFileProvider struct {
 	locateFn func() (lat, lon, alt float64, err error)
 }
 
-// NewLocationFileProvider initializes a CoordinatesFileProvider with a file path and default update
+// NewCoordinatesFileProvider initializes a Provider with a file path and default update
 // interval and TTL settings.
-func NewLocationFileProvider(path string) *CoordinatesFileProvider {
-	provider := &CoordinatesFileProvider{
+func NewCoordinatesFileProvider(path string) *Provider {
+	provider := &Provider{
 		name:   name,
 		path:   path,
 		period: pollTime,
@@ -48,14 +48,14 @@ func NewLocationFileProvider(path string) *CoordinatesFileProvider {
 	return provider
 }
 
-// Name returns the name of the CoordinatesFileProvider instance.
-func (p *CoordinatesFileProvider) Name() string {
+// Name returns the name of the Provider instance.
+func (p *Provider) Name() string {
 	return p.name
 }
 
 // LookupStream continuously streams geolocation results from a file, emitting updates when data changes
 // or context ends.
-func (p *CoordinatesFileProvider) LookupStream(ctx context.Context, key string) <-chan geobus.Result {
+func (p *Provider) LookupStream(ctx context.Context, key string) <-chan geobus.Result {
 	out := make(chan geobus.Result)
 	go func() {
 		defer close(out)
@@ -96,7 +96,7 @@ func (p *CoordinatesFileProvider) LookupStream(ctx context.Context, key string) 
 }
 
 // createResult composes and returns a Result using provided geolocation data and metadata.
-func (p *CoordinatesFileProvider) createResult(key string, coord types.Coordinate) geobus.Result {
+func (p *Provider) createResult(key string, coord types.Coordinate) geobus.Result {
 	return geobus.Result{
 		Key:       key,
 		Altitude:  coord.Altitude,
@@ -112,7 +112,7 @@ func (p *CoordinatesFileProvider) createResult(key string, coord types.Coordinat
 // readFile reads geolocation data from the file at the configured path.
 // Returns latitude, longitude, altitude, accuracy, or an error if the file cannot be
 // read or parsed correctly.
-func (p *CoordinatesFileProvider) readFile() (lat, lon, alt float64, err error) {
+func (p *Provider) readFile() (lat, lon, alt float64, err error) {
 	data, err := os.ReadFile(p.path)
 	if err != nil {
 		return 0, 0, 0, fmt.Errorf("failed to read coordinates file %q: %w", p.path, err)
