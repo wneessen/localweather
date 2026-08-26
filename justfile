@@ -1,0 +1,19 @@
+root      := justfile_directory()
+log_dir   := root / ".dev"
+
+[private]
+default:
+    @just --list --unsorted
+
+[group('run')]
+shell:
+    nix develop -c zsh
+
+[group('service')]
+server:
+    nix develop -c air | tee {{ log_dir }}/service.log
+
+[group('setup')]
+bootstrap:
+    mkdir -p {{ log_dir }}
+    test -f .air.toml || nix develop -c 'air init'
