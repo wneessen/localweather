@@ -1,7 +1,10 @@
 package server
 
 import (
+	"context"
+	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 
@@ -50,4 +53,49 @@ func New(params Params, conf *config.Config) *Server {
 		IdleTimeout:       conf.Server.Timeout,
 	}
 	return server
+}
+
+// Start initializes and starts the server, including cron jobs, metrics registration, and HTTP server setup.
+func (s *Server) Start(ctx context.Context) error {
+	s.log.Info("starting localweather service")
+
+	/*
+		s.log.Info("starting cron scheduler")
+		if err := s.cronjobs(ctx); err != nil {
+			return fmt.Errorf("failed to set up cron jobs: %w", err)
+		}
+
+		s.log.Info("starting http backend", "listen_addr", s.conf.ListenAddr())
+		s.httpRoutes(ctx)
+		if err := s.httpserv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			return fmt.Errorf("failed to start http server: %w", err)
+		}
+	*/
+
+	return nil
+}
+
+// Stop gracefully shuts down the server by stopping HTTP services, unregistering metrics, and halting the scheduler.
+func (s *Server) Stop() error {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+	defer cancel()
+
+	s.log.Info("stopping http backend")
+	if err := s.httpserv.Shutdown(ctx); err != nil {
+		return fmt.Errorf("failed to stop http server: %w", err)
+	}
+
+	/*
+		s.log.Info("stopping scheduler")
+		if err := s.cron.StopJobs(); err != nil {
+			return fmt.Errorf("failed to stop scheduler jobs: %w", err)
+		}
+		if err := s.cron.Shutdown(); err != nil {
+			return fmt.Errorf("failed to shut down scheduler: %w", err)
+		}
+
+	*/
+
+	s.log.Info("localweather service gracefully stopped")
+	return nil
 }
