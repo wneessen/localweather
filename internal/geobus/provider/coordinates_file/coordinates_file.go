@@ -82,7 +82,6 @@ func (p *CoordinatesFileProvider) LookupStream(ctx context.Context, key string) 
 				Latitude:  lat,
 				Longitude: lon,
 			}
-			fmt.Printf("Coordinate: %+v\n", coord)
 			state.Update(coord)
 			r := p.createResult(key, coord)
 

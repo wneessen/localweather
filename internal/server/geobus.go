@@ -8,6 +8,7 @@ import (
 	"github.com/wneessen/localweather/internal/apperror"
 	"github.com/wneessen/localweather/internal/geobus"
 	"github.com/wneessen/localweather/internal/geobus/provider/coordinates_file"
+	"github.com/wneessen/localweather/internal/geobus/provider/geoip"
 	"github.com/wneessen/localweather/internal/http"
 )
 
@@ -41,10 +42,16 @@ func (s *Server) geobusProviderList() ([]geobus.Provider, error) {
 	httpClient := http.New(s.log)
 	var provider []geobus.Provider
 
-	_ = httpClient
-	switch {
-	case !s.conf.Geobus.DisableCoordinatesFile:
+	if !s.conf.Geobus.DisableCoordinatesFile {
 		provider = append(provider, coordinates_file.NewLocationFileProvider(s.conf.Geobus.CoordinatesFile))
+	}
+
+	if !s.conf.Geobus.DisableGeoIP {
+		gip, err := geoip.NewGeoIPProvider(httpClient)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create GeoIP provider: %w", err)
+		}
+		provider = append(provider, gip)
 	}
 
 	/*
