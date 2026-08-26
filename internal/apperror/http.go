@@ -6,34 +6,13 @@ func (*UnexpectedError) Error() string {
 	return "unexpected error or internal server error"
 }
 
-type AuthTokenInvalidError struct{}
+type InvalidRequestParametersError struct{}
 
-func (*AuthTokenInvalidError) Error() string {
-	return "authentication token missing, invalid or expired"
-}
-
-type UserNotAuthorizedError struct{}
-
-func (*UserNotAuthorizedError) Error() string {
-	return "user not authorized"
-}
-
-type InvalidUserTypeError struct{}
-
-func (*InvalidUserTypeError) Error() string {
-	return "invalid user type"
-}
-
-type InvalidRequestParameters struct{}
-
-func (*InvalidRequestParameters) Error() string {
+func (*InvalidRequestParametersError) Error() string {
 	return "invalid request parameters"
 }
 
 var (
-	ErrInvalidAuthToken         = new(AuthTokenInvalidError)
-	ErrInvalidRequestParameters = new(InvalidRequestParameters)
-	ErrUserNotAuthorized        = new(UserNotAuthorizedError)
-	ErrUserTypeNotValid         = new(InvalidUserTypeError)
+	ErrInvalidRequestParameters = new(InvalidRequestParametersError)
 	ErrUnexpected               = new(UnexpectedError)
 )
