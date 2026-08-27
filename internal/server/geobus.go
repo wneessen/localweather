@@ -113,7 +113,7 @@ func (s *Server) processGeobusUpdate(ctx context.Context, sub <-chan geobus.Resu
 				slog.Float64("latitude", r.Coordinates.Latitude),
 				slog.Float64("longitude", r.Coordinates.Longitude),
 				slog.Float64("altitude", r.Coordinates.Altitude),
-				slog.Float64("accuracy", r.Coordinates.Accuracy.Float64()),
+				slog.String("accuracy", r.Coordinates.Accuracy.String()),
 				slog.String("provider", r.Provider))
 		}
 	}

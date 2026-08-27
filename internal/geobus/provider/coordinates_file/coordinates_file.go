@@ -21,6 +21,7 @@ import (
 
 const (
 	name     = "coordinates_file"
+	accuracy = types.AccuracyExact
 	ttlTime  = time.Hour * 12
 	pollTime = time.Minute * 5
 )
@@ -78,7 +79,9 @@ func (p *Provider) LookupStream(ctx context.Context, key string) <-chan geobus.R
 // Returns latitude, longitude, altitude, accuracy, or an error if the file cannot be
 // read or parsed correctly.
 func (p *Provider) readFile(_ context.Context) (types.Coordinate, error) {
-	coords := types.Coordinate{}
+	coords := types.Coordinate{
+		Accuracy: accuracy,
+	}
 	data, err := os.ReadFile(p.path)
 	if err != nil {
 		return coords, fmt.Errorf("failed to read coordinates file %q: %w", p.path, err)
