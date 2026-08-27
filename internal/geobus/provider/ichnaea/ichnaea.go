@@ -8,7 +8,7 @@ import (
 	"bytes"
 	"context"
 	"crypto/sha256"
-	"encoding/json"
+	"encoding/json/v2"
 	"fmt"
 	"slices"
 	"strings"
@@ -269,7 +269,7 @@ func (p *Provider) lookup(ctx context.Context, wifiList []WirelessNetwork) (cach
 		Accesspoints: wifiList,
 	}
 	bodyBuffer := bytes.NewBuffer(nil)
-	if err := json.NewEncoder(bodyBuffer).Encode(req); err != nil {
+	if err := json.MarshalWrite(bodyBuffer, req); err != nil {
 		return location, fmt.Errorf("failed to encode wifi list to JSON: %w", err)
 	}
 

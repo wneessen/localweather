@@ -7,7 +7,7 @@ package gpsdpoll
 import (
 	"bufio"
 	"context"
-	"encoding/json"
+	"encoding/json/v2"
 	"errors"
 	"fmt"
 	"math"
@@ -66,10 +66,9 @@ func (c *Client) Poll(ctx context.Context) (types.Coordinate, error) {
 
 	// Respect context deadline if present, otherwise we add a safety net so we don't hang
 	// forever if ctx has no deadline.
+	_ = conn.SetDeadline(time.Now().Add(watchTimeout))
 	if deadline, ok := ctx.Deadline(); ok {
 		_ = conn.SetDeadline(deadline)
-	} else {
-		_ = conn.SetDeadline(time.Now().Add(watchTimeout))
 	}
 
 	// Request a WATCH.
