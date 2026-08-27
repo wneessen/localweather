@@ -59,12 +59,15 @@ func New(path, file string) (*Config, error) {
 
 // Validate checks and updates the Config object to ensure required fields are set, assigning defaults if necessary.
 func (c *Config) Validate() error {
-	switch {
-	case c.Geobus.CoordinatesFile == "":
+	if c.Geobus.CitynameFile == "" {
+		home, _ := os.UserHomeDir()
+		c.Geobus.CitynameFile = filepath.Join(home, ".config", "localweather", "cityname")
+	}
+
+	if c.Geobus.CoordinatesFile == "" {
 		home, _ := os.UserHomeDir()
 		c.Geobus.CoordinatesFile = filepath.Join(home, ".config", "localweather", "coordinates")
 	}
-
 	return nil
 }
 

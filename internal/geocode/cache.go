@@ -49,7 +49,7 @@ func (c *CachedGeocoder) Reverse(ctx context.Context, coords types.Coordinate) (
 	return c.reverse.Fetch(ctx,
 		key,
 		func(ctx context.Context) (types.Address, error) { return c.coder.Reverse(ctx, coords) },
-		func(a types.Address) bool { return a.AddressFound },
+		func(a types.Address) bool { return a.Found },
 		func(a *types.Address) { a.CacheHit = true },
 	)
 }

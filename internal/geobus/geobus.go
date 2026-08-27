@@ -112,7 +112,7 @@ func (b *Service) Publish(r Result) {
 	}
 
 	b.mu.Lock()
-	updateRequired := false
+	superseded := false
 
 	prev, have := b.best[r.Key]
 	prevCoord := types.Coordinate{
@@ -124,18 +124,18 @@ func (b *Service) Publish(r Result) {
 
 	// If the result is not expired or better and the position has changed significantly, update it.
 	if !have || prev.IsExpired() || r.BetterThan(prev) && newCoord.PositionHasSignificantChange(prevCoord) {
-		updateRequired = true
+		superseded = true
 	}
 
-	b.log.Debug("received publish request",
+	b.log.Debug("a geobus provider published a new geolocation update",
 		slog.Float64("accuracy", r.Coordinates.Accuracy.Float64()),
 		slog.Float64("altitude", r.Coordinates.Altitude),
 		slog.Float64("latitude", r.Coordinates.Latitude),
 		slog.Float64("longitude", r.Coordinates.Longitude),
-		slog.String("source", r.Provider),
-		slog.Bool("update_required", updateRequired),
+		slog.String("provider", r.Provider),
+		slog.Bool("current_location_superseded", superseded),
 	)
-	if !updateRequired {
+	if !superseded {
 		b.mu.Unlock()
 		return
 	}

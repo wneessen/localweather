@@ -8,6 +8,7 @@ import (
 	"bufio"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"math"
 	"net"
@@ -108,6 +109,11 @@ func (c *Client) Poll(ctx context.Context) (types.Coordinate, error) {
 	}
 
 	if err = scanner.Err(); err != nil {
+		// a network timeout here usually means there is no gpsd running or the signal is too
+		// bad to return a proper response. We'll ignore these without returning an error
+		if _, ok := errors.AsType[*net.OpError](err); ok {
+			return zero, nil
+		}
 		return zero, fmt.Errorf("failed to scan GPSd response: %w", err)
 	}
 

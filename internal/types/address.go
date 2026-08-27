@@ -1,8 +1,8 @@
 package types
 
 type Address struct {
-	AddressFound bool
-	CacheHit     bool
+	Found    bool
+	CacheHit bool
 
 	Latitude     float64
 	Longitude    float64
