@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"sync"
 	"time"
 
 	"github.com/go-chi/chi/v5"
@@ -14,6 +15,7 @@ import (
 	"github.com/wneessen/localweather/internal/geobus"
 	"github.com/wneessen/localweather/internal/geocode"
 	"github.com/wneessen/localweather/internal/log"
+	"github.com/wneessen/localweather/internal/weather"
 )
 
 // Server represents the main application server, managing HTTP services, cron jobs, metrics, and database interactions.
@@ -26,9 +28,8 @@ type Server struct {
 	httpserv    *http.Server
 	mux         chi.Router
 	cron        gocron.Scheduler
-	/*queries  *model.Queries
-	pool     *pgxpool.Pool
-	*/
+	weatherLock sync.RWMutex
+	weather     weather.Provider
 }
 
 type Params struct {
@@ -76,6 +77,11 @@ func (s *Server) Start(ctx context.Context) error {
 	s.log.Info("selecting geocoder provider")
 	if err := s.initGeocoder(); err != nil {
 		return fmt.Errorf("failed to select geocoding provider: %w", err)
+	}
+
+	s.log.Info("selecting weather provider")
+	if err := s.initWeather(); err != nil {
+		return fmt.Errorf("failed to select weather provider: %w", err)
 	}
 
 	s.log.Info("starting geobus service")
