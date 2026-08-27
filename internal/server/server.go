@@ -11,16 +11,19 @@ import (
 	"github.com/go-co-op/gocron/v2"
 
 	"github.com/wneessen/localweather/internal/config"
+	"github.com/wneessen/localweather/internal/geobus"
 	"github.com/wneessen/localweather/internal/log"
 )
 
 // Server represents the main application server, managing HTTP services, cron jobs, metrics, and database interactions.
 type Server struct {
-	conf     *config.Config
-	log      *log.Logger
-	httpserv *http.Server
-	mux      chi.Router
-	cron     gocron.Scheduler
+	conf        *config.Config
+	geobus      *geobus.Service
+	geobusUnsub func()
+	log         *log.Logger
+	httpserv    *http.Server
+	mux         chi.Router
+	cron        gocron.Scheduler
 	/*queries  *model.Queries
 	pool     *pgxpool.Pool
 	*/
@@ -47,6 +50,7 @@ func New(params Params, conf *config.Config) *Server {
 		mux:  chi.NewMux(),
 		cron: params.Cron,
 	}
+
 	server.httpserv = &http.Server{
 		Addr:              conf.ListenAddr(),
 		Handler:           server.mux,
@@ -67,6 +71,11 @@ func (s *Server) Start(ctx context.Context) error {
 		return fmt.Errorf("failed to set up cron jobs: %w", err)
 	}
 
+	s.log.Info("starting geobus service")
+	if err := s.startGeobus(ctx); err != nil {
+		return fmt.Errorf("failed to start geobus provider: %w", err)
+	}
+
 	s.log.Info("starting http backend", "listen_addr", s.conf.ListenAddr())
 	s.httpRoutes(ctx)
 	if err := s.httpserv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
@@ -84,6 +93,11 @@ func (s *Server) Stop() error {
 	s.log.Info("stopping http backend")
 	if err := s.httpserv.Shutdown(ctx); err != nil {
 		return fmt.Errorf("failed to stop http server: %w", err)
+	}
+
+	s.log.Info("unsubscribing from geobus updates")
+	if s.geobusUnsub != nil {
+		s.geobusUnsub()
 	}
 
 	s.log.Info("stopping scheduler")
