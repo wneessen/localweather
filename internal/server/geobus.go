@@ -7,6 +7,7 @@ import (
 
 	"github.com/wneessen/localweather/internal/apperror"
 	"github.com/wneessen/localweather/internal/geobus"
+	"github.com/wneessen/localweather/internal/geobus/provider/cityname_file"
 	"github.com/wneessen/localweather/internal/geobus/provider/coordinates_file"
 	"github.com/wneessen/localweather/internal/geobus/provider/geoapi"
 	"github.com/wneessen/localweather/internal/geobus/provider/geoip"
@@ -49,6 +50,14 @@ func (s *Server) geobusProviderList() ([]geobus.Provider, error) {
 		provider = append(provider, coordinates_file.NewCoordinatesFileProvider(s.conf.Geobus.CoordinatesFile, s.log))
 	}
 
+	if !s.conf.Geobus.DisableCitynameFile {
+		cnf, err := cityname_file.NewCitynameFileProvider(s.conf.Geobus.CitynameFile, s.geocoder, s.log)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create cityname file provider: %w", err)
+		}
+		provider = append(provider, cnf)
+	}
+
 	if !s.conf.Geobus.DisableGeoIP {
 		gip, err := geoip.NewGeoIPProvider(httpClient, s.log)
 		if err != nil {
@@ -77,20 +86,6 @@ func (s *Server) geobusProviderList() ([]geobus.Provider, error) {
 		provider = append(provider, gpsd.NewGPSdProvider(s.log))
 	}
 
-	/*
-		if !s.config.GeoLocation.DisableCitynameFile {
-			cnf, err := cityname_file.NewCitynameFileProvider(s.config.GeoLocation.CitynameFile, s.geocoder)
-			if err != nil {
-				return nil, fmt.Errorf("failed to create cityname file provider: %w", err)
-			}
-			provider = append(provider, cnf)
-		}
-
-
-
-
-
-	*/
 	if len(provider) == 0 {
 		return nil, apperror.ErrNoGeobusProvider
 	}
