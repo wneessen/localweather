@@ -32,7 +32,7 @@ type Provider struct {
 	path     string
 	period   time.Duration
 	ttl      time.Duration
-	locateFn func() (lat, lon, alt float64, err error)
+	locateFn func() (types.Coordinate, error)
 }
 
 // NewCoordinatesFileProvider initializes a Provider with a file path and default update
@@ -72,18 +72,12 @@ func (p *Provider) LookupStream(ctx context.Context, key string) <-chan geobus.R
 			}
 			firstRun = false
 
-			lat, lon, alt, err := p.locateFn()
+			coords, err := p.locateFn()
 			if err != nil {
 				continue
 			}
-			coord := types.Coordinate{
-				Altitude:  alt,
-				Accuracy:  types.AccuracyExact,
-				Latitude:  lat,
-				Longitude: lon,
-			}
-			state.Update(coord)
-			r := p.createResult(key, coord)
+			state.Update(coords)
+			r := p.createResult(key, coords)
 
 			select {
 			case <-ctx.Done():
@@ -98,24 +92,22 @@ func (p *Provider) LookupStream(ctx context.Context, key string) <-chan geobus.R
 // createResult composes and returns a Result using provided geolocation data and metadata.
 func (p *Provider) createResult(key string, coord types.Coordinate) geobus.Result {
 	return geobus.Result{
-		Key:       key,
-		Altitude:  coord.Altitude,
-		Accuracy:  coord.Accuracy,
-		Latitude:  coord.Latitude,
-		Longitude: coord.Longitude,
-		Provider:  p.name,
-		At:        time.Now(),
-		TTL:       p.ttl,
+		Key:         key,
+		Coordinates: coord,
+		Provider:    p.name,
+		At:          time.Now(),
+		TTL:         p.ttl,
 	}
 }
 
 // readFile reads geolocation data from the file at the configured path.
 // Returns latitude, longitude, altitude, accuracy, or an error if the file cannot be
 // read or parsed correctly.
-func (p *Provider) readFile() (lat, lon, alt float64, err error) {
+func (p *Provider) readFile() (types.Coordinate, error) {
+	coords := types.Coordinate{}
 	data, err := os.ReadFile(p.path)
 	if err != nil {
-		return 0, 0, 0, fmt.Errorf("failed to read coordinates file %q: %w", p.path, err)
+		return coords, fmt.Errorf("failed to read coordinates file %q: %w", p.path, err)
 	}
 	lines := strings.SplitSeq(string(data), "\n")
 	for line := range lines {
@@ -123,26 +115,26 @@ func (p *Provider) readFile() (lat, lon, alt float64, err error) {
 		if strings.HasPrefix(line, "#") {
 			continue
 		}
-		coords := strings.Split(line, ",")
-		if len(coords) < 2 || len(coords) > 3 {
+		coordSplit := strings.Split(line, ",")
+		if len(coordSplit) < 2 || len(coordSplit) > 3 {
 			continue
 		}
-		lat, err = strconv.ParseFloat(strings.TrimSpace(coords[0]), 64)
+		coords.Latitude, err = strconv.ParseFloat(strings.TrimSpace(coordSplit[0]), 64)
 		if err != nil {
 			continue
 		}
-		lon, err = strconv.ParseFloat(strings.TrimSpace(coords[1]), 64)
+		coords.Longitude, err = strconv.ParseFloat(strings.TrimSpace(coordSplit[1]), 64)
 		if err != nil {
 			continue
 		}
-		if len(coords) == 3 {
-			alt, err = strconv.ParseFloat(strings.TrimSpace(coords[2]), 64)
+		if len(coordSplit) == 3 {
+			coords.Altitude, err = strconv.ParseFloat(strings.TrimSpace(coordSplit[2]), 64)
 			if err != nil {
 				continue
 			}
 		}
 
-		return lat, lon, alt, nil
+		return coords, nil
 	}
-	return 0, 0, 0, apperror.ErrNoValidCoordinates
+	return coords, apperror.ErrNoValidCoordinates
 }

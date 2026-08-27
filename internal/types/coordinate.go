@@ -15,6 +15,7 @@ type Coordinate struct {
 	Altitude  float64
 	Accuracy  Accuracy
 
+	GPSMode  int
 	CacheHit bool
 	Found    bool
 }
@@ -42,4 +43,9 @@ func (c Coordinate) PositionHasSignificantChange(other Coordinate) bool {
 // Valid checks if the coordinate is valid according to the EPSG logic
 func (c Coordinate) Valid() bool {
 	return c.Latitude >= -90 && c.Latitude <= 90 && c.Longitude >= -180 && c.Longitude <= 180
+}
+
+// Has2DFix reports whether the fix has at least a 2D fix.
+func (c Coordinate) Has2DFix() bool {
+	return c.GPSMode >= 2
 }

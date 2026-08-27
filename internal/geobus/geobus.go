@@ -39,14 +39,11 @@ type Service struct {
 
 // Result represents a geolocation result with associated metadata.
 type Result struct {
-	Key       string
-	Latitude  float64
-	Longitude float64
-	Altitude  float64
-	Accuracy  types.Accuracy
-	Provider  string
-	At        time.Time
-	TTL       time.Duration
+	Key         string
+	Coordinates types.Coordinate
+	Provider    string
+	At          time.Time
+	TTL         time.Duration
 }
 
 // New initializes and returns a new instance of Service to handle
@@ -98,7 +95,7 @@ func (b *Service) Subscribe(key string, size int) (<-chan Result, func()) {
 // Publish updates the best result for a key and notifies subscribers
 func (b *Service) Publish(r Result) {
 	// Ignore zero-accuracy results; they’re meaningless.
-	if r.Accuracy <= 0 {
+	if r.Coordinates.Accuracy <= 0 {
 		return
 	}
 
@@ -108,10 +105,10 @@ func (b *Service) Publish(r Result) {
 	}
 
 	newCoord := types.Coordinate{
-		Accuracy:  r.Accuracy,
-		Altitude:  r.Altitude,
-		Latitude:  r.Latitude,
-		Longitude: r.Longitude,
+		Accuracy:  r.Coordinates.Accuracy,
+		Altitude:  r.Coordinates.Altitude,
+		Latitude:  r.Coordinates.Latitude,
+		Longitude: r.Coordinates.Longitude,
 	}
 
 	b.mu.Lock()
@@ -119,10 +116,10 @@ func (b *Service) Publish(r Result) {
 
 	prev, have := b.best[r.Key]
 	prevCoord := types.Coordinate{
-		Altitude:  prev.Altitude,
-		Accuracy:  prev.Accuracy,
-		Latitude:  prev.Latitude,
-		Longitude: prev.Longitude,
+		Altitude:  prev.Coordinates.Altitude,
+		Accuracy:  prev.Coordinates.Accuracy,
+		Latitude:  prev.Coordinates.Latitude,
+		Longitude: prev.Coordinates.Longitude,
 	}
 
 	// If the result is not expired or better and the position has changed significantly, update it.
@@ -131,10 +128,10 @@ func (b *Service) Publish(r Result) {
 	}
 
 	b.log.Debug("received publish request",
-		slog.Float64("accuracy", r.Accuracy.Float64()),
-		slog.Float64("altitude", r.Altitude),
-		slog.Float64("latitude", r.Latitude),
-		slog.Float64("longitude", r.Longitude),
+		slog.Float64("accuracy", r.Coordinates.Accuracy.Float64()),
+		slog.Float64("altitude", r.Coordinates.Altitude),
+		slog.Float64("latitude", r.Coordinates.Latitude),
+		slog.Float64("longitude", r.Coordinates.Longitude),
 		slog.String("source", r.Provider),
 		slog.Bool("update_required", updateRequired),
 	)
@@ -177,10 +174,10 @@ func (r Result) BetterThan(prev Result) bool {
 	}
 
 	// More accurate?
-	if r.Accuracy < prev.Accuracy-accuracyEpsilon {
+	if r.Coordinates.Accuracy < prev.Coordinates.Accuracy-accuracyEpsilon {
 		return true
 	}
-	if prev.Accuracy < r.Accuracy-accuracyEpsilon {
+	if prev.Coordinates.Accuracy < r.Coordinates.Accuracy-accuracyEpsilon {
 		return false
 	}
 
