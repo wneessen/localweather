@@ -9,6 +9,7 @@ import (
 	"golang.org/x/text/language"
 
 	"github.com/wneessen/localweather/internal/geocode"
+	geocodeearth "github.com/wneessen/localweather/internal/geocode/provider/geocode-earth"
 	"github.com/wneessen/localweather/internal/geocode/provider/opencage"
 	nominatim "github.com/wneessen/localweather/internal/geocode/provider/osm-nominatim"
 	"github.com/wneessen/localweather/internal/http"
@@ -42,14 +43,12 @@ func (s *Server) selectGeocodeProvider(lang language.Tag) (geocode.Geocoder, err
 		}
 		geocoder = geocode.NewCachedGeocoder(opencage.New(http.New(s.log), lang, s.conf.Geocoder.APIKey),
 			cacheHitTTL, cacheMissTTL)
-		/*
-			case "geocode-earth":
-				if conf.GeoCoder.APIKey == "" {
-					return nil, fmt.Errorf("geocode-earth geocoder requires an API key")
-				}
-				geocoder = geocode.NewCachedGeocoder(geocodeearth.New(http.New(log), lang, conf.GeoCoder.APIKey),
-					cacheHitTTL, cacheMissTTL)
-		*/
+	case "geocode-earth":
+		if s.conf.Geocoder.APIKey == "" {
+			return nil, fmt.Errorf("geocode-earth geocoder requires an API key")
+		}
+		geocoder = geocode.NewCachedGeocoder(geocodeearth.New(http.New(s.log), lang, s.conf.Geocoder.APIKey),
+			cacheHitTTL, cacheMissTTL)
 	default:
 		return nil, fmt.Errorf("unsupported geocoder type: %s", s.conf.Geocoder.Provider)
 	}

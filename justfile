@@ -7,6 +7,7 @@ export APP_URL := "http://127.0.0.1:10001"
 ## App-specific development environment
 export LOCALWEATHER_LOG_LEVEL := "debug"
 export LOCALWEATHER_GEOCODER_PROVIDER := "opencage"
+#export LOCALWEATHER_GEOCODER_PROVIDER := "geocode-earth"
 
 [private]
 default:
