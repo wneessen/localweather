@@ -11,6 +11,7 @@ import (
 	"github.com/wneessen/localweather/internal/geobus/provider/geoapi"
 	"github.com/wneessen/localweather/internal/geobus/provider/geoip"
 	"github.com/wneessen/localweather/internal/geobus/provider/gpsd"
+	"github.com/wneessen/localweather/internal/geobus/provider/ichnaea"
 	"github.com/wneessen/localweather/internal/http"
 )
 
@@ -64,6 +65,14 @@ func (s *Server) geobusProviderList() ([]geobus.Provider, error) {
 		provider = append(provider, gap)
 	}
 
+	if !s.conf.Geobus.DisableICHNAEA {
+		mls, err := ichnaea.NewICHNAEAProvider(httpClient)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create GeoAPI provider: %w", err)
+		}
+		provider = append(provider, mls)
+	}
+
 	if !s.conf.Geobus.DisableGPSD {
 		provider = append(provider, gpsd.NewGPSdProvider())
 	}
@@ -80,14 +89,6 @@ func (s *Server) geobusProviderList() ([]geobus.Provider, error) {
 
 
 
-		if !s.config.GeoLocation.DisableICHNAEA {
-			mls, err := ichnaea.NewGeolocationICHNAEAProvider(httpClient)
-			if err != nil {
-				s.logger.Error("failed to create ICHNAEA provider", logger.Err(err))
-			} else {
-				provider = append(provider, mls)
-			}
-		}
 
 	*/
 	if len(provider) == 0 {
