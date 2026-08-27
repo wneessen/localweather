@@ -11,6 +11,7 @@ require (
 	github.com/mdlayher/wifi v0.9.0
 	github.com/wneessen/waybar-weather v0.3.1
 	golang.org/x/sync v0.22.0
+	golang.org/x/text v0.40.0
 )
 
 require (

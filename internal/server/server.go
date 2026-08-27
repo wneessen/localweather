@@ -12,6 +12,7 @@ import (
 
 	"github.com/wneessen/localweather/internal/config"
 	"github.com/wneessen/localweather/internal/geobus"
+	"github.com/wneessen/localweather/internal/geocode"
 	"github.com/wneessen/localweather/internal/log"
 )
 
@@ -19,6 +20,7 @@ import (
 type Server struct {
 	conf        *config.Config
 	geobus      *geobus.Service
+	geocoder    geocode.Geocoder
 	geobusUnsub func()
 	log         *log.Logger
 	httpserv    *http.Server
@@ -69,6 +71,11 @@ func (s *Server) Start(ctx context.Context) error {
 	s.log.Info("starting cron scheduler")
 	if err := s.cronjobs(ctx); err != nil {
 		return fmt.Errorf("failed to set up cron jobs: %w", err)
+	}
+
+	s.log.Info("selecting geocoder provider")
+	if err := s.initGeocoder(); err != nil {
+		return fmt.Errorf("failed to select geocoding provider: %w", err)
 	}
 
 	s.log.Info("starting geobus service")

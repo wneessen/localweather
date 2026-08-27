@@ -20,6 +20,10 @@ type Config struct {
 		DisableICHNAEA         bool   `fig:"disable_ichnaea"`
 		DisableGPSD            bool   `fig:"disable_gpsd"`
 	} `fig:"geobus"`
+	Geocoder struct {
+		Provider string `fig:"provider" default:"nominatim"`
+		APIKey   string `fig:"apikey"`
+	} `fig:"geocoder"`
 	Log struct {
 		Format string   `fig:"format" default:"json"`
 		Output string   `fig:"output" default:"stdout"`
