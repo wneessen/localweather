@@ -131,5 +131,7 @@ func (s *Server) updateCurrentLocation(ctx context.Context, coords types.Coordin
 	if address.Found {
 		s.log.Info("reverse geocoded coordinates", slog.String("address", address.DisplayName))
 	}
+	s.fetchWeather(ctx, coords)
+
 	return nil
 }

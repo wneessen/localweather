@@ -10,6 +10,8 @@ import (
 )
 
 type Config struct {
+	Units  string `fig:"units" default:"metric"`
+	Locale string `fig:"locale"`
 	Geobus struct {
 		CoordinatesFile        string `fig:"coordinates_file"`
 		CitynameFile           string `fig:"cityname_file"`
@@ -38,6 +40,17 @@ type Config struct {
 	Scheduler struct {
 		MaintenanceInterval time.Duration `fig:"maintenance_interval" default:"1h"`
 	}
+	Weather struct {
+		Provider string `fig:"provider" default:"open-meteo"`
+
+		// Allowed value: 1 to 24
+		ForecastHours uint `fig:"forecast_hours" default:"3"`
+
+		// Cold and hot class thresholds (Defaults are based on °C)
+		// Defaults are based on suggestions for dangerous driving conditions and uncomfortable heat.
+		ColdThreshold float64 `fig:"cold_threshold" default:"2"`
+		HotThreshold  float64 `fig:"hot_threshold" default:"30"`
+	} `fig:"weather"`
 }
 
 // New creates a new instance of Config by reading and loading configuration values. It takes in the file

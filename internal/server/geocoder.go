@@ -24,7 +24,7 @@ const (
 func (s *Server) initGeocoder() error {
 	geocodeProvider, err := s.selectGeocodeProvider(language.English) // TODO: Integrate i18n
 	if err != nil {
-		return fmt.Errorf("failed to create geocode provider: %w", err)
+		return fmt.Errorf("failed to select geocoding provider: %w", err)
 	}
 	s.geocoder = geocodeProvider
 	s.log.Debug("geocoder initialized", slog.String("provider", s.geocoder.Name()))
