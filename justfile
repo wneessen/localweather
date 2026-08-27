@@ -6,6 +6,7 @@ export APP_URL := "http://127.0.0.1:10001"
 
 ## App-specific development environment
 export LOCALWEATHER_LOG_LEVEL := "debug"
+export LOCALWEATHER_GEOCODER_PROVIDER := "opencage"
 
 [private]
 default:
@@ -13,7 +14,7 @@ default:
 
 [group('run')]
 shell:
-    nix develop -c zsh
+    secretspec run -- nix develop -c zsh
 
 [group('run')]
 lint:
@@ -25,7 +26,7 @@ logs:
 
 [group('service')]
 server:
-    nix develop -c air | tee {{ log_dir }}/service.log
+    nix develop -c secretspec run -- air | tee {{ log_dir }}/service.log
 
 [group('setup')]
 bootstrap:

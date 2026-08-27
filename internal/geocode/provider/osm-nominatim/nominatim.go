@@ -87,7 +87,7 @@ func (n *Nominatim) Reverse(ctx context.Context, coords types.Coordinate) (types
 
 	// Fill the geocode.Address struct
 	address = types.Address{
-		AddressFound: true,
+		Found:        true,
 		DisplayName:  result.DisplayName,
 		Country:      result.Address.Country,
 		State:        result.Address.State,
