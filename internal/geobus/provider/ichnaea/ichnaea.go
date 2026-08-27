@@ -19,21 +19,30 @@ import (
 	"github.com/wneessen/localweather/internal/geobus/lookupstream"
 	"github.com/wneessen/localweather/internal/http"
 	"github.com/wneessen/localweather/internal/log"
+	"github.com/wneessen/localweather/internal/ttlcache"
 	"github.com/wneessen/localweather/internal/types"
 
 	"github.com/mdlayher/wifi"
 )
 
 const (
-	apiEndpoint        = "https://api.beacondb.net/v1/geolocate"
-	lookupTimeout      = time.Second * 5
-	wifiScanTime       = time.Second * 5
-	wifiMaxPollTime    = time.Minute * 10
-	wifiClearCacheTime = time.Hour * 12
-	name               = "ichnaea"
-	ttlTime            = time.Hour * 1
-	pollTime           = time.Second * 30
-	fallbackCacheTime  = time.Minute * 30
+	apiEndpoint     = "https://api.beacondb.net/v1/geolocate"
+	lookupTimeout   = time.Second * 5
+	wifiScanTime    = time.Second * 5
+	wifiMaxPollTime = time.Minute * 10
+	name            = "ichnaea"
+	ttlTime         = time.Hour * 1
+	pollTime        = time.Second * 30
+
+	// wifiCacheTTL is the duration for which a WiFi-based (precise) geolocation result is
+	// considered valid. It replaces the former periodic cache clearing.
+	wifiCacheTTL = time.Hour * 12
+	// fallbackCacheTTL is the duration for which an IP-based fallback result is considered
+	// valid. Fallback results are stored as cache "misses" and therefore expire earlier.
+	fallbackCacheTTL = time.Minute * 30
+	// ipFallbackKey is the cache key that is used whenever no WiFi access points are known,
+	// in which case the API can only perform an IP-based lookup.
+	ipFallbackKey = "ip-fallback"
 )
 
 type Provider struct {
@@ -45,13 +54,18 @@ type Provider struct {
 	locateFn func(context.Context) (types.Coordinate, error)
 	log      *log.Logger
 
-	apLock    sync.RWMutex
-	aps       []WirelessNetwork
-	apHash    string
-	ipfLock   sync.RWMutex
-	ipfcache  *ipFallbackCache
-	wifiLock  sync.RWMutex
-	wifiCache map[string]types.Coordinate
+	apLock sync.RWMutex
+	aps    []WirelessNetwork
+	apHash string
+
+	cache *ttlcache.Cache[string, cachedLocation]
+}
+
+// cachedLocation holds a geolocation result together with the information whether it was
+// derived from the WiFi access points or from the IP-based fallback of the API.
+type cachedLocation struct {
+	coords     types.Coordinate
+	isFallback bool
 }
 
 type APIResult struct {
@@ -70,11 +84,6 @@ type WirelessNetwork struct {
 	SignalStrength int32  `json:"signalStrength"`
 }
 
-type ipFallbackCache struct {
-	expires time.Time
-	coords  types.Coordinate
-}
-
 func NewICHNAEAProvider(http *http.Client, log *log.Logger) (*Provider, error) {
 	if http == nil {
 		return nil, fmt.Errorf("http client is required")
@@ -85,14 +94,14 @@ func NewICHNAEAProvider(http *http.Client, log *log.Logger) (*Provider, error) {
 	}
 
 	provider := &Provider{
-		name:      name,
-		http:      http,
-		wlan:      wlan,
-		period:    pollTime,
-		ttl:       ttlTime,
-		ipfcache:  &ipFallbackCache{},
-		wifiCache: make(map[string]types.Coordinate),
-		log:       log,
+		name:   name,
+		http:   http,
+		wlan:   wlan,
+		period: pollTime,
+		ttl:    ttlTime,
+		apHash: ipFallbackKey,
+		cache:  ttlcache.NewCache[string, cachedLocation](wifiCacheTTL, fallbackCacheTTL),
+		log:    log,
 	}
 	provider.locateFn = provider.locate
 	return provider, nil
@@ -106,7 +115,6 @@ func (p *Provider) Name() string {
 func (p *Provider) LookupStream(ctx context.Context, key string) <-chan geobus.Result {
 	out := make(chan geobus.Result)
 	go p.monitorWifiAccessPoints(ctx)
-	go p.clearWifiCache(ctx)
 	params := lookupstream.Params{
 		Key:        key,
 		LocateFn:   p.locateFn,
@@ -118,20 +126,6 @@ func (p *Provider) LookupStream(ctx context.Context, key string) <-chan geobus.R
 	}
 	go lookupstream.NewLookupStream(ctx, params)()
 	return out
-}
-
-func (p *Provider) clearWifiCache(ctx context.Context) {
-	ticker := time.NewTicker(wifiClearCacheTime)
-	for {
-		select {
-		case <-ctx.Done():
-			return
-		case <-ticker.C:
-			p.wifiLock.Lock()
-			p.wifiCache = make(map[string]types.Coordinate)
-			p.wifiLock.Unlock()
-		}
-	}
 }
 
 func (p *Provider) monitorWifiAccessPoints(ctx context.Context) {
@@ -152,17 +146,33 @@ func (p *Provider) monitorWifiAccessPoints(ctx context.Context) {
 		if err != nil {
 			continue
 		}
+
+		// The hash is used as cache key, therefore it must be stable for an identical set
+		// of access points. We hash the MAC addresses in lexicographical order, so that
+		// fluctuating signal strengths do not change the key (and cause needless API calls).
+		hash := ipFallbackKey
+		if len(list) > 0 {
+			macs := make([]string, 0, len(list))
+			for _, ap := range list {
+				macs = append(macs, ap.MACAddress)
+			}
+			slices.Sort(macs)
+			for _, mac := range macs {
+				hasher.Write([]byte(mac))
+			}
+			hash = fmt.Sprintf("%x", hasher.Sum(nil))
+			hasher.Reset()
+		}
+
+		// The API prefers the strongest access points first.
 		slices.SortFunc(list, func(a, b WirelessNetwork) int {
 			return int(b.SignalStrength - a.SignalStrength)
 		})
-		for _, ap := range list {
-			hasher.Write([]byte(ap.MACAddress))
-		}
+
 		p.apLock.Lock()
-		p.apHash = fmt.Sprintf("%x", hasher.Sum(nil))
+		p.apHash = hash
 		p.aps = list
 		p.apLock.Unlock()
-		hasher.Reset()
 
 		if len(list) == 0 {
 			if nextScanTime < wifiMaxPollTime {
@@ -170,9 +180,6 @@ func (p *Provider) monitorWifiAccessPoints(ctx context.Context) {
 			}
 			continue
 		}
-		p.ipfLock.Lock()
-		p.ipfcache.expires = time.Time{}
-		p.ipfLock.Unlock()
 		nextScanTime = wifiMaxPollTime
 	}
 }
@@ -221,28 +228,37 @@ func (p *Provider) wifiAccessPoints(ctx context.Context) ([]WirelessNetwork, err
 	return list, nil
 }
 
+// locate returns the current coordinates, either from the TTL cache or, on a cache miss, from
+// the ICHNAEA API. The cache key is the hash over the currently visible access points, so a
+// changed environment automatically invalidates the previous result.
 func (p *Provider) locate(ctx context.Context) (types.Coordinate, error) {
-	coords := types.Coordinate{}
 	p.apLock.RLock()
 	wifiList := p.aps
 	wifiHash := p.apHash
 	p.apLock.RUnlock()
 
-	// If WiFi cache is valid, return cached coordinates
-	p.wifiLock.RLock()
-	if cache, ok := p.wifiCache[wifiHash]; ok {
-		p.wifiLock.RUnlock()
-		return cache, nil
+	cached, err := p.cache.Fetch(ctx, wifiHash,
+		func(ctx context.Context) (cachedLocation, error) {
+			return p.lookup(ctx, wifiList)
+		},
+		func(location cachedLocation) bool {
+			// IP-based fallback results are stored as "not found", so that they only live
+			// for the shorter fallback TTL and a proper WiFi fix is retried earlier.
+			return !location.isFallback
+		},
+		func(location *cachedLocation) {
+			// Cache hit; no API request was performed.
+		},
+	)
+	if err != nil {
+		return types.Coordinate{}, err
 	}
-	p.wifiLock.RUnlock()
+	return cached.coords, nil
+}
 
-	// If IP fallback cache is still valid, return cached coordinates
-	p.ipfLock.RLock()
-	if p.ipfcache.expires.After(time.Now()) {
-		p.ipfLock.RUnlock()
-		return p.ipfcache.coords, nil
-	}
-	p.ipfLock.RUnlock()
+// lookup performs the actual API request against the ICHNAEA endpoint.
+func (p *Provider) lookup(ctx context.Context, wifiList []WirelessNetwork) (cachedLocation, error) {
+	location := cachedLocation{}
 
 	type request struct {
 		ConsiderIP   bool              `json:"considerIp"`
@@ -254,7 +270,7 @@ func (p *Provider) locate(ctx context.Context) (types.Coordinate, error) {
 	}
 	bodyBuffer := bytes.NewBuffer(nil)
 	if err := json.NewEncoder(bodyBuffer).Encode(req); err != nil {
-		return coords, fmt.Errorf("failed to encode wifi list to JSON: %w", err)
+		return location, fmt.Errorf("failed to encode wifi list to JSON: %w", err)
 	}
 
 	ctxHttp, cancelHttp := context.WithTimeout(ctx, lookupTimeout)
@@ -262,24 +278,14 @@ func (p *Provider) locate(ctx context.Context) (types.Coordinate, error) {
 	result := new(APIResult)
 	if _, err := p.http.Post(ctxHttp, apiEndpoint, result, bodyBuffer,
 		map[string]string{"Content-Type": "application/json"}); err != nil {
-		return coords, fmt.Errorf("failed to get geolocation data from API: %w", err)
+		return location, fmt.Errorf("failed to get geolocation data from API: %w", err)
 	}
 
-	coords.Accuracy = types.Accuracy(geobus.Truncate(result.Accuracy, geobus.TruncPrecision))
-	coords.Altitude = geobus.Truncate(result.Location.Altitude, geobus.TruncPrecision)
-	coords.Latitude = geobus.Truncate(result.Location.Latitude, geobus.TruncPrecision)
-	coords.Longitude = geobus.Truncate(result.Location.Longitude, geobus.TruncPrecision)
+	location.coords.Accuracy = types.Accuracy(geobus.Truncate(result.Accuracy, geobus.TruncPrecision))
+	location.coords.Altitude = geobus.Truncate(result.Location.Altitude, geobus.TruncPrecision)
+	location.coords.Latitude = geobus.Truncate(result.Location.Latitude, geobus.TruncPrecision)
+	location.coords.Longitude = geobus.Truncate(result.Location.Longitude, geobus.TruncPrecision)
+	location.isFallback = result.IsFallback != ""
 
-	if result.IsFallback != "" {
-		p.ipfLock.Lock()
-		p.ipfcache.expires = time.Now().Add(fallbackCacheTime)
-		p.ipfcache.coords = coords
-		p.ipfLock.Unlock()
-		return coords, nil
-	}
-
-	p.wifiLock.Lock()
-	p.wifiCache[wifiHash] = coords
-	p.wifiLock.Unlock()
-	return coords, nil
+	return location, nil
 }
