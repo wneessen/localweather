@@ -14,6 +14,8 @@ import (
 
 	"github.com/wneessen/localweather/internal/apperror"
 	"github.com/wneessen/localweather/internal/geobus"
+	"github.com/wneessen/localweather/internal/geobus/lookupstream"
+	"github.com/wneessen/localweather/internal/log"
 	"github.com/wneessen/localweather/internal/types"
 )
 
@@ -32,17 +34,19 @@ type Provider struct {
 	path     string
 	period   time.Duration
 	ttl      time.Duration
-	locateFn func() (types.Coordinate, error)
+	locateFn func(ctx context.Context) (types.Coordinate, error)
+	log      *log.Logger
 }
 
 // NewCoordinatesFileProvider initializes a Provider with a file path and default update
 // interval and TTL settings.
-func NewCoordinatesFileProvider(path string) *Provider {
+func NewCoordinatesFileProvider(path string, log *log.Logger) *Provider {
 	provider := &Provider{
 		name:   name,
 		path:   path,
 		period: pollTime,
 		ttl:    ttlTime,
+		log:    log,
 	}
 	provider.locateFn = provider.readFile
 	return provider
@@ -57,53 +61,23 @@ func (p *Provider) Name() string {
 // or context ends.
 func (p *Provider) LookupStream(ctx context.Context, key string) <-chan geobus.Result {
 	out := make(chan geobus.Result)
-	go func() {
-		defer close(out)
-		state := geobus.GeoLocationState{}
-		firstRun := true
-
-		for {
-			if !firstRun {
-				select {
-				case <-ctx.Done():
-					return
-				case <-time.After(p.period):
-				}
-			}
-			firstRun = false
-
-			coords, err := p.locateFn()
-			if err != nil {
-				continue
-			}
-			state.Update(coords)
-			r := p.createResult(key, coords)
-
-			select {
-			case <-ctx.Done():
-				return
-			case out <- r:
-			}
-		}
-	}()
-	return out
-}
-
-// createResult composes and returns a Result using provided geolocation data and metadata.
-func (p *Provider) createResult(key string, coord types.Coordinate) geobus.Result {
-	return geobus.Result{
-		Key:         key,
-		Coordinates: coord,
-		Provider:    p.name,
-		At:          time.Now(),
-		TTL:         p.ttl,
+	params := lookupstream.Params{
+		Key:        key,
+		LocateFn:   p.locateFn,
+		Log:        p.log,
+		OutChannel: out,
+		Period:     p.period,
+		Provider:   p.name,
+		TTL:        p.ttl,
 	}
+	go lookupstream.NewLookupStream(ctx, params)()
+	return out
 }
 
 // readFile reads geolocation data from the file at the configured path.
 // Returns latitude, longitude, altitude, accuracy, or an error if the file cannot be
 // read or parsed correctly.
-func (p *Provider) readFile() (types.Coordinate, error) {
+func (p *Provider) readFile(_ context.Context) (types.Coordinate, error) {
 	coords := types.Coordinate{}
 	data, err := os.ReadFile(p.path)
 	if err != nil {

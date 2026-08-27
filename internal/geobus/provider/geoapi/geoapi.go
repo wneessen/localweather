@@ -13,6 +13,7 @@ import (
 	"github.com/wneessen/localweather/internal/geobus"
 	"github.com/wneessen/localweather/internal/geobus/lookupstream"
 	"github.com/wneessen/localweather/internal/http"
+	"github.com/wneessen/localweather/internal/log"
 	"github.com/wneessen/localweather/internal/types"
 )
 
@@ -30,6 +31,7 @@ type Provider struct {
 	period   time.Duration
 	ttl      time.Duration
 	locateFn func(context.Context) (types.Coordinate, error)
+	log      *log.Logger
 }
 
 type APIResult struct {
@@ -48,7 +50,7 @@ type APIResult struct {
 	} `json:"location"`
 }
 
-func NewGeoAPIProvider(http *http.Client) (*Provider, error) {
+func NewGeoAPIProvider(http *http.Client, log *log.Logger) (*Provider, error) {
 	if http == nil {
 		return nil, fmt.Errorf("http client is required")
 	}
@@ -57,6 +59,7 @@ func NewGeoAPIProvider(http *http.Client) (*Provider, error) {
 		http:   http,
 		period: pollTime,
 		ttl:    ttlTime,
+		log:    log,
 	}
 	provider.locateFn = provider.locate
 	return provider, nil
@@ -70,7 +73,16 @@ func (p *Provider) Name() string {
 // or context ends.
 func (p *Provider) LookupStream(ctx context.Context, key string) <-chan geobus.Result {
 	out := make(chan geobus.Result)
-	go lookupstream.NewLookupStream(ctx, p.name, key, out, p.ttl, p.period, p.locateFn)()
+	params := lookupstream.Params{
+		Key:        key,
+		LocateFn:   p.locateFn,
+		Log:        p.log,
+		OutChannel: out,
+		Period:     p.period,
+		Provider:   p.name,
+		TTL:        p.ttl,
+	}
+	go lookupstream.NewLookupStream(ctx, params)()
 	return out
 }
 

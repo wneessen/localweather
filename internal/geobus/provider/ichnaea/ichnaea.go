@@ -18,6 +18,7 @@ import (
 	"github.com/wneessen/localweather/internal/geobus"
 	"github.com/wneessen/localweather/internal/geobus/lookupstream"
 	"github.com/wneessen/localweather/internal/http"
+	"github.com/wneessen/localweather/internal/log"
 	"github.com/wneessen/localweather/internal/types"
 
 	"github.com/mdlayher/wifi"
@@ -42,6 +43,7 @@ type Provider struct {
 	period   time.Duration
 	ttl      time.Duration
 	locateFn func(context.Context) (types.Coordinate, error)
+	log      *log.Logger
 
 	apLock    sync.RWMutex
 	aps       []WirelessNetwork
@@ -73,7 +75,7 @@ type ipFallbackCache struct {
 	coords  types.Coordinate
 }
 
-func NewICHNAEAProvider(http *http.Client) (*Provider, error) {
+func NewICHNAEAProvider(http *http.Client, log *log.Logger) (*Provider, error) {
 	if http == nil {
 		return nil, fmt.Errorf("http client is required")
 	}
@@ -90,6 +92,7 @@ func NewICHNAEAProvider(http *http.Client) (*Provider, error) {
 		ttl:       ttlTime,
 		ipfcache:  &ipFallbackCache{},
 		wifiCache: make(map[string]types.Coordinate),
+		log:       log,
 	}
 	provider.locateFn = provider.locate
 	return provider, nil
@@ -104,7 +107,16 @@ func (p *Provider) LookupStream(ctx context.Context, key string) <-chan geobus.R
 	out := make(chan geobus.Result)
 	go p.monitorWifiAccessPoints(ctx)
 	go p.clearWifiCache(ctx)
-	go lookupstream.NewLookupStream(ctx, p.name, key, out, p.ttl, p.period, p.locateFn)()
+	params := lookupstream.Params{
+		Key:        key,
+		LocateFn:   p.locateFn,
+		Log:        p.log,
+		OutChannel: out,
+		Period:     p.period,
+		Provider:   p.name,
+		TTL:        p.ttl,
+	}
+	go lookupstream.NewLookupStream(ctx, params)()
 	return out
 }
 

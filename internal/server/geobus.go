@@ -46,11 +46,11 @@ func (s *Server) geobusProviderList() ([]geobus.Provider, error) {
 	var provider []geobus.Provider
 
 	if !s.conf.Geobus.DisableCoordinatesFile {
-		provider = append(provider, coordinates_file.NewCoordinatesFileProvider(s.conf.Geobus.CoordinatesFile))
+		provider = append(provider, coordinates_file.NewCoordinatesFileProvider(s.conf.Geobus.CoordinatesFile, s.log))
 	}
 
 	if !s.conf.Geobus.DisableGeoIP {
-		gip, err := geoip.NewGeoIPProvider(httpClient)
+		gip, err := geoip.NewGeoIPProvider(httpClient, s.log)
 		if err != nil {
 			return nil, fmt.Errorf("failed to create GeoIP provider: %w", err)
 		}
@@ -58,7 +58,7 @@ func (s *Server) geobusProviderList() ([]geobus.Provider, error) {
 	}
 
 	if !s.conf.Geobus.DisableGeoAPI {
-		gap, err := geoapi.NewGeoAPIProvider(httpClient)
+		gap, err := geoapi.NewGeoAPIProvider(httpClient, s.log)
 		if err != nil {
 			return nil, fmt.Errorf("failed to create GeoAPI provider: %w", err)
 		}
@@ -66,7 +66,7 @@ func (s *Server) geobusProviderList() ([]geobus.Provider, error) {
 	}
 
 	if !s.conf.Geobus.DisableICHNAEA {
-		mls, err := ichnaea.NewICHNAEAProvider(httpClient)
+		mls, err := ichnaea.NewICHNAEAProvider(httpClient, s.log)
 		if err != nil {
 			return nil, fmt.Errorf("failed to create GeoAPI provider: %w", err)
 		}
@@ -74,7 +74,7 @@ func (s *Server) geobusProviderList() ([]geobus.Provider, error) {
 	}
 
 	if !s.conf.Geobus.DisableGPSD {
-		provider = append(provider, gpsd.NewGPSdProvider())
+		provider = append(provider, gpsd.NewGPSdProvider(s.log))
 	}
 
 	/*
