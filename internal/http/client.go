@@ -7,7 +7,7 @@ package http
 import (
 	"context"
 	"crypto/tls"
-	"encoding/json"
+	"encoding/json/v2"
 	"errors"
 	"fmt"
 	"io"
@@ -125,7 +125,7 @@ func (h *Client) PerformReq(ctx context.Context, method string, endpoint string,
 	}(response.Body)
 
 	// Unmarshal the JSON API response into target
-	if err = json.NewDecoder(response.Body).Decode(target); err != nil {
+	if err = json.UnmarshalRead(response.Body, target); err != nil {
 		return response.StatusCode, fmt.Errorf("failed to decode JSON: %w", err)
 	}
 
