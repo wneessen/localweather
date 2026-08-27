@@ -8,6 +8,7 @@ import (
 	"github.com/wneessen/localweather/internal/apperror"
 	"github.com/wneessen/localweather/internal/geobus"
 	"github.com/wneessen/localweather/internal/geobus/provider/coordinates_file"
+	"github.com/wneessen/localweather/internal/geobus/provider/geoapi"
 	"github.com/wneessen/localweather/internal/geobus/provider/geoip"
 	"github.com/wneessen/localweather/internal/geobus/provider/gpsd"
 	"github.com/wneessen/localweather/internal/http"
@@ -55,6 +56,14 @@ func (s *Server) geobusProviderList() ([]geobus.Provider, error) {
 		provider = append(provider, gip)
 	}
 
+	if !s.conf.Geobus.DisableGeoAPI {
+		gap, err := geoapi.NewGeoAPIProvider(httpClient)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create GeoAPI provider: %w", err)
+		}
+		provider = append(provider, gap)
+	}
+
 	if !s.conf.Geobus.DisableGPSD {
 		provider = append(provider, gpsd.NewGPSdProvider())
 	}
@@ -69,21 +78,7 @@ func (s *Server) geobusProviderList() ([]geobus.Provider, error) {
 		}
 
 
-		if !s.config.GeoLocation.DisableGeoIP {
-			gip, err := geoip.NewGeolocationGeoIPProvider(httpClient)
-			if err != nil {
-				return nil, fmt.Errorf("failed to create GeoIP provider: %w", err)
-			}
-			provider = append(provider, gip)
-		}
 
-		if !s.config.GeoLocation.DisableGeoAPI {
-			gap, err := geoapi.NewGeolocationGeoAPIProvider(httpClient)
-			if err != nil {
-				return nil, fmt.Errorf("failed to create GeoAPI provider: %w", err)
-			}
-			provider = append(provider, gap)
-		}
 
 		if !s.config.GeoLocation.DisableICHNAEA {
 			mls, err := ichnaea.NewGeolocationICHNAEAProvider(httpClient)

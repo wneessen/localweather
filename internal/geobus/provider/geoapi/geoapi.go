@@ -2,11 +2,12 @@
 //
 // SPDX-License-Identifier: MIT
 
-package geoip
+package geoapi
 
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/wneessen/localweather/internal/geobus"
@@ -16,11 +17,11 @@ import (
 )
 
 const (
-	apiEndpoint   = "https://reallyfreegeoip.org/json/"
-	lookupTimeout = time.Second * 10
-	name          = "geoip"
-	ttlTime       = time.Hour * 2
-	pollTime      = time.Minute * 15
+	apiEndpoint  = "https://geoapi.info/api/geo"
+	lookupTimeou = time.Second * 5
+	name         = "geoapi"
+	ttlTime      = time.Hour * 2
+	pollTime     = time.Minute * 5
 )
 
 type Provider struct {
@@ -32,20 +33,22 @@ type Provider struct {
 }
 
 type APIResult struct {
-	IP          string  `json:"ip"`
-	CountryCode string  `json:"country_code"`
-	Country     string  `json:"country_name"`
-	RegionCode  string  `json:"region_code,omitempty"`
-	Region      string  `json:"region_name,omitempty"`
-	City        string  `json:"city,omitempty"`
-	ZipCode     string  `json:"zip_code,omitempty"`
-	TimeZone    string  `json:"time_zone"`
-	Latitude    float64 `json:"latitude"`
-	Longitude   float64 `json:"longitude"`
-	MetroCode   int     `json:"metro_code"`
+	IP       string `json:"ip"`
+	Location struct {
+		CountryCode string `json:"country,omitempty"`
+		Country     string `json:"countryName,omitempty"`
+		Region      string `json:"region,omitempty"`
+		City        string `json:"city,omitempty"`
+		ZipCode     string `json:"postalCode,omitempty"`
+		TimeZone    string `json:"timezone"`
+		Coordinates struct {
+			Latitude  string `json:"latitude"`
+			Longitude string `json:"longitude"`
+		} `json:"coordinates"`
+	} `json:"location"`
 }
 
-func NewGeoIPProvider(http *http.Client) (*Provider, error) {
+func NewGeoAPIProvider(http *http.Client) (*Provider, error) {
 	if http == nil {
 		return nil, fmt.Errorf("http client is required")
 	}
@@ -73,7 +76,7 @@ func (p *Provider) LookupStream(ctx context.Context, key string) <-chan geobus.R
 
 func (p *Provider) locate(ctx context.Context) (types.Coordinate, error) {
 	coords := types.Coordinate{}
-	ctxHttp, cancelHttp := context.WithTimeout(ctx, lookupTimeout)
+	ctxHttp, cancelHttp := context.WithTimeout(ctx, lookupTimeou)
 	defer cancelHttp()
 
 	result := new(APIResult)
@@ -82,21 +85,28 @@ func (p *Provider) locate(ctx context.Context) (types.Coordinate, error) {
 	}
 
 	coords.Accuracy = types.AccuracyUnknown
-	if result.CountryCode != "" {
+	if result.Location.CountryCode != "" {
 		coords.Accuracy = types.AccuracyCountry
 	}
-	if result.RegionCode != "" {
+	if result.Location.Region != "" {
 		coords.Accuracy = types.AccuracyRegion
 	}
-	if result.City != "" {
+	if result.Location.City != "" {
 		coords.Accuracy = types.AccuracyCity
 	}
-	if result.ZipCode != "" {
+	if result.Location.ZipCode != "" {
 		coords.Accuracy = types.AccuracyZip
 	}
 
-	coords.Latitude = geobus.Truncate(result.Latitude, geobus.TruncPrecision)
-	coords.Longitude = geobus.Truncate(result.Longitude, geobus.TruncPrecision)
+	var err error
+	coords.Latitude, err = strconv.ParseFloat(result.Location.Coordinates.Latitude, 64)
+	if err != nil {
+		return coords, fmt.Errorf("failed to parse latitude from API response: %w", err)
+	}
+	coords.Longitude, err = strconv.ParseFloat(result.Location.Coordinates.Longitude, 64)
+	if err != nil {
+		return coords, fmt.Errorf("failed to parse longitude from API response: %w", err)
+	}
 
 	return coords, nil
 }

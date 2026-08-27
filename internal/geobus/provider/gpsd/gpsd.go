@@ -8,6 +8,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/wneessen/localweather/internal/geobus/lookupstream"
 	"github.com/wneessen/localweather/internal/gpsdpoll"
 	"github.com/wneessen/localweather/internal/types"
 
@@ -48,49 +49,6 @@ func (p *Provider) Name() string {
 
 func (p *Provider) LookupStream(ctx context.Context, key string) <-chan geobus.Result {
 	out := make(chan geobus.Result)
-
-	go func() {
-		defer close(out)
-		state := geobus.GeoLocationState{}
-		firstRun := true
-
-		for {
-			if !firstRun {
-				select {
-				case <-ctx.Done():
-					return
-				case <-time.After(p.period):
-				}
-			}
-			firstRun = false
-
-			coord, err := p.locateFn(ctx)
-			if err != nil {
-				continue
-			}
-			if !coord.Has2DFix() {
-				continue
-			}
-			state.Update(coord)
-			r := p.createResult(key, coord)
-
-			select {
-			case <-ctx.Done():
-				return
-			case out <- r:
-			}
-		}
-	}()
+	go lookupstream.NewLookupStream(ctx, p.name, key, out, p.ttl, p.period, p.locateFn)()
 	return out
-}
-
-// createResult composes and returns a Result using provided geolocation data and metadata.
-func (p *Provider) createResult(key string, coord types.Coordinate) geobus.Result {
-	return geobus.Result{
-		Key:         key,
-		Coordinates: coord,
-		Provider:    p.name,
-		At:          time.Now(),
-		TTL:         p.ttl,
-	}
 }
