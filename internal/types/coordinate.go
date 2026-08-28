@@ -3,9 +3,10 @@ package types
 import "math"
 
 const (
-	EarthRadius       = 6371000.0 // meters
-	DistanceThreshold = 2500.0    // 2.5km
-	AccuracyThreshold = 50.0
+	AccuracyThreshold   = 50.0
+	DistanceThreshold   = 2500.0    // 2.5km
+	EarthRadius         = 6371000.0 // meters
+	CoordinatePrecision = 6
 )
 
 // Coordinate represents a geographic coordinate.
@@ -48,4 +49,10 @@ func (c Coordinate) Valid() bool {
 // Has2DFix reports whether the fix has at least a 2D fix.
 func (c Coordinate) Has2DFix() bool {
 	return c.GPSMode >= 2
+}
+
+// TruncateFloat64 truncates a floating-point number to a specified number of decimal places without rounding.
+func TruncateFloat64[V Accuracy | float64](val V, precision int) V {
+	p := math.Pow(10, float64(precision))
+	return V(math.Trunc(float64(val)*p) / p)
 }

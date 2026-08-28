@@ -107,8 +107,8 @@ func (p *Provider) locate(ctx context.Context) (types.Coordinate, error) {
 		coords.Accuracy = types.AccuracyZip
 	}
 
-	coords.Latitude = geobus.Truncate(result.Latitude, geobus.TruncPrecision)
-	coords.Longitude = geobus.Truncate(result.Longitude, geobus.TruncPrecision)
+	coords.Latitude = types.TruncateFloat64(result.Latitude, types.CoordinatePrecision)
+	coords.Longitude = types.TruncateFloat64(result.Longitude, types.CoordinatePrecision)
 
 	return coords, nil
 }

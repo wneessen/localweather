@@ -283,10 +283,10 @@ func (p *Provider) lookup(ctx context.Context, wifiList []WirelessNetwork) (cach
 		return location, fmt.Errorf("failed to get geolocation data from API: %w", err)
 	}
 
-	location.coords.Accuracy = types.Accuracy(geobus.Truncate(result.Accuracy, geobus.TruncPrecision))
-	location.coords.Altitude = geobus.Truncate(result.Location.Altitude, geobus.TruncPrecision)
-	location.coords.Latitude = geobus.Truncate(result.Location.Latitude, geobus.TruncPrecision)
-	location.coords.Longitude = geobus.Truncate(result.Location.Longitude, geobus.TruncPrecision)
+	location.coords.Accuracy = types.TruncateFloat64(types.Accuracy(result.Accuracy), types.CoordinatePrecision)
+	location.coords.Altitude = types.TruncateFloat64(result.Location.Altitude, types.CoordinatePrecision)
+	location.coords.Latitude = types.TruncateFloat64(result.Location.Latitude, types.CoordinatePrecision)
+	location.coords.Longitude = types.TruncateFloat64(result.Location.Longitude, types.CoordinatePrecision)
 	location.isFallback = result.IsFallback != ""
 
 	return location, nil
