@@ -12,6 +12,8 @@ import (
 	"golang.org/x/sync/errgroup"
 
 	"github.com/wneessen/localweather/internal/config"
+	"github.com/wneessen/localweather/internal/database"
+	"github.com/wneessen/localweather/internal/database/model"
 	"github.com/wneessen/localweather/internal/log"
 	"github.com/wneessen/localweather/internal/server"
 )
@@ -47,29 +49,31 @@ func start() error {
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGTERM, os.Interrupt)
 	defer cancel()
 
-	// DB migrations
-	/*
-		versionDiff, err := database.CheckDBVersion(ctx, conf, logger)
-		if err != nil {
-			return fmt.Errorf("failed to check SQL migrations: %w", err)
+	// Connect to the database
+	db, err := database.Open(ctx, database.Options{
+		Path:           conf.Database.Path,
+		BusyTimeout:    conf.Database.BusyTimeout,
+		MaxConnections: conf.Database.MaxConnections,
+	})
+	if err != nil {
+		return fmt.Errorf("failed to open database: %w", err)
+	}
+	defer func() {
+		logger.Info("closing database")
+		if cerr := db.Close(); cerr != nil {
+			logger.Error("failed to close database", log.ErrAttr(cerr))
 		}
-		if versionDiff > 0 {
-			logger.Warn("current database version is not up-to-date", slog.Int("versions_behind", versionDiff))
-			if conf.Database.AutoMigrate {
-				logger.Info("initiating database auto migration")
-				if err = database.DBMigrate(ctx, conf, logger); err != nil {
-					return fmt.Errorf("failed to migrate database: %w", err)
-				}
-			}
-		}
+	}()
 
-		// Connect to the datbase and assign it to the sqlc queries instance
-		dbConn, err := database.OpenDBPool(ctx, conf, logger)
-		if err != nil {
-			return fmt.Errorf("failed to open database: %w", err)
+	// DB migrations
+	if !conf.Database.DisableAutoMigrate {
+		if err = database.Migrate(ctx, db, logger); err != nil {
+			return fmt.Errorf("failed to migrate database: %w", err)
 		}
-		queries := model.New(dbConn)
-	*/
+	}
+
+	// DB model / queries
+	queries := model.New(db)
 
 	// Cron task scheduler
 	cron, err := gocron.NewScheduler()
@@ -79,20 +83,18 @@ func start() error {
 
 	// Create a new http.Server instance
 	s := server.New(server.Params{
-		Cron: cron,
-		Log:  logger,
+		Cron:    cron,
+		DB:      db,
+		Log:     logger,
+		Queries: queries,
 	}, conf)
 
 	// Use an errgroup to wait for separate goroutines which can error
-	eg, ctx := errgroup.WithContext(ctx)
+	eg, egctx := errgroup.WithContext(ctx)
+	eg.Go(func() error { return s.Start(egctx) })
 	eg.Go(func() error {
-		return s.Start(ctx)
-	})
-
-	<-ctx.Done()
-	logger.Info("gracefully shutting down localweather")
-
-	eg.Go(func() error {
+		<-egctx.Done()
+		logger.Info("gracefully shutting down localweather")
 		return s.Stop()
 	})
 	if err = eg.Wait(); err != nil {

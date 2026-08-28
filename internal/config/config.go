@@ -10,8 +10,14 @@ import (
 )
 
 type Config struct {
-	Units  string `fig:"units" default:"metric"`
-	Locale string `fig:"locale"`
+	Units    string `fig:"units" default:"metric"`
+	Locale   string `fig:"locale"`
+	Database struct {
+		BusyTimeout        time.Duration `fig:"busy_timeout" default:"10s"`
+		DisableAutoMigrate bool          `fig:"disable_auto_migrate"`
+		MaxConnections     int           `fig:"max_connections" default:"5"`
+		Path               string        `fig:"path"`
+	}
 	Geobus struct {
 		CoordinatesFile        string `fig:"coordinates_file"`
 		CitynameFile           string `fig:"cityname_file"`
@@ -72,14 +78,18 @@ func New(path, file string) (*Config, error) {
 
 // Validate checks and updates the Config object to ensure required fields are set, assigning defaults if necessary.
 func (c *Config) Validate() error {
+	home, _ := os.UserHomeDir()
+	confDir := filepath.Join(home, ".config", "localweather")
 	if c.Geobus.CitynameFile == "" {
-		home, _ := os.UserHomeDir()
-		c.Geobus.CitynameFile = filepath.Join(home, ".config", "localweather", "cityname")
+		c.Geobus.CitynameFile = filepath.Join(confDir, "cityname")
 	}
 
 	if c.Geobus.CoordinatesFile == "" {
-		home, _ := os.UserHomeDir()
-		c.Geobus.CoordinatesFile = filepath.Join(home, ".config", "localweather", "coordinates")
+		c.Geobus.CoordinatesFile = filepath.Join(confDir, "coordinates")
+	}
+
+	if c.Database.Path == "" {
+		c.Database.Path = filepath.Join(confDir, "storage.db")
 	}
 	return nil
 }

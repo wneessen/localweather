@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
 	"net/http"
@@ -12,6 +13,7 @@ import (
 	"github.com/go-co-op/gocron/v2"
 
 	"github.com/wneessen/localweather/internal/config"
+	"github.com/wneessen/localweather/internal/database/model"
 	"github.com/wneessen/localweather/internal/geobus"
 	"github.com/wneessen/localweather/internal/geocode"
 	"github.com/wneessen/localweather/internal/log"
@@ -21,25 +23,24 @@ import (
 // Server represents the main application server, managing HTTP services, cron jobs, metrics, and database interactions.
 type Server struct {
 	conf        *config.Config
+	cron        gocron.Scheduler
+	db          *sql.DB
 	geobus      *geobus.Service
 	geocoder    geocode.Geocoder
 	geobusUnsub func()
-	log         *log.Logger
 	httpserv    *http.Server
+	log         *log.Logger
 	mux         chi.Router
-	cron        gocron.Scheduler
-	weatherLock sync.RWMutex
+	queries     *model.Queries
 	weather     weather.Provider
+	weatherLock sync.RWMutex
 }
 
 type Params struct {
-	Log  *log.Logger
-	Cron gocron.Scheduler
-	/*
-		Queries *model.Queries
-		PgxPool *pgxpool.Pool
-
-	*/
+	Cron    gocron.Scheduler
+	DB      *sql.DB
+	Log     *log.Logger
+	Queries *model.Queries
 }
 
 func New(params Params, conf *config.Config) *Server {
@@ -48,10 +49,12 @@ func New(params Params, conf *config.Config) *Server {
 	}
 
 	server := &Server{
-		conf: conf,
-		log:  params.Log,
-		mux:  chi.NewMux(),
-		cron: params.Cron,
+		conf:    conf,
+		cron:    params.Cron,
+		db:      params.DB,
+		log:     params.Log,
+		mux:     chi.NewMux(),
+		queries: params.Queries,
 	}
 
 	server.httpserv = &http.Server{
