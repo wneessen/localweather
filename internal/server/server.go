@@ -25,7 +25,6 @@ type Server struct {
 	conf        *config.Config
 	cron        gocron.Scheduler
 	db          *sql.DB
-	updateLock  sync.RWMutex
 	geobus      *geobus.Service
 	geocoder    geocode.Geocoder
 	geobusUnsub func()
@@ -103,8 +102,8 @@ func (s *Server) Start(ctx context.Context) error {
 }
 
 // Stop gracefully shuts down the server by stopping HTTP services, unregistering metrics, and halting the scheduler.
-func (s *Server) Stop() error {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+func (s *Server) Stop(ctx context.Context) error {
+	ctx, cancel := context.WithTimeout(ctx, time.Minute)
 	defer cancel()
 
 	s.log.Info("stopping http backend")

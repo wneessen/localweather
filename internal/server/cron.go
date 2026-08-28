@@ -7,8 +7,6 @@ import (
 	"time"
 
 	"github.com/go-co-op/gocron/v2"
-
-	"github.com/wneessen/localweather/internal/log"
 )
 
 func (s *Server) cronjobs(ctx context.Context) error {
@@ -53,6 +51,7 @@ func (s *Server) logJobCompletion(name string, startTime time.Time, failed bool)
 	)
 }
 
+/*
 func (s *Server) logJobCompletionWithError(name string, startTime time.Time, err error) {
 	s.log.Info("scheduled job completed",
 		slog.Group("job_details",
@@ -64,3 +63,5 @@ func (s *Server) logJobCompletionWithError(name string, startTime time.Time, err
 		),
 	)
 }
+
+*/

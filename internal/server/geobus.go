@@ -147,6 +147,7 @@ func (s *Server) processGeobusUpdate(ctx context.Context, sub <-chan geobus.Resu
 		if err := s.updateCurrentLocation(ctx, r.Coordinates, r.Provider); err != nil {
 			s.log.Error("failed to update current location", log.ErrAttr(err))
 		}
+		s.fetchWeather(ctx, r.Coordinates)
 	}
 
 	for {
@@ -167,7 +168,6 @@ func (s *Server) processGeobusUpdate(ctx context.Context, sub <-chan geobus.Resu
 				slog.Float64("altitude", r.Coordinates.Altitude),
 				slog.String("accuracy", r.Coordinates.Accuracy.String()),
 				slog.String("provider", r.Provider))
-
 			if !open {
 				best, open = r, true
 				timer.Reset(burstWindow)

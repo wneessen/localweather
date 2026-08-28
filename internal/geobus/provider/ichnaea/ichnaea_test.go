@@ -26,10 +26,10 @@ import (
 )
 
 const (
-	testFile = "../../../../testdata/beacondb.json"
-	testLat  = 40.7185
-	testLon  = -74.0025
-	testAcc  = 2000
+	testFile         = "../../../../testdata/beacondb.json"
+	testLat          = 40.7185
+	testLon          = -74.0025
+	testAcc  float64 = 2000
 )
 
 func TestNewICHNAEAProvider(t *testing.T) {
@@ -117,9 +117,9 @@ func TestICHNAEAProvider_locate(t *testing.T) {
 		if coords.Longitude != testLon {
 			t.Errorf("expected longitude to be %f, got %f", testLon, coords.Longitude)
 		}
-		if geobus.Truncate(coords.Accuracy.Float64(), 1) != geobus.Truncate(testAcc, 1) {
-			t.Errorf("expected accuracy to be %f, got %f", geobus.Truncate(testAcc, 1),
-				geobus.Truncate(coords.Accuracy.Float64(), 1))
+		if types.TruncateFloat64(coords.Accuracy.Float64(), 1) != types.TruncateFloat64(testAcc, 1) {
+			t.Errorf("expected accuracy to be %f, got %f", types.TruncateFloat64(testAcc, 1),
+				types.TruncateFloat64(coords.Accuracy.Float64(), 1))
 		}
 	})
 	t.Run("locate fails with broken JSON", func(t *testing.T) {
