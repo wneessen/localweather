@@ -12,6 +12,8 @@ type Address struct {
 	ID           int64
 	Latitude     float64
 	Longitude    float64
+	LatTrunc     float64
+	LonTrunc     float64
 	Altitude     sql.NullFloat64
 	Accuracy     float64
 	DisplayName  string

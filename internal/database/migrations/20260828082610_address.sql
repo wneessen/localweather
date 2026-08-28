@@ -2,11 +2,13 @@
 CREATE TABLE addresses
 (
     id            INTEGER PRIMARY KEY AUTOINCREMENT,
-    latitude      REAL NOT NULL,
-    longitude     REAL NOT NULL,
+    latitude      REAL    NOT NULL,
+    longitude     REAL    NOT NULL,
+    lat_trunc     REAL    NOT NULL,
+    lon_trunc     REAL    NOT NULL,
     altitude      REAL,
-    accuracy      REAL NOT NULL,
-    display_name  TEXT NOT NULL,
+    accuracy      REAL    NOT NULL,
+    display_name  TEXT    NOT NULL,
     country       TEXT,
     state         TEXT,
     municipality  TEXT,
@@ -16,11 +18,11 @@ CREATE TABLE addresses
     suburb        TEXT,
     street        TEXT,
     house_number  TEXT,
-    provider      TEXT NOT NULL,
+    provider      TEXT    NOT NULL,
     created_at    INTEGER NOT NULL DEFAULT (unixepoch())
 );
 CREATE UNIQUE INDEX idx_locations_name ON addresses (display_name);
-CREATE UNIQUE INDEX idx_locations_coords ON addresses (latitude, longitude);
+CREATE UNIQUE INDEX idx_locations_coords ON addresses (lat_trunc, lon_trunc);
 
 CREATE TABLE current_address
 (
