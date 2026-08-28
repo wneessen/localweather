@@ -4,13 +4,21 @@
 
 package model
 
-type Location struct {
-	ID        int64       `json:"id"`
-	Name      string      `json:"name"`
-	Latitude  float64     `json:"latitude"`
-	Longitude float64     `json:"longitude"`
-	Altitude  interface{} `json:"altitude"`
-	Accuracy  float64     `json:"accuracy"`
-	UpdatedAt int64       `json:"updated_at"`
-	CreatedAt int64       `json:"created_at"`
+type Address struct {
+	ID           int64       `json:"id"`
+	Latitude     interface{} `json:"latitude"`
+	Longitude    interface{} `json:"longitude"`
+	Altitude     interface{} `json:"altitude"`
+	Accuracy     interface{} `json:"accuracy"`
+	DisplayName  interface{} `json:"display_name"`
+	Country      interface{} `json:"country"`
+	State        interface{} `json:"state"`
+	Municipality interface{} `json:"municipality"`
+	CityDistrict interface{} `json:"city_district"`
+	Postcode     interface{} `json:"postcode"`
+	City         interface{} `json:"city"`
+	Suburb       interface{} `json:"suburb"`
+	Street       interface{} `json:"street"`
+	HouseNumber  interface{} `json:"house_number"`
+	CreatedAt    int64       `json:"created_at"`
 }

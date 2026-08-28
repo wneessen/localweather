@@ -9,7 +9,8 @@ import (
 )
 
 type Querier interface {
-	LocationByID(ctx context.Context, id int64) (Location, error)
+	AddressByCoords(ctx context.Context, arg AddressByCoordsParams) (Address, error)
+	NewAddress(ctx context.Context, arg NewAddressParams) (Address, error)
 }
 
 var _ Querier = (*Queries)(nil)

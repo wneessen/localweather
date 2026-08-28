@@ -15,7 +15,6 @@ import (
 	"github.com/wneessen/localweather/internal/geobus/provider/ichnaea"
 	"github.com/wneessen/localweather/internal/http"
 	"github.com/wneessen/localweather/internal/log"
-	"github.com/wneessen/localweather/internal/types"
 )
 
 const (
@@ -117,21 +116,4 @@ func (s *Server) processGeobusUpdate(ctx context.Context, sub <-chan geobus.Resu
 			}
 		}
 	}
-}
-
-func (s *Server) updateCurrentLocation(ctx context.Context, coords types.Coordinate) error {
-	if !coords.Valid() {
-		return fmt.Errorf("invalid coordinates: %f, %f", coords.Latitude, coords.Longitude)
-	}
-	address, err := s.geocoder.Reverse(ctx, coords)
-	if err != nil {
-		return fmt.Errorf("failed reverse geocode coordinates: %w", err)
-	}
-
-	if address.Found {
-		s.log.Info("reverse geocoded coordinates", slog.String("address", address.DisplayName))
-	}
-	s.fetchWeather(ctx, coords)
-
-	return nil
 }
