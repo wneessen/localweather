@@ -133,6 +133,7 @@ func (b *Service) Publish(r Result) {
 		slog.Float64("latitude", r.Coordinates.Latitude),
 		slog.Float64("longitude", r.Coordinates.Longitude),
 		slog.String("provider", r.Provider),
+		slog.Bool("cache_hit", r.Coordinates.CacheHit),
 		slog.Bool("current_location_superseded", superseded),
 	)
 	if !superseded {

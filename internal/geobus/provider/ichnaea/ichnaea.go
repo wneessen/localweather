@@ -237,6 +237,7 @@ func (p *Provider) locate(ctx context.Context) (types.Coordinate, error) {
 	wifiHash := p.apHash
 	p.apLock.RUnlock()
 
+	cacheHit := false
 	cached, err := p.cache.Fetch(ctx, wifiHash,
 		func(ctx context.Context) (cachedLocation, error) {
 			return p.lookup(ctx, wifiList)
@@ -247,12 +248,13 @@ func (p *Provider) locate(ctx context.Context) (types.Coordinate, error) {
 			return !location.isFallback
 		},
 		func(location *cachedLocation) {
-			// Cache hit; no API request was performed.
+			cacheHit = true
 		},
 	)
 	if err != nil {
 		return types.Coordinate{}, err
 	}
+	cached.coords.CacheHit = cacheHit
 	return cached.coords, nil
 }
 

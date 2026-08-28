@@ -66,11 +66,16 @@ func start() error {
 	}()
 
 	// DB migrations
-	if !conf.Database.DisableAutoMigrate {
-		if err = database.Migrate(ctx, db, logger); err != nil {
-			return fmt.Errorf("failed to migrate database: %w", err)
-		}
+	provider, err := database.Migrate(ctx, db, logger)
+	if err != nil {
+		return fmt.Errorf("failed to migrate database: %w", err)
 	}
+	defer func() {
+		logger.Info("closing migration provider")
+		if cerr := provider.Close(); cerr != nil {
+			logger.Error("failed to close migration provider", log.ErrAttr(cerr))
+		}
+	}()
 
 	// DB model / queries
 	queries := model.New(db)

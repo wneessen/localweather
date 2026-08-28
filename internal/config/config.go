@@ -13,10 +13,9 @@ type Config struct {
 	Units    string `fig:"units" default:"metric"`
 	Locale   string `fig:"locale"`
 	Database struct {
-		BusyTimeout        time.Duration `fig:"busy_timeout" default:"10s"`
-		DisableAutoMigrate bool          `fig:"disable_auto_migrate"`
-		MaxConnections     int           `fig:"max_connections" default:"5"`
-		Path               string        `fig:"path"`
+		BusyTimeout    time.Duration `fig:"busy_timeout" default:"10s"`
+		MaxConnections int           `fig:"max_connections" default:"5"`
+		Path           string        `fig:"path"`
 	}
 	Geobus struct {
 		CoordinatesFile        string `fig:"coordinates_file"`
