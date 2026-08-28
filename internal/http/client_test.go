@@ -7,8 +7,6 @@ package http
 import (
 	"context"
 	"errors"
-	"io"
-	"log/slog"
 	stdhttp "net/http"
 	"net/url"
 	"os"
@@ -16,8 +14,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/wneessen/waybar-weather/internal/logger"
-	"github.com/wneessen/waybar-weather/internal/testhelper"
+	"github.com/wneessen/localweather/internal/config"
+	"github.com/wneessen/localweather/internal/log"
+	"github.com/wneessen/localweather/internal/testhelper"
 )
 
 type testType struct {
@@ -30,13 +29,15 @@ type testType struct {
 const testFile = "../../testdata/testtype.json"
 
 func TestNew(t *testing.T) {
-	client := New(log.New(slog.LevelInfo))
+	logger := log.New(new(config.Config))
+	client := New(logger)
 	if client == nil {
 		t.Fatal("expected client to be non-nil")
 	}
 }
 
 func TestClient_Get(t *testing.T) {
+	logger := log.New(new(config.Config))
 	t.Run("getting and serializing JSON should work", func(t *testing.T) {
 		rtFn := func(req *stdhttp.Request) (*stdhttp.Response, error) {
 			data, err := os.Open(testFile)
@@ -51,7 +52,7 @@ func TestClient_Get(t *testing.T) {
 			}, nil
 		}
 
-		client := New(logger.New(slog.LevelInfo))
+		client := New(logger)
 		client.Transport = testhelper.MockRoundTripper{Fn: rtFn}
 		query := url.Values{}
 		query.Add("key", "value")
@@ -81,7 +82,7 @@ func TestClient_Get(t *testing.T) {
 		}
 	})
 	t.Run("unmarshalling into non-pointer should fail", func(t *testing.T) {
-		client := New(logger.New(slog.LevelInfo))
+		client := New(logger)
 		var target testType
 		_, err := client.Get(t.Context(), "https://example.com", target, nil, nil)
 		if err == nil {
@@ -92,7 +93,7 @@ func TestClient_Get(t *testing.T) {
 		}
 	})
 	t.Run("parsing an invalid url should fail", func(t *testing.T) {
-		client := New(logger.New(slog.LevelInfo))
+		client := New(logger)
 		target := new(testType)
 		_, err := client.Get(t.Context(), "http://example.com/xyz%", target, nil, nil)
 		if err == nil {
@@ -107,7 +108,7 @@ func TestClient_Get(t *testing.T) {
 			return nil, errors.New("intentionally failing")
 		}
 
-		client := New(logger.New(slog.LevelInfo))
+		client := New(logger)
 		client.Transport = testhelper.MockRoundTripper{Fn: rtFn}
 
 		target := new(testType)
@@ -125,7 +126,10 @@ func TestClient_Get(t *testing.T) {
 			}, nil
 		}
 
-		client := New(logger.NewLogger(slog.LevelInfo, io.Discard, nil))
+		conf := new(config.Config)
+		conf.Log.Output = "discard"
+		discarder := log.New(conf)
+		client := New(discarder)
 		client.Transport = testhelper.MockRoundTripper{Fn: rtFn}
 
 		target := new(testType)
@@ -137,9 +141,10 @@ func TestClient_Get(t *testing.T) {
 }
 
 func TestClient_GetWithTimeout(t *testing.T) {
+	logger := log.New(new(config.Config))
 	t.Run("get request fails on context cancel", func(t *testing.T) {
 		testhelper.PerformIntegrationTests(t)
-		client := New(logger.New(slog.LevelInfo))
+		client := New(logger)
 		ctx, cancel := context.WithTimeout(t.Context(), time.Millisecond)
 		defer cancel()
 
@@ -155,6 +160,7 @@ func TestClient_GetWithTimeout(t *testing.T) {
 }
 
 func TestClient_Post(t *testing.T) {
+	logger := log.New(new(config.Config))
 	t.Run("post request succeeds", func(t *testing.T) {
 		rtFn := func(req *stdhttp.Request) (*stdhttp.Response, error) {
 			data, err := os.Open(testFile)
@@ -169,7 +175,7 @@ func TestClient_Post(t *testing.T) {
 			}, nil
 		}
 
-		client := New(logger.New(slog.LevelInfo))
+		client := New(logger)
 		client.Transport = testhelper.MockRoundTripper{Fn: rtFn}
 
 		target := new(testType)
@@ -181,8 +187,9 @@ func TestClient_Post(t *testing.T) {
 }
 
 func TestClient_PostWithTimeout(t *testing.T) {
+	logger := log.New(new(config.Config))
 	t.Run("post request times out", func(t *testing.T) {
-		client := New(logger.New(slog.LevelInfo))
+		client := New(logger)
 
 		target := new(testType)
 		_, err := client.PostWithTimeout(t.Context(), testhelper.TestOnlineAPIURL, target, nil, nil, time.Nanosecond)

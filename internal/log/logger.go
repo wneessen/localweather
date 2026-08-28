@@ -1,6 +1,7 @@
 package log
 
 import (
+	"io"
 	"log/slog"
 	"os"
 	"strings"
@@ -27,11 +28,13 @@ func NewWithReplaceAttr(conf *config.Config, replaceAttr func(groups []string, a
 	}
 
 	level := conf.Log.Level.SLog()
-	var output *os.File
+	var output io.Writer
 
 	switch strings.ToLower(conf.Log.Output) {
 	case "stderr":
 		output = os.Stderr
+	case "discard":
+		output = io.Discard
 	default:
 		output = os.Stdout
 	}

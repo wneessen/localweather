@@ -220,7 +220,10 @@ func TestICHNAEAProvider_LookupStream(t *testing.T) {
 			ctx, cancel := context.WithCancel(t.Context())
 			defer cancel()
 
-			provider, err := NewICHNAEAProvider(http.New(logger), logger)
+			conf := new(config.Config)
+			conf.Log.Output = "discard"
+			discarder := log.New(conf)
+			provider, err := NewICHNAEAProvider(http.New(discarder), discarder)
 			if err != nil {
 				t.Fatalf("failed to create GeoIP provider: %s", err)
 			}
