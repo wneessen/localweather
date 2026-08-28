@@ -111,7 +111,7 @@ func (s *Server) processGeobusUpdate(ctx context.Context, sub <-chan geobus.Resu
 				slog.Float64("altitude", r.Coordinates.Altitude),
 				slog.String("accuracy", r.Coordinates.Accuracy.String()),
 				slog.String("provider", r.Provider))
-			if err := s.updateCurrentLocation(ctx, r.Coordinates); err != nil {
+			if err := s.updateCurrentLocation(ctx, r.Coordinates, r.Provider); err != nil {
 				s.log.Error("failed to update current location", log.ErrAttr(err))
 			}
 		}

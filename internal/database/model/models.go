@@ -20,5 +20,13 @@ type Address struct {
 	Suburb       interface{} `json:"suburb"`
 	Street       interface{} `json:"street"`
 	HouseNumber  interface{} `json:"house_number"`
+	Provider     interface{} `json:"provider"`
 	CreatedAt    int64       `json:"created_at"`
+}
+
+type CurrentAddress struct {
+	Lock      int64 `json:"lock"`
+	AddressID int64 `json:"address_id"`
+	UpdatedAt int64 `json:"updated_at"`
+	CreatedAt int64 `json:"created_at"`
 }
