@@ -1,6 +1,8 @@
-root      := justfile_directory()
-dev_dir   := root / ".dev"
-db_path   := dev_dir / "storage.db"
+root := justfile_directory()
+dev_dir := root / ".dev"
+db_path := dev_dir / "storage.db"
+cityname_path := dev_dir / "cityname"
+coordinates_path := dev_dir / "coordinates"
 
 ## Some exports for convenice
 export APP_URL := "http://127.0.0.1:10001"
@@ -12,7 +14,8 @@ export GOOSE_MIGRATION_DIR := root / "internal/database/migrations"
 export LOCALWEATHER_LOG_LEVEL := "debug"
 export LOCALWEATHER_GEOCODER_PROVIDER := "opencage"
 export LOCALWEATHER_DATABASE_PATH := db_path
-export LOCALWEATHER_GEOBUS_DISABLE_COORDINATES_FILE := "true"
+export LOCALWEATHER_GEOBUS_COORDINATES_FILE := coordinates_path
+export LOCALWEATHER_GEOBUS_CITYNAME_FILE := cityname_path
 #export LOCALWEATHER_GEOCODER_PROVIDER := "geocode-earth"
 
 [private]
