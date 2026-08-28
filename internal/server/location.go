@@ -26,9 +26,11 @@ func (s *Server) updateCurrentLocation(ctx context.Context, coords types.Coordin
 }
 
 func (s *Server) addressByCoords(ctx context.Context, coords types.Coordinate) (model.Address, error) {
+	lat := types.TruncateFloat64(coords.Latitude, types.CoordinatePrecision)
+	lon := types.TruncateFloat64(coords.Longitude, types.CoordinatePrecision)
 	address, err := s.queries.AddressByCoords(ctx, model.AddressByCoordsParams{
-		Latitude:  coords.Latitude,
-		Longitude: coords.Longitude,
+		Latitude:  lat,
+		Longitude: lon,
 	})
 	if err != nil {
 		switch {
@@ -38,12 +40,12 @@ func (s *Server) addressByCoords(ctx context.Context, coords types.Coordinate) (
 				return address, fmt.Errorf("failed to reverse geocode coordinates: %w", aerr)
 			}
 			if !lookup.Found {
-				return address, fmt.Errorf("no address found for coordinates: %f, %f", coords.Latitude,
-					coords.Longitude)
+				return address, fmt.Errorf("no address found for coordinates: %f (%f), %f (%f)", coords.Latitude, lat,
+					coords.Longitude, lon)
 			}
 			params := model.NewAddressParams{
-				Latitude:     coords.Latitude,
-				Longitude:    coords.Longitude,
+				Latitude:     lat,
+				Longitude:    lon,
 				Altitude:     coords.Altitude,
 				Accuracy:     coords.Accuracy,
 				DisplayName:  lookup.DisplayName,

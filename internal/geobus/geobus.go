@@ -7,7 +7,6 @@ package geobus
 import (
 	"context"
 	"log/slog"
-	"math"
 	"sync"
 	"time"
 
@@ -17,7 +16,6 @@ import (
 )
 
 const (
-	TruncPrecision  = 4
 	accuracyEpsilon = 1e-6
 )
 
@@ -190,12 +188,6 @@ func (r Result) BetterThan(prev Result) bool {
 // based on the current time and the timestamp.
 func (r Result) IsExpired() bool {
 	return r.TTL > 0 && time.Since(r.At) > r.TTL
-}
-
-// Truncate truncates a float to a fixed decimal precision.
-func Truncate(x float64, precision int) float64 {
-	p := math.Pow(10, float64(precision))
-	return math.Trunc(x*p) / p
 }
 
 // TrackProviders starts one goroutine per provider that streams results into the bus.
