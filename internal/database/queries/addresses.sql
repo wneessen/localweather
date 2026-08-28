@@ -1,14 +1,15 @@
 -- name: AddressByCoords :one
 SELECT *
 FROM addresses
-WHERE latitude = ?
-  AND longitude = ?;
+WHERE lat_trunc = ?
+  AND lon_trunc = ?;
 
 -- name: NewAddress :one
 INSERT INTO addresses
-(latitude, longitude, altitude, accuracy, display_name, country, state, municipality, city_district, postcode, city,
+(latitude, longitude, lat_trunc, lon_trunc, altitude, accuracy, display_name, country, state, municipality,
+ city_district, postcode, city,
  suburb, street, house_number, provider)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 RETURNING *;
 
 -- name: UpdateCurrentAddress :exec

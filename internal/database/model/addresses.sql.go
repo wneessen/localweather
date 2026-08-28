@@ -11,24 +11,26 @@ import (
 )
 
 const addressByCoords = `-- name: AddressByCoords :one
-SELECT id, latitude, longitude, altitude, accuracy, display_name, country, state, municipality, city_district, postcode, city, suburb, street, house_number, provider, created_at
+SELECT id, latitude, longitude, lat_trunc, lon_trunc, altitude, accuracy, display_name, country, state, municipality, city_district, postcode, city, suburb, street, house_number, provider, created_at
 FROM addresses
-WHERE latitude = ?
-  AND longitude = ?
+WHERE lat_trunc = ?
+  AND lon_trunc = ?
 `
 
 type AddressByCoordsParams struct {
-	Latitude  float64
-	Longitude float64
+	LatTrunc float64
+	LonTrunc float64
 }
 
 func (q *Queries) AddressByCoords(ctx context.Context, arg AddressByCoordsParams) (Address, error) {
-	row := q.db.QueryRowContext(ctx, addressByCoords, arg.Latitude, arg.Longitude)
+	row := q.db.QueryRowContext(ctx, addressByCoords, arg.LatTrunc, arg.LonTrunc)
 	var i Address
 	err := row.Scan(
 		&i.ID,
 		&i.Latitude,
 		&i.Longitude,
+		&i.LatTrunc,
+		&i.LonTrunc,
 		&i.Altitude,
 		&i.Accuracy,
 		&i.DisplayName,
@@ -58,7 +60,7 @@ func (q *Queries) ClearCurrentAddress(ctx context.Context) error {
 }
 
 const currentAddress = `-- name: CurrentAddress :one
-SELECT lock, address_id, updated_at, current_address.created_at, id, latitude, longitude, altitude, accuracy, display_name, country, state, municipality, city_district, postcode, city, suburb, street, house_number, provider, addresses.created_at
+SELECT lock, address_id, updated_at, current_address.created_at, id, latitude, longitude, lat_trunc, lon_trunc, altitude, accuracy, display_name, country, state, municipality, city_district, postcode, city, suburb, street, house_number, provider, addresses.created_at
 FROM current_address
          JOIN addresses ON addresses.id = current_address.address_id
 LIMIT 1
@@ -72,6 +74,8 @@ type CurrentAddressRow struct {
 	ID           int64
 	Latitude     float64
 	Longitude    float64
+	LatTrunc     float64
+	LonTrunc     float64
 	Altitude     sql.NullFloat64
 	Accuracy     float64
 	DisplayName  string
@@ -99,6 +103,8 @@ func (q *Queries) CurrentAddress(ctx context.Context) (CurrentAddressRow, error)
 		&i.ID,
 		&i.Latitude,
 		&i.Longitude,
+		&i.LatTrunc,
+		&i.LonTrunc,
 		&i.Altitude,
 		&i.Accuracy,
 		&i.DisplayName,
@@ -119,15 +125,18 @@ func (q *Queries) CurrentAddress(ctx context.Context) (CurrentAddressRow, error)
 
 const newAddress = `-- name: NewAddress :one
 INSERT INTO addresses
-(latitude, longitude, altitude, accuracy, display_name, country, state, municipality, city_district, postcode, city,
+(latitude, longitude, lat_trunc, lon_trunc, altitude, accuracy, display_name, country, state, municipality,
+ city_district, postcode, city,
  suburb, street, house_number, provider)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-RETURNING id, latitude, longitude, altitude, accuracy, display_name, country, state, municipality, city_district, postcode, city, suburb, street, house_number, provider, created_at
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+RETURNING id, latitude, longitude, lat_trunc, lon_trunc, altitude, accuracy, display_name, country, state, municipality, city_district, postcode, city, suburb, street, house_number, provider, created_at
 `
 
 type NewAddressParams struct {
 	Latitude     float64
 	Longitude    float64
+	LatTrunc     float64
+	LonTrunc     float64
 	Altitude     sql.NullFloat64
 	Accuracy     float64
 	DisplayName  string
@@ -147,6 +156,8 @@ func (q *Queries) NewAddress(ctx context.Context, arg NewAddressParams) (Address
 	row := q.db.QueryRowContext(ctx, newAddress,
 		arg.Latitude,
 		arg.Longitude,
+		arg.LatTrunc,
+		arg.LonTrunc,
 		arg.Altitude,
 		arg.Accuracy,
 		arg.DisplayName,
@@ -166,6 +177,8 @@ func (q *Queries) NewAddress(ctx context.Context, arg NewAddressParams) (Address
 		&i.ID,
 		&i.Latitude,
 		&i.Longitude,
+		&i.LatTrunc,
+		&i.LonTrunc,
 		&i.Altitude,
 		&i.Accuracy,
 		&i.DisplayName,
