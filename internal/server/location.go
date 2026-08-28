@@ -13,24 +13,28 @@ import (
 	"github.com/wneessen/localweather/internal/types"
 )
 
-func (s *Server) updateCurrentLocation(ctx context.Context, coords types.Coordinate) error {
+func (s *Server) updateCurrentLocation(ctx context.Context, coords types.Coordinate, provider string) error {
 	if !coords.Valid() {
 		return fmt.Errorf("invalid coordinates: %f, %f", coords.Latitude, coords.Longitude)
 	}
 
-	location, err := s.addressByCoords(ctx, coords)
+	location, err := s.addressByCoords(ctx, coords, provider)
 	if err != nil {
 		return fmt.Errorf("failed to get location by coordinates: %w", err)
 	}
 	if location.ID == 0 {
 		return nil
 	}
-	s.log.Info("found location", slog.Any("location", location))
+
+	if err = s.queries.CurrentAddress(ctx, location.ID); err != nil {
+		return fmt.Errorf("failed to set current address: %w", err)
+	}
+	s.log.Info("set current address", slog.Any("location", location))
 
 	return nil
 }
 
-func (s *Server) addressByCoords(ctx context.Context, coords types.Coordinate) (model.Address, error) {
+func (s *Server) addressByCoords(ctx context.Context, coords types.Coordinate, provider string) (model.Address, error) {
 	lat := types.TruncateFloat64(coords.Latitude, types.CoordinatePrecision)
 	lon := types.TruncateFloat64(coords.Longitude, types.CoordinatePrecision)
 	address, err := s.queries.AddressByCoords(ctx, model.AddressByCoordsParams{
@@ -63,6 +67,7 @@ func (s *Server) addressByCoords(ctx context.Context, coords types.Coordinate) (
 				Suburb:       lookup.Suburb,
 				Street:       lookup.Street,
 				HouseNumber:  lookup.HouseNumber,
+				Provider:     provider,
 			}
 			address, err = s.queries.NewAddress(ctx, params)
 			if err != nil {

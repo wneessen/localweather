@@ -10,9 +10,10 @@ import (
 )
 
 const addressByCoords = `-- name: AddressByCoords :one
-SELECT id, latitude, longitude, altitude, accuracy, display_name, country, state, municipality, city_district, postcode, city, suburb, street, house_number, created_at
+SELECT id, latitude, longitude, altitude, accuracy, display_name, country, state, municipality, city_district, postcode, city, suburb, street, house_number, provider, created_at
 FROM addresses
-WHERE latitude = ? AND longitude = ?
+WHERE latitude = ?
+  AND longitude = ?
 `
 
 type AddressByCoordsParams struct {
@@ -39,16 +40,40 @@ func (q *Queries) AddressByCoords(ctx context.Context, arg AddressByCoordsParams
 		&i.Suburb,
 		&i.Street,
 		&i.HouseNumber,
+		&i.Provider,
 		&i.CreatedAt,
 	)
 	return i, err
 }
 
+const clearCurrentAddress = `-- name: ClearCurrentAddress :exec
+DELETE
+FROM current_address
+`
+
+func (q *Queries) ClearCurrentAddress(ctx context.Context) error {
+	_, err := q.db.ExecContext(ctx, clearCurrentAddress)
+	return err
+}
+
+const currentAddress = `-- name: CurrentAddress :exec
+INSERT INTO current_address (address_id)
+VALUES (?)
+ON CONFLICT (lock) DO UPDATE SET address_id = excluded.address_id,
+                                 updated_at = unixepoch()
+`
+
+func (q *Queries) CurrentAddress(ctx context.Context, addressID int64) error {
+	_, err := q.db.ExecContext(ctx, currentAddress, addressID)
+	return err
+}
+
 const newAddress = `-- name: NewAddress :one
 INSERT INTO addresses
-(latitude, longitude, altitude, accuracy, display_name, country, state, municipality, city_district, postcode, city, suburb, street, house_number)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-RETURNING id, latitude, longitude, altitude, accuracy, display_name, country, state, municipality, city_district, postcode, city, suburb, street, house_number, created_at
+(latitude, longitude, altitude, accuracy, display_name, country, state, municipality, city_district, postcode, city,
+ suburb, street, house_number, provider)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+RETURNING id, latitude, longitude, altitude, accuracy, display_name, country, state, municipality, city_district, postcode, city, suburb, street, house_number, provider, created_at
 `
 
 type NewAddressParams struct {
@@ -66,6 +91,7 @@ type NewAddressParams struct {
 	Suburb       interface{} `json:"suburb"`
 	Street       interface{} `json:"street"`
 	HouseNumber  interface{} `json:"house_number"`
+	Provider     interface{} `json:"provider"`
 }
 
 func (q *Queries) NewAddress(ctx context.Context, arg NewAddressParams) (Address, error) {
@@ -84,6 +110,7 @@ func (q *Queries) NewAddress(ctx context.Context, arg NewAddressParams) (Address
 		arg.Suburb,
 		arg.Street,
 		arg.HouseNumber,
+		arg.Provider,
 	)
 	var i Address
 	err := row.Scan(
@@ -102,6 +129,7 @@ func (q *Queries) NewAddress(ctx context.Context, arg NewAddressParams) (Address
 		&i.Suburb,
 		&i.Street,
 		&i.HouseNumber,
+		&i.Provider,
 		&i.CreatedAt,
 	)
 	return i, err

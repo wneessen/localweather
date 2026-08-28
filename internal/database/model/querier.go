@@ -10,6 +10,8 @@ import (
 
 type Querier interface {
 	AddressByCoords(ctx context.Context, arg AddressByCoordsParams) (Address, error)
+	ClearCurrentAddress(ctx context.Context) error
+	CurrentAddress(ctx context.Context, addressID int64) error
 	NewAddress(ctx context.Context, arg NewAddressParams) (Address, error)
 }
 
