@@ -8,6 +8,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io/fs"
 	"os"
 	"strings"
 	"time"
@@ -88,6 +89,9 @@ func (p *Provider) readFile(ctx context.Context) (types.Coordinate, error) {
 	coords := types.Coordinate{}
 	data, err := os.ReadFile(p.path)
 	if err != nil {
+		if _, ok := errors.AsType[*fs.PathError](err); ok {
+			return coords, nil
+		}
 		return coords, fmt.Errorf("failed to read cityname file %q: %w", p.path, err)
 	}
 	lines := strings.SplitSeq(string(data), "\n")

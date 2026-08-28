@@ -6,7 +6,9 @@ package coordinates_file
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"io/fs"
 	"os"
 	"strconv"
 	"strings"
@@ -79,11 +81,12 @@ func (p *Provider) LookupStream(ctx context.Context, key string) <-chan geobus.R
 // Returns latitude, longitude, altitude, accuracy, or an error if the file cannot be
 // read or parsed correctly.
 func (p *Provider) readFile(_ context.Context) (types.Coordinate, error) {
-	coords := types.Coordinate{
-		Accuracy: accuracy,
-	}
+	coords := types.Coordinate{}
 	data, err := os.ReadFile(p.path)
 	if err != nil {
+		if _, ok := errors.AsType[*fs.PathError](err); ok {
+			return coords, nil
+		}
 		return coords, fmt.Errorf("failed to read coordinates file %q: %w", p.path, err)
 	}
 	lines := strings.SplitSeq(string(data), "\n")
@@ -110,6 +113,7 @@ func (p *Provider) readFile(_ context.Context) (types.Coordinate, error) {
 				continue
 			}
 		}
+		coords.Accuracy = accuracy
 
 		return coords, nil
 	}

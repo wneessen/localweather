@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"log/slog"
 
+	"modernc.org/sqlite"
+
 	"github.com/wneessen/localweather/internal/database/model"
 	"github.com/wneessen/localweather/internal/types"
 )
@@ -19,6 +21,9 @@ func (s *Server) updateCurrentLocation(ctx context.Context, coords types.Coordin
 	location, err := s.addressByCoords(ctx, coords)
 	if err != nil {
 		return fmt.Errorf("failed to get location by coordinates: %w", err)
+	}
+	if location.ID == 0 {
+		return nil
 	}
 	s.log.Info("found location", slog.Any("location", location))
 
@@ -61,6 +66,9 @@ func (s *Server) addressByCoords(ctx context.Context, coords types.Coordinate) (
 			}
 			address, err = s.queries.NewAddress(ctx, params)
 			if err != nil {
+				if sqlErr, ok := errors.AsType[*sqlite.Error](err); ok && sqlErr.Code() == 2067 {
+					return address, nil
+				}
 				return address, fmt.Errorf("failed to create new location: %w", err)
 			}
 			return address, nil
