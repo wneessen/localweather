@@ -20,6 +20,17 @@ import (
 	"github.com/wneessen/localweather/internal/log"
 )
 
+// reqParams defines the parameters for an HTTP request, including method, endpoint, query, headers, body, and timeout.
+type reqParams struct {
+	method   string
+	endpoint string
+	target   any
+	query    url.Values
+	headers  map[string]string
+	body     io.Reader
+	timeout  time.Duration
+}
+
 const (
 	// DefaultTimeout is the default timeout value for the HTTPClient
 	DefaultTimeout = time.Second * 10
@@ -60,50 +71,82 @@ func New(logger *log.Logger) *Client {
 // Get performs a HTTP GET request for the given URL and json-unmarshals the response
 // into target
 func (h *Client) Get(ctx context.Context, endpoint string, target any, query url.Values, headers map[string]string) (int, error) {
-	return h.PerformReq(ctx, http.MethodGet, endpoint, target, query, headers, nil, DefaultTimeout)
+	params := reqParams{
+		method:   http.MethodGet,
+		endpoint: endpoint,
+		target:   target,
+		query:    query,
+		headers:  headers,
+		timeout:  DefaultTimeout,
+	}
+	return h.PerformReq(ctx, params)
 }
 
 func (h *Client) GetWithTimeout(ctx context.Context, endpoint string, target any, query url.Values, headers map[string]string, timeout time.Duration) (int, error) {
-	return h.PerformReq(ctx, http.MethodGet, endpoint, target, query, headers, nil, timeout)
+	params := reqParams{
+		method:   http.MethodGet,
+		endpoint: endpoint,
+		target:   target,
+		query:    query,
+		headers:  headers,
+		timeout:  timeout,
+	}
+	return h.PerformReq(ctx, params)
 }
 
 // Post performs a HTTP POST request for the given URL and json-unmarshals the response
 // into target
 func (h *Client) Post(ctx context.Context, endpoint string, target any, body io.Reader, headers map[string]string) (int, error) {
-	return h.PerformReq(ctx, http.MethodPost, endpoint, target, nil, headers, body, DefaultTimeout)
+	params := reqParams{
+		method:   http.MethodPost,
+		endpoint: endpoint,
+		target:   target,
+		headers:  headers,
+		body:     body,
+		timeout:  DefaultTimeout,
+	}
+	return h.PerformReq(ctx, params)
 }
 
 func (h *Client) PostWithTimeout(ctx context.Context, endpoint string, target any, body io.Reader, headers map[string]string, timeout time.Duration) (int, error) {
-	return h.PerformReq(ctx, http.MethodPost, endpoint, target, nil, headers, body, timeout)
+	params := reqParams{
+		method:   http.MethodPost,
+		endpoint: endpoint,
+		target:   target,
+		headers:  headers,
+		body:     body,
+		timeout:  timeout,
+	}
+	return h.PerformReq(ctx, params)
 }
 
 // PerformReq performs a HTTP GET or POST request for the given URL and timeout and JSON-unmarshals the
 // response into target
-func (h *Client) PerformReq(ctx context.Context, method string, endpoint string, target any, query url.Values, headers map[string]string, body io.Reader, timeout time.Duration) (int, error) {
-	rv := reflect.ValueOf(target)
+func (h *Client) PerformReq(ctx context.Context, params reqParams) (int, error) {
+	rv := reflect.ValueOf(params.target)
 	if rv.Kind() != reflect.Pointer || rv.IsNil() {
 		return 0, ErrNonPointerTarget
 	}
 
-	ctx, cancel := context.WithTimeout(ctx, timeout)
+	ctx, cancel := context.WithTimeout(ctx, params.timeout)
 	defer cancel()
 
 	// Prepare URL and query parameters
-	reqURL, err := url.Parse(endpoint)
+	reqURL, err := url.Parse(params.endpoint)
 	if err != nil {
 		return 0, fmt.Errorf("failed to parse URL: %w", err)
 	}
-	if len(query) > 0 {
-		reqURL.RawQuery = query.Encode()
+	if len(params.query) > 0 {
+		reqURL.RawQuery = params.query.Encode()
 	}
 
 	// Prepare HTTP request
-	request, err := http.NewRequestWithContext(ctx, method, reqURL.String(), body)
+	request, err := http.NewRequestWithContext(ctx, params.method, reqURL.String(), params.body)
 	if err != nil {
 		return 0, fmt.Errorf("failed create new HTTP request with context: %w", err)
 	}
 	request.Header.Set("User-Agent", UserAgent)
-	for k, v := range headers {
+	for k, v := range params.headers {
 		request.Header.Set(k, v)
 	}
 
@@ -125,7 +168,7 @@ func (h *Client) PerformReq(ctx context.Context, method string, endpoint string,
 	}(response.Body)
 
 	// Unmarshal the JSON API response into target
-	if err = json.UnmarshalRead(response.Body, target); err != nil {
+	if err = json.UnmarshalRead(response.Body, params.target); err != nil {
 		return response.StatusCode, fmt.Errorf("failed to decode JSON: %w", err)
 	}
 
