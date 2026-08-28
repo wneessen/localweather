@@ -12,6 +12,8 @@ import (
 	"github.com/wneessen/localweather/internal/types"
 )
 
+const dbCoordinatePrecision = 2
+
 func (s *Server) updateCurrentLocation(ctx context.Context, coords types.Coordinate, provider string) error {
 	if !coords.Valid() {
 		return fmt.Errorf("invalid coordinates: %f, %f", coords.Latitude, coords.Longitude)
@@ -35,8 +37,8 @@ func (s *Server) updateCurrentLocation(ctx context.Context, coords types.Coordin
 func (s *Server) addressByCoords(ctx context.Context, coords types.Coordinate, provider string) (model.Address, error) {
 	lat := types.TruncateFloat64(coords.Latitude, types.CoordinatePrecision)
 	lon := types.TruncateFloat64(coords.Longitude, types.CoordinatePrecision)
-	latTrunc := types.TruncateFloat64(lat, 3)
-	lonTrunc := types.TruncateFloat64(lon, 3)
+	latTrunc := types.TruncateFloat64(lat, dbCoordinatePrecision)
+	lonTrunc := types.TruncateFloat64(lon, dbCoordinatePrecision)
 	address, err := s.queries.AddressByCoords(ctx, model.AddressByCoordsParams{
 		LatTrunc: latTrunc,
 		LonTrunc: lonTrunc,
