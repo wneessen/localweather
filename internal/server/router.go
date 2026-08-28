@@ -41,20 +41,7 @@ func (s *Server) httpRoutes(_ context.Context) {
 
 	// Routes
 	s.mux.Get("/healthz", s.handlerHealthzGet)
-	s.mux.Route("/api", func(r chi.Router) {
-		/*
-				// Authenticated routes
-				r.Group(func(r chi.Router) {
-					r.With(s.tokenAuth(true)).Get("/user/info", s.handlerUserInfoGet)
-					r.With(s.tokenAuth(true)).Get("/now-playing", s.handlerNowPlayingGet)
-				})
-			})
-			// Listenbrainz compatiblity routes
-			s.mux.Route("/1", func(r chi.Router) {
-				r.Group(func(r chi.Router) {
-					r.With(s.tokenAuth(true)).Get("/validate-token", s.handlerTokenValidGet)
-					r.With(s.tokenAuth(true)).Post("/submit-listens", s.handlerSubmitListenPost)
-				})
-		*/
+	s.mux.Route("/location", func(r chi.Router) {
+		r.Get("/current", s.handlerLocationCurrentGet)
 	})
 }

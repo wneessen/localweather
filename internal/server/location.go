@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"log/slog"
 
 	"modernc.org/sqlite"
 
@@ -26,10 +25,9 @@ func (s *Server) updateCurrentLocation(ctx context.Context, coords types.Coordin
 		return nil
 	}
 
-	if err = s.queries.CurrentAddress(ctx, location.ID); err != nil {
+	if err = s.queries.UpdateCurrentAddress(ctx, location.ID); err != nil {
 		return fmt.Errorf("failed to set current address: %w", err)
 	}
-	s.log.Info("set current address", slog.Any("location", location))
 
 	return nil
 }
@@ -41,45 +39,45 @@ func (s *Server) addressByCoords(ctx context.Context, coords types.Coordinate, p
 		Latitude:  lat,
 		Longitude: lon,
 	})
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		return address, fmt.Errorf("failed to retrieve location from database: %w", err)
+	}
+
+	if address.ID != 0 {
+		return address, nil
+	}
+
+	lookup, aerr := s.geocoder.Reverse(ctx, coords)
+	if aerr != nil {
+		return address, fmt.Errorf("failed to reverse geocode coordinates: %w", aerr)
+	}
+	if !lookup.Found {
+		return address, fmt.Errorf("no address found for coordinates: %f (%f), %f (%f)", coords.Latitude, lat,
+			coords.Longitude, lon)
+	}
+	params := model.NewAddressParams{
+		Latitude:     lat,
+		Longitude:    lon,
+		Altitude:     sql.NullFloat64{Float64: coords.Altitude, Valid: true},
+		Accuracy:     coords.Accuracy.Float64(),
+		DisplayName:  lookup.DisplayName,
+		Country:      sql.NullString{String: lookup.Country, Valid: true},
+		State:        sql.NullString{String: lookup.State, Valid: true},
+		Municipality: sql.NullString{String: lookup.Municipality, Valid: true},
+		CityDistrict: sql.NullString{String: lookup.CityDistrict, Valid: true},
+		Postcode:     sql.NullString{String: lookup.Postcode, Valid: true},
+		City:         sql.NullString{String: lookup.City, Valid: true},
+		Suburb:       sql.NullString{String: lookup.Suburb, Valid: true},
+		Street:       sql.NullString{String: lookup.Street, Valid: true},
+		HouseNumber:  sql.NullString{String: lookup.HouseNumber, Valid: true},
+		Provider:     provider,
+	}
+	address, err = s.queries.NewAddress(ctx, params)
 	if err != nil {
-		switch {
-		case errors.Is(err, sql.ErrNoRows):
-			lookup, aerr := s.geocoder.Reverse(ctx, coords)
-			if aerr != nil {
-				return address, fmt.Errorf("failed to reverse geocode coordinates: %w", aerr)
-			}
-			if !lookup.Found {
-				return address, fmt.Errorf("no address found for coordinates: %f (%f), %f (%f)", coords.Latitude, lat,
-					coords.Longitude, lon)
-			}
-			params := model.NewAddressParams{
-				Latitude:     lat,
-				Longitude:    lon,
-				Altitude:     coords.Altitude,
-				Accuracy:     coords.Accuracy,
-				DisplayName:  lookup.DisplayName,
-				Country:      lookup.Country,
-				State:        lookup.State,
-				Municipality: lookup.Municipality,
-				CityDistrict: lookup.CityDistrict,
-				Postcode:     lookup.Postcode,
-				City:         lookup.City,
-				Suburb:       lookup.Suburb,
-				Street:       lookup.Street,
-				HouseNumber:  lookup.HouseNumber,
-				Provider:     provider,
-			}
-			address, err = s.queries.NewAddress(ctx, params)
-			if err != nil {
-				if sqlErr, ok := errors.AsType[*sqlite.Error](err); ok && sqlErr.Code() == 2067 {
-					return address, nil
-				}
-				return address, fmt.Errorf("failed to create new location: %w", err)
-			}
+		if sqlErr, ok := errors.AsType[*sqlite.Error](err); ok && sqlErr.Code() == 2067 {
 			return address, nil
-		default:
-			return address, fmt.Errorf("failed to retrieve location from database: %w", err)
 		}
+		return address, fmt.Errorf("failed to create new location: %w", err)
 	}
 
 	return address, nil

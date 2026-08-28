@@ -4,29 +4,33 @@
 
 package model
 
+import (
+	"database/sql"
+)
+
 type Address struct {
-	ID           int64       `json:"id"`
-	Latitude     interface{} `json:"latitude"`
-	Longitude    interface{} `json:"longitude"`
-	Altitude     interface{} `json:"altitude"`
-	Accuracy     interface{} `json:"accuracy"`
-	DisplayName  interface{} `json:"display_name"`
-	Country      interface{} `json:"country"`
-	State        interface{} `json:"state"`
-	Municipality interface{} `json:"municipality"`
-	CityDistrict interface{} `json:"city_district"`
-	Postcode     interface{} `json:"postcode"`
-	City         interface{} `json:"city"`
-	Suburb       interface{} `json:"suburb"`
-	Street       interface{} `json:"street"`
-	HouseNumber  interface{} `json:"house_number"`
-	Provider     interface{} `json:"provider"`
-	CreatedAt    int64       `json:"created_at"`
+	ID           int64
+	Latitude     float64
+	Longitude    float64
+	Altitude     sql.NullFloat64
+	Accuracy     float64
+	DisplayName  string
+	Country      sql.NullString
+	State        sql.NullString
+	Municipality sql.NullString
+	CityDistrict sql.NullString
+	Postcode     sql.NullString
+	City         sql.NullString
+	Suburb       sql.NullString
+	Street       sql.NullString
+	HouseNumber  sql.NullString
+	Provider     string
+	CreatedAt    int64
 }
 
 type CurrentAddress struct {
-	Lock      int64 `json:"lock"`
-	AddressID int64 `json:"address_id"`
-	UpdatedAt int64 `json:"updated_at"`
-	CreatedAt int64 `json:"created_at"`
+	Lock      int64
+	AddressID int64
+	UpdatedAt int64
+	CreatedAt int64
 }

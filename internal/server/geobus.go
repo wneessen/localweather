@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"time"
 
 	"github.com/wneessen/localweather/internal/apperror"
 	"github.com/wneessen/localweather/internal/geobus"
@@ -18,7 +19,8 @@ import (
 )
 
 const (
-	SubID = "geobus-update"
+	SubID       = "geobus-update"
+	burstWindow = 5 * time.Second
 )
 
 // startGeobus initializes the geobus service, sets up providers, subscribes to updates, and starts processing them.
@@ -96,6 +98,7 @@ func (s *Server) geobusProviderList() ([]geobus.Provider, error) {
 
 // processGeobusUpdate subscribes to geolocation updates, processes location data, and updates the
 // service state accordingly.
+/*
 func (s *Server) processGeobusUpdate(ctx context.Context, sub <-chan geobus.Result) {
 	for {
 		select {
@@ -114,6 +117,69 @@ func (s *Server) processGeobusUpdate(ctx context.Context, sub <-chan geobus.Resu
 			if err := s.updateCurrentLocation(ctx, r.Coordinates, r.Provider); err != nil {
 				s.log.Error("failed to update current location", log.ErrAttr(err))
 			}
+		}
+	}
+}
+*/
+// processGeobusUpdate subscribes to geolocation updates, processes location data, and updates the
+// service state accordingly. Updates arriving within geobusWindow are collected and only the one
+// with the best accuracy is processed.
+func (s *Server) processGeobusUpdate(ctx context.Context, sub <-chan geobus.Result) {
+	var (
+		best geobus.Result
+		open bool
+	)
+
+	timer := time.NewTimer(burstWindow)
+	if !timer.Stop() {
+		<-timer.C
+	}
+	defer timer.Stop()
+
+	process := func(r geobus.Result) {
+		s.log.Debug("processing geolocation update",
+			slog.Float64("latitude", r.Coordinates.Latitude),
+			slog.Float64("longitude", r.Coordinates.Longitude),
+			slog.Float64("altitude", r.Coordinates.Altitude),
+			slog.String("accuracy", r.Coordinates.Accuracy.String()),
+			slog.String("provider", r.Provider))
+
+		if err := s.updateCurrentLocation(ctx, r.Coordinates, r.Provider); err != nil {
+			s.log.Error("failed to update current location", log.ErrAttr(err))
+		}
+	}
+
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case r, ok := <-sub:
+			if !ok {
+				if open {
+					process(best)
+				}
+				return
+			}
+
+			s.log.Debug("received geolocation update",
+				slog.Float64("latitude", r.Coordinates.Latitude),
+				slog.Float64("longitude", r.Coordinates.Longitude),
+				slog.Float64("altitude", r.Coordinates.Altitude),
+				slog.String("accuracy", r.Coordinates.Accuracy.String()),
+				slog.String("provider", r.Provider))
+
+			if !open {
+				best, open = r, true
+				timer.Reset(burstWindow)
+				continue
+			}
+			if r.Coordinates.Accuracy.Float64() < best.Coordinates.Accuracy.Float64() {
+				best = r
+			}
+		case <-timer.C:
+			open = false
+			process(best)
+			best = geobus.Result{} // drop reference
 		}
 	}
 }
