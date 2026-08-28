@@ -100,7 +100,7 @@ func start() error {
 	eg.Go(func() error {
 		<-egctx.Done()
 		logger.Info("gracefully shutting down localweather")
-		return s.Stop()
+		return s.Stop(ctx)
 	})
 	if err = eg.Wait(); err != nil {
 		return err

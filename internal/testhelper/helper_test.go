@@ -7,12 +7,12 @@ package testhelper
 import (
 	"bytes"
 	"io"
-	"log/slog"
 	stdhttp "net/http"
 	"testing"
 
-	"github.com/wneessen/waybar-weather/internal/http"
-	"github.com/wneessen/waybar-weather/internal/logger"
+	"github.com/wneessen/localweather/internal/config"
+	"github.com/wneessen/localweather/internal/http"
+	"github.com/wneessen/localweather/internal/log"
 )
 
 func TestPerformIntegrationTests(t *testing.T) {
@@ -28,6 +28,7 @@ func TestPerformIntegrationTests(t *testing.T) {
 
 func TestMockRoundTripper(t *testing.T) {
 	PerformIntegrationTests(t)
+	logger := log.New(new(config.Config{}))
 	t.Run("perform a mocked http request", func(t *testing.T) {
 		rtFn := func(req *stdhttp.Request) (*stdhttp.Response, error) {
 			return &stdhttp.Response{
@@ -39,7 +40,7 @@ func TestMockRoundTripper(t *testing.T) {
 
 		type testType struct{}
 		target := new(testType)
-		client := http.New(logger.NewLogger(slog.LevelInfo, io.Discard, nil))
+		client := http.New(logger)
 		client.Transport = MockRoundTripper{Fn: rtFn}
 		_, err := client.Get(t.Context(), TestOnlineAPIURL, target, nil, nil)
 		if err != nil {

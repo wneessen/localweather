@@ -8,7 +8,6 @@ import (
 	"bufio"
 	"context"
 	"fmt"
-	"math"
 	"net"
 	"sync"
 	"testing"
@@ -48,22 +47,22 @@ func TestClient_Poll(t *testing.T) {
 			},
 			{
 				"no Eph use Epx/Epy",
-				`{"class":"TPV","device":"/dev/ttyACM0","mode":3,"time":"2025-11-24T10:44:41.000Z","lat":51.0,"lon":7.0,"alt":75.0000,"epx":8.100,"epy":11.400}`,
-				51, 7, math.Hypot(8.100, 11.400), 3,
+				`{"class":"TPV","device":"/dev/ttyACM0","mode":3,"time":"2025-11-24T10:44:41.000Z","lat":51.0,"lon":7.0,"altMSL":75.0000,"epx":8.100,"epy":11.400}`,
+				51, 7, fallbackAccuracy3DFix, 3,
 			},
 			{
 				"no Eph, Epx and Epy - fallback to 3d fix accuracy",
-				`{"class":"TPV","device":"/dev/ttyACM0","mode":3,"time":"2025-11-24T10:44:41.000Z","lat":51.0,"lon":7.0,"alt":75.0000}`,
+				`{"class":"TPV","device":"/dev/ttyACM0","mode":3,"time":"2025-11-24T10:44:41.000Z","lat":51.0,"lon":7.0,"altMSL":75.0000}`,
 				51, 7, fallbackAccuracy3DFix, 3,
 			},
 			{
 				"no Eph, Epx and Epy - fallback to 2d fix accuracy",
-				`{"class":"TPV","device":"/dev/ttyACM0","mode":2,"time":"2025-11-24T10:44:41.000Z","lat":51.0,"lon":7.0,"alt":75.0000}`,
+				`{"class":"TPV","device":"/dev/ttyACM0","mode":2,"time":"2025-11-24T10:44:41.000Z","lat":51.0,"lon":7.0,"altMSL":75.0000}`,
 				51, 7, fallbackAccuracy2DFix, 2,
 			},
 			{
 				"no accuracy information at all",
-				`{"class":"TPV","device":"/dev/ttyACM0","mode":1,"time":"2025-11-24T10:44:41.000Z","lat":51.0,"lon":7.0,"alt":75.0000}`,
+				`{"class":"TPV","device":"/dev/ttyACM0","mode":1,"time":"2025-11-24T10:44:41.000Z","lat":51.0,"lon":7.0,"altMSL":75.0000}`,
 				51, 7, fallbackAccuracyNoFix, 1,
 			},
 		}
@@ -77,6 +76,7 @@ func TestClient_Poll(t *testing.T) {
 				}
 				client := New(host, port)
 				coords, err := client.Poll(t.Context())
+				t.Logf("coords: %+v", coords)
 				if err != nil {
 					t.Fatalf("failed to poll for fix: %v", err)
 				}
@@ -155,12 +155,8 @@ func startMockGPSD(ctx context.Context, t *testing.T, tpv string) string {
 	addr := ln.Addr().String()
 
 	var wg sync.WaitGroup
-	wg.Add(1)
 
-	go func() {
-		defer wg.Done()
-
-		// Wait for either an incoming connection or context cancellation.
+	wg.Go(func() {
 		connChan := make(chan net.Conn, 1)
 		errChan := make(chan error, 1)
 
@@ -175,19 +171,16 @@ func startMockGPSD(ctx context.Context, t *testing.T, tpv string) string {
 
 		select {
 		case <-ctx.Done():
-			// Context canceled before any connection – exit cleanly.
 			return
 
-		case err := <-errChan:
-			// Listener closed or accept error.
+		case err = <-errChan:
 			_ = err
 			return
 
 		case conn := <-connChan:
-			// We got a client connection.
 			handleMockGPSDConnection(ctx, conn, t, tpv)
 		}
-	}()
+	})
 
 	// Make the test wait for the goroutine to fully exit on cleanup
 	t.Cleanup(func() {
@@ -210,11 +203,7 @@ func handleMockGPSDConnection(ctx context.Context, conn net.Conn, t *testing.T, 
 
 	_ = conn.SetReadDeadline(time.Now().Add(time.Millisecond * 200))
 	_, _ = bufio.NewReader(conn).ReadString('\n')
-
-	// Remove read deadline so writes work normally.
 	_ = conn.SetReadDeadline(time.Time{})
-
-	// Return some mock data.
 	_, err := fmt.Fprintln(conn, `{"class":"VERSION","release":"gpsd 3.26","proto_major":3,"proto_minor":14}`)
 	if err != nil {
 		t.Logf("failed to write mock gpsd version: %s", err)
