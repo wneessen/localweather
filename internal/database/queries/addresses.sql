@@ -11,11 +11,17 @@ INSERT INTO addresses
 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 RETURNING *;
 
--- name: CurrentAddress :exec
+-- name: UpdateCurrentAddress :exec
 INSERT INTO current_address (address_id)
 VALUES (?)
 ON CONFLICT (lock) DO UPDATE SET address_id = excluded.address_id,
                                  updated_at = unixepoch();
+
+-- name: CurrentAddress :one
+SELECT *
+FROM current_address
+         JOIN addresses ON addresses.id = current_address.address_id
+LIMIT 1;
 
 -- name: ClearCurrentAddress :exec
 DELETE

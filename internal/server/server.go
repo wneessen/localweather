@@ -25,6 +25,7 @@ type Server struct {
 	conf        *config.Config
 	cron        gocron.Scheduler
 	db          *sql.DB
+	updateLock  sync.RWMutex
 	geobus      *geobus.Service
 	geocoder    geocode.Geocoder
 	geobusUnsub func()
@@ -114,6 +115,11 @@ func (s *Server) Stop() error {
 	s.log.Info("unsubscribing from geobus updates")
 	if s.geobusUnsub != nil {
 		s.geobusUnsub()
+	}
+
+	s.log.Info("clearing current location")
+	if err := s.queries.ClearCurrentAddress(ctx); err != nil {
+		return fmt.Errorf("failed to clear current address: %w", err)
 	}
 
 	s.log.Info("stopping scheduler")

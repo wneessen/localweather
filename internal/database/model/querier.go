@@ -11,8 +11,9 @@ import (
 type Querier interface {
 	AddressByCoords(ctx context.Context, arg AddressByCoordsParams) (Address, error)
 	ClearCurrentAddress(ctx context.Context) error
-	CurrentAddress(ctx context.Context, addressID int64) error
+	CurrentAddress(ctx context.Context) (CurrentAddressRow, error)
 	NewAddress(ctx context.Context, arg NewAddressParams) (Address, error)
+	UpdateCurrentAddress(ctx context.Context, addressID int64) error
 }
 
 var _ Querier = (*Queries)(nil)
