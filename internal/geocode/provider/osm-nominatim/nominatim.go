@@ -13,6 +13,7 @@ import (
 
 	"golang.org/x/text/language"
 
+	"github.com/wneessen/localweather/internal/apperror"
 	"github.com/wneessen/localweather/internal/http"
 	"github.com/wneessen/localweather/internal/types"
 )
@@ -107,11 +108,11 @@ func (n *Nominatim) Reverse(ctx context.Context, coords types.Coordinate) (types
 	}
 	address.Latitude, err = strconv.ParseFloat(result.APILat, 64)
 	if err != nil {
-		return address, fmt.Errorf("failed to parse latitude from Nominatim API response: %w", err)
+		return address, &apperror.CoordinateParsingError{Val: "latitude", Err: err}
 	}
 	address.Longitude, err = strconv.ParseFloat(result.APILon, 64)
 	if err != nil {
-		return address, fmt.Errorf("failed to parse longitude from Nominatim API response: %w", err)
+		return address, &apperror.CoordinateParsingError{Val: "longitude", Err: err}
 	}
 
 	return address, nil
@@ -137,11 +138,11 @@ func (n *Nominatim) Search(ctx context.Context, address string) (types.Coordinat
 	}
 	coords.Latitude, err = strconv.ParseFloat(result[0].APILat, 64)
 	if err != nil {
-		return coords, fmt.Errorf("failed to parse latitude from Nominatim API response: %w", err)
+		return coords, &apperror.CoordinateParsingError{Val: "latitude", Err: err}
 	}
 	coords.Longitude, err = strconv.ParseFloat(result[0].APILon, 64)
 	if err != nil {
-		return coords, fmt.Errorf("failed to parse longitude from Nominatim API response: %w", err)
+		return coords, &apperror.CoordinateParsingError{Val: "longitude", Err: err}
 	}
 	coords.Found = true
 

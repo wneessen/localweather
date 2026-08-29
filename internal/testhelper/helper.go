@@ -9,11 +9,27 @@ import (
 	"os"
 	"strings"
 	"testing"
+
+	"github.com/wneessen/localweather/internal/config"
+	"github.com/wneessen/localweather/internal/log"
 )
 
 const (
 	TestOnlineAPIURL = "https://api.restful-api.dev/objects"
 )
+
+func NewLogger(t *testing.T, level config.LogLevel, out string) *log.Logger {
+	t.Helper()
+
+	if out == "" {
+		out = "stdout"
+	}
+
+	conf := new(config.Config)
+	conf.Log.Level = level
+	conf.Log.Output = out
+	return log.New(conf)
+}
 
 func PerformIntegrationTests(t *testing.T) {
 	t.Helper()

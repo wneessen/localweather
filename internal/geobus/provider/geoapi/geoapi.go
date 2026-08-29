@@ -6,10 +6,10 @@ package geoapi
 
 import (
 	"context"
-	"fmt"
 	"strconv"
 	"time"
 
+	"github.com/wneessen/localweather/internal/apperror"
 	"github.com/wneessen/localweather/internal/geobus"
 	"github.com/wneessen/localweather/internal/geobus/lookupstream"
 	"github.com/wneessen/localweather/internal/http"
@@ -52,7 +52,7 @@ type APIResult struct {
 
 func NewGeoAPIProvider(http *http.Client, log *log.Logger) (*Provider, error) {
 	if http == nil {
-		return nil, fmt.Errorf("http client is required")
+		return nil, apperror.ErrHTTPClientRequired
 	}
 	provider := &Provider{
 		name:   name,
@@ -93,7 +93,7 @@ func (p *Provider) locate(ctx context.Context) (types.Coordinate, error) {
 
 	result := new(APIResult)
 	if _, err := p.http.Get(ctxHttp, apiEndpoint, result, nil, nil); err != nil {
-		return coords, fmt.Errorf("failed to get geolocation data from API: %w", err)
+		return coords, &apperror.GeoLocationAPIFetchError{Err: err}
 	}
 
 	coords.Accuracy = types.AccuracyUnknown
@@ -113,11 +113,11 @@ func (p *Provider) locate(ctx context.Context) (types.Coordinate, error) {
 	var err error
 	coords.Latitude, err = strconv.ParseFloat(result.Location.Coordinates.Latitude, 64)
 	if err != nil {
-		return coords, fmt.Errorf("failed to parse latitude from API response: %w", err)
+		return coords, &apperror.CoordinateParsingError{Val: "latitude", Err: err}
 	}
 	coords.Longitude, err = strconv.ParseFloat(result.Location.Coordinates.Longitude, 64)
 	if err != nil {
-		return coords, fmt.Errorf("failed to parse longitude from API response: %w", err)
+		return coords, &apperror.CoordinateParsingError{Val: "longitude", Err: err}
 	}
 
 	return coords, nil

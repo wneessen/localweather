@@ -17,6 +17,7 @@ import (
 	"runtime"
 	"time"
 
+	"github.com/wneessen/localweather/internal/apperror"
 	"github.com/wneessen/localweather/internal/log"
 )
 
@@ -45,8 +46,6 @@ var (
 		runtime.GOARCH,
 		version,
 	)
-
-	ErrNonPointerTarget = errors.New("target must be a non-nil pointer")
 )
 
 // Client is a type wrapper for the Go stdlib http.Client and the Config
@@ -125,7 +124,7 @@ func (h *Client) PostWithTimeout(ctx context.Context, endpoint string, target an
 func (h *Client) PerformReq(ctx context.Context, params reqParams) (int, error) {
 	rv := reflect.ValueOf(params.target)
 	if rv.Kind() != reflect.Pointer || rv.IsNil() {
-		return 0, ErrNonPointerTarget
+		return 0, apperror.ErrNonPointerTarget
 	}
 
 	ctx, cancel := context.WithTimeout(ctx, params.timeout)
@@ -159,7 +158,7 @@ func (h *Client) PerformReq(ctx context.Context, params reqParams) (int, error) 
 		return 0, fmt.Errorf("failed to perform HTTP request: %w", err)
 	}
 	if response == nil {
-		return 0, errors.New("nil response received")
+		return 0, apperror.ErrResponseBodyIsNil
 	}
 	defer func(body io.ReadCloser) {
 		if err = body.Close(); err != nil {
