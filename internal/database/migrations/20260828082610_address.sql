@@ -22,8 +22,8 @@ CREATE TABLE addresses
     locale        TEXT    NOT NULL,
     created_at    INTEGER NOT NULL
 );
-CREATE UNIQUE INDEX idx_locations_name ON addresses (display_name);
-CREATE UNIQUE INDEX idx_locations_coords ON addresses (lat_trunc, lon_trunc, locale);
+CREATE UNIQUE INDEX idx_addresses_name ON addresses (display_name);
+CREATE UNIQUE INDEX idx_addresses_coords ON addresses (lat_trunc, lon_trunc, locale);
 
 CREATE TABLE current_address
 (
@@ -35,5 +35,7 @@ CREATE TABLE current_address
 
 
 -- +goose Down
+DROP INDEX idx_addresses_name;
+DROP INDEX idx_addresses_coords;
 DROP TABLE current_address;
 DROP TABLE addresses;

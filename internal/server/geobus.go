@@ -138,12 +138,14 @@ func (s *Server) processGeobusUpdate(ctx context.Context, sub <-chan geobus.Resu
 
 	process := func(r geobus.Result) {
 		s.log.Debug("processing geolocation update",
-			slog.Float64("latitude", r.Coordinates.Latitude),
-			slog.Float64("longitude", r.Coordinates.Longitude),
-			slog.Float64("altitude", r.Coordinates.Altitude),
-			slog.String("accuracy", r.Coordinates.Accuracy.String()),
-			slog.String("provider", r.Provider))
-
+			slog.Group("location_details",
+				slog.Float64("latitude", r.Coordinates.Latitude),
+				slog.Float64("longitude", r.Coordinates.Longitude),
+				slog.Float64("altitude", r.Coordinates.Altitude),
+				slog.String("accuracy", r.Coordinates.Accuracy.String()),
+				slog.String("provider", r.Provider),
+			),
+		)
 		if err := s.updateCurrentLocation(ctx, r.Coordinates, r.Provider); err != nil {
 			s.log.Error("failed to update current location", log.ErrAttr(err))
 		}
@@ -171,11 +173,14 @@ func (s *Server) processGeobusUpdate(ctx context.Context, sub <-chan geobus.Resu
 			}
 
 			s.log.Debug("received geolocation update",
-				slog.Float64("latitude", r.Coordinates.Latitude),
-				slog.Float64("longitude", r.Coordinates.Longitude),
-				slog.Float64("altitude", r.Coordinates.Altitude),
-				slog.String("accuracy", r.Coordinates.Accuracy.String()),
-				slog.String("provider", r.Provider))
+				slog.Group("location_details",
+					slog.Float64("latitude", r.Coordinates.Latitude),
+					slog.Float64("longitude", r.Coordinates.Longitude),
+					slog.Float64("altitude", r.Coordinates.Altitude),
+					slog.String("accuracy", r.Coordinates.Accuracy.String()),
+					slog.String("provider", r.Provider),
+				),
+			)
 			if !open {
 				best, open = r, true
 				timer.Reset(burstWindow)

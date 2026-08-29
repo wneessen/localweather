@@ -37,3 +37,18 @@ type CurrentAddress struct {
 	UpdatedAt int64
 	CreatedAt int64
 }
+
+type CurrentWeather struct {
+	AddressID           int64
+	Timestamp           int64
+	Temperature         float64
+	ApparentTemperature float64
+	WeatherCode         int64
+	WindSpeed           float64
+	WindGusts           float64
+	WindDirection       float64
+	RelativeHumidity    float64
+	PressureMsl         float64
+	IsDay               bool
+	UpdatedAt           int64
+}

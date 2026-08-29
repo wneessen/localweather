@@ -123,6 +123,7 @@ type response struct {
 		Time           []resDay  `json:"time"`
 		TemperatureMin []float64 `json:"temperature_2m_min"`
 		TemperatureMax []float64 `json:"temperature_2m_max"`
+		UVIndex        []float64 `json:"uv_index_max"`
 	} `json:"daily"`
 }
 
