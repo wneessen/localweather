@@ -281,7 +281,7 @@ func (p *Provider) lookup(ctx context.Context, wifiList []WirelessNetwork) (cach
 	result := new(APIResult)
 	if _, err := p.http.Post(ctxHttp, apiEndpoint, result, bodyBuffer,
 		map[string]string{"Content-Type": "application/json"}); err != nil {
-		return location, fmt.Errorf("failed to get geolocation data from API: %w", err)
+		return location, &apperror.GeoLocationAPIFetchError{Err: err}
 	}
 
 	location.coords.Accuracy = types.TruncateFloat64(types.Accuracy(result.Accuracy), types.CoordinatePrecision)
