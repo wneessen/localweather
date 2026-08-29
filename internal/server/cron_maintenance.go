@@ -5,10 +5,9 @@ import (
 	"time"
 )
 
-func (s *Server) cronjobMaintenance(ctx context.Context) {
+func (s *Server) cronjobMaintenance(_ context.Context) {
 	now := time.Now()
 	const action = "maintenance"
-	_ = ctx
 
 	s.logJobCompletion(action, now, false)
 }

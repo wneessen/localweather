@@ -43,13 +43,11 @@ type Config struct {
 		DevEnvironment bool          `fig:"dev_env"`
 	}
 	Scheduler struct {
-		MaintenanceInterval time.Duration `fig:"maintenance_interval" default:"1h"`
+		MaintenanceInterval   time.Duration `fig:"maintenance_interval" default:"1h"`
+		WeatherUpdateInterval time.Duration `fig:"weatherdata_update_interval" default:"15m"`
 	}
 	Weather struct {
 		Provider string `fig:"provider" default:"open-meteo"`
-
-		// Allowed value: 1 to 24
-		ForecastHours uint `fig:"forecast_hours" default:"3"`
 
 		// Cold and hot class thresholds (Defaults are based on °C)
 		// Defaults are based on suggestions for dangerous driving conditions and uncomfortable heat.

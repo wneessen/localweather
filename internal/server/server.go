@@ -11,6 +11,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-co-op/gocron/v2"
+	"github.com/google/uuid"
 	"github.com/vorlif/spreak"
 
 	"github.com/wneessen/localweather/internal/config"
@@ -23,19 +24,20 @@ import (
 
 // Server represents the main application server, managing HTTP services, cron jobs, metrics, and database interactions.
 type Server struct {
-	conf        *config.Config
-	cron        gocron.Scheduler
-	db          *sql.DB
-	geobus      *geobus.Service
-	geocoder    geocode.Geocoder
-	geobusUnsub func()
-	httpserv    *http.Server
-	log         *log.Logger
-	mux         chi.Router
-	queries     *model.Queries
-	weather     weather.Provider
-	weatherLock sync.RWMutex
-	t           *spreak.Localizer
+	conf         *config.Config
+	cron         gocron.Scheduler
+	db           *sql.DB
+	geobus       *geobus.Service
+	geocoder     geocode.Geocoder
+	geobusUnsub  func()
+	httpserv     *http.Server
+	log          *log.Logger
+	mux          chi.Router
+	queries      *model.Queries
+	weather      weather.Provider
+	weatherJobID uuid.UUID
+	weatherLock  sync.RWMutex
+	t            *spreak.Localizer
 }
 
 type Params struct {
