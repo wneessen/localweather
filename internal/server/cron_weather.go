@@ -5,10 +5,10 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"log/slog"
 	"time"
 
 	"github.com/wneessen/localweather/internal/apperror"
+	"github.com/wneessen/localweather/internal/database/model"
 	"github.com/wneessen/localweather/internal/types"
 )
 
@@ -36,9 +36,23 @@ func (s *Server) cronjobWeatherdataUpdate(ctx context.Context) {
 		s.logJobCompletionWithError(action, now, fmt.Errorf("failed to retrieve weather data: %w", err))
 		return
 	}
-	if data.Current.Temperature.IsSet() {
-		s.log.Debug("current temperature", slog.Float64("temperature", data.Current.Temperature.Value()),
-			slog.String("provider", s.weather.Name()))
+
+	currentDB := model.UpdateCurrentWeatherParams{
+		AddressID:           location.ID,
+		Timestamp:           data.Current.InstantTime.UnixMicro(),
+		Temperature:         data.Current.Temperature.Value(),
+		ApparentTemperature: data.Current.ApparentTemperature.Value(),
+		WeatherCode:         int64(data.Current.WeatherCode.Value()),
+		WindSpeed:           data.Current.WindSpeed.Value(),
+		WindGusts:           data.Current.WindGusts.Value(),
+		WindDirection:       data.Current.WindDirection.Value(),
+		RelativeHumidity:    data.Current.RelativeHumidity.Value(),
+		PressureMsl:         data.Current.PressureMSL.Value(),
+		IsDay:               data.Current.IsDay.Value(),
+		UpdatedAt:           time.Now().UnixMicro(),
+	}
+	if err = s.queries.UpdateCurrentWeather(ctx, currentDB); err != nil {
+		s.logJobCompletionWithError(action, now, fmt.Errorf("failed to update current weather in database: %w", err))
 	}
 
 	s.logJobCompletion(action, now, false)

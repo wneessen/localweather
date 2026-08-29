@@ -86,7 +86,6 @@ func (b *Service) Subscribe(key string, size int) (<-chan Result, func()) {
 		close(ch)
 	}
 
-	b.log.Debug("subscribed to geobus updates", slog.String("key", key))
 	return ch, unsub
 }
 
@@ -126,13 +125,15 @@ func (b *Service) Publish(r Result) {
 	}
 
 	b.log.Debug("a geobus provider published a new geolocation update",
-		slog.Float64("accuracy", r.Coordinates.Accuracy.Float64()),
-		slog.Float64("altitude", r.Coordinates.Altitude),
-		slog.Float64("latitude", r.Coordinates.Latitude),
-		slog.Float64("longitude", r.Coordinates.Longitude),
-		slog.String("provider", r.Provider),
-		slog.Bool("cache_hit", r.Coordinates.CacheHit),
-		slog.Bool("current_location_superseded", superseded),
+		slog.Group("location_details",
+			slog.Float64("accuracy", r.Coordinates.Accuracy.Float64()),
+			slog.Float64("altitude", r.Coordinates.Altitude),
+			slog.Float64("latitude", r.Coordinates.Latitude),
+			slog.Float64("longitude", r.Coordinates.Longitude),
+			slog.String("provider", r.Provider),
+			slog.Bool("cache_hit", r.Coordinates.CacheHit),
+			slog.Bool("current_location_superseded", superseded),
+		),
 	)
 	if !superseded {
 		b.mu.Unlock()
