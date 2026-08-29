@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"os"
 	"os/signal"
 	"path/filepath"
@@ -105,7 +106,10 @@ func start() error {
 
 	// Use an errgroup to wait for separate goroutines which can error
 	eg, egctx := errgroup.WithContext(ctx)
-	eg.Go(func() error { return s.Start(egctx) })
+	eg.Go(func() error {
+		logger.Info("starting server instance", slog.Int("pid", os.Getpid()))
+		return s.Start(egctx)
+	})
 	eg.Go(func() error {
 		<-egctx.Done()
 		logger.Info("gracefully shutting down localweather")
