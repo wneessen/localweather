@@ -1,14 +1,11 @@
 package server
 
 import (
-	"context"
 	"fmt"
 	"log/slog"
 	"strings"
 
 	"github.com/wneessen/localweather/internal/http"
-	"github.com/wneessen/localweather/internal/log"
-	"github.com/wneessen/localweather/internal/types"
 	"github.com/wneessen/localweather/internal/weather"
 	openmeteo "github.com/wneessen/localweather/internal/weather/provider/open-meteo"
 )
@@ -37,21 +34,4 @@ func (s *Server) selectWeatherProvider() (provider weather.Provider, err error) 
 		return nil, fmt.Errorf("unsupported weather provider: %s", s.conf.Weather.Provider)
 	}
 	return provider, nil
-}
-
-// fetchWeather retrieves the current weather data from the weather provider.
-func (s *Server) fetchWeather(ctx context.Context, location types.Coordinate) {
-	s.weatherLock.Lock()
-	defer s.weatherLock.Unlock()
-
-	data, err := s.weather.GetWeather(ctx, location)
-	if err != nil {
-		s.log.Error("failed to fetch weather data", log.ErrAttr(err), slog.String("provider", s.weather.Name()))
-		return
-	}
-	if data.Current.Temperature.IsSet() {
-		s.log.Debug("current temperature", slog.Float64("temperature", data.Current.Temperature.Value()),
-			slog.String("provider", s.weather.Name()))
-	}
-	s.log.Debug("weather data successfully fetched")
 }

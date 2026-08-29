@@ -147,7 +147,15 @@ func (s *Server) processGeobusUpdate(ctx context.Context, sub <-chan geobus.Resu
 		if err := s.updateCurrentLocation(ctx, r.Coordinates, r.Provider); err != nil {
 			s.log.Error("failed to update current location", log.ErrAttr(err))
 		}
-		s.fetchWeather(ctx, r.Coordinates)
+
+		// Run weather data update job based on the new location
+		for _, job := range s.cron.Jobs() {
+			if job.ID() == s.weatherJobID {
+				if err := job.RunNow(); err != nil {
+					s.log.Error("failed to run weather data update job", log.ErrAttr(err))
+				}
+			}
+		}
 	}
 
 	for {
