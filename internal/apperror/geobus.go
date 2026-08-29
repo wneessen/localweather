@@ -1,18 +1,18 @@
 package apperror
 
-type noGeobusEnabledError struct{}
+type NoGeobusEnabledError struct{}
 
-func (*noGeobusEnabledError) Error() string {
+func (*NoGeobusEnabledError) Error() string {
 	return "no geobus provider enabled"
 }
 
-type noValidCoordinatesFoundError struct{}
+type NoValidCoordinatesFoundError struct{}
 
-func (*noValidCoordinatesFoundError) Error() string {
+func (*NoValidCoordinatesFoundError) Error() string {
 	return "no valid coordinates found in coordinates file"
 }
 
 var (
-	ErrNoGeobusProvider   = new(noGeobusEnabledError)
-	ErrNoValidCoordinates = new(noValidCoordinatesFoundError)
+	ErrNoGeobusProvider   = new(NoGeobusEnabledError)
+	ErrNoValidCoordinates = new(NoValidCoordinatesFoundError)
 )

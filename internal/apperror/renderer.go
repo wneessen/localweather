@@ -1,9 +1,9 @@
 package apperror
 
-type failedToRenderErrResponseError struct{}
+type FailedToRenderErrResponseError struct{}
 
-func (*failedToRenderErrResponseError) Error() string {
+func (*FailedToRenderErrResponseError) Error() string {
 	return "failed to render error response"
 }
 
-var ErrFailedToRenderErrorResponse = new(failedToRenderErrResponseError)
+var ErrFailedToRenderErrorResponse = new(FailedToRenderErrResponseError)

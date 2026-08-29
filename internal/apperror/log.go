@@ -1,9 +1,9 @@
 package apperror
 
-type loggerRequiredError struct{}
+type LoggerRequiredError struct{}
 
-func (*loggerRequiredError) Error() string {
+func (*LoggerRequiredError) Error() string {
 	return "function requires a logger"
 }
 
-var ErrLoggerRequired = new(loggerRequiredError)
+var ErrLoggerRequired = new(LoggerRequiredError)

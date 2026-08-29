@@ -11,18 +11,19 @@ func TestApperrors(t *testing.T) {
 		err   error
 		match func(error) bool
 	}{
-		{"geobus: ErrNoGeobusProvider", ErrNoGeobusProvider, wantType[*noGeobusEnabledError]},
-		{"geobus: ErrNoValidCoordinates", ErrNoValidCoordinates, wantType[*noValidCoordinatesFoundError]},
-		{"geocoder: ErrGeoCoderRequired", ErrGeoCoderRequired, wantType[*geoCoderRequiredError]},
-		{"http: ErrUnexpected", ErrUnexpected, wantType[*unexpectedError]},
-		{"http: ErrNonPointerTarget", ErrNonPointerTarget, wantType[*nonPointerTargetError]},
-		{"http: ErrInvalidRequestParameters", ErrInvalidRequestParameters, wantType[*invalidRequestParametersError]},
-		{"http: ErrResponseBodyIsNil", ErrResponseBodyIsNil, wantType[*responseBodyIsNilError]},
-		{"location: ErrLocationNotSet", ErrLocationNotSet, wantType[*locationNotSetError]},
-		{"logger: ErrLoggerRequired", ErrLoggerRequired, wantType[*loggerRequiredError]},
+		{"geobus: ErrNoGeobusProvider", ErrNoGeobusProvider, wantType[*NoGeobusEnabledError]},
+		{"geobus: ErrNoValidCoordinates", ErrNoValidCoordinates, wantType[*NoValidCoordinatesFoundError]},
+		{"geocoder: ErrGeoCoderRequired", ErrGeoCoderRequired, wantType[*GeoCoderRequiredError]},
+		{"http: ErrHTTPClientRequired", ErrHTTPClientRequired, wantType[*HTTPClientRequiredError]},
+		{"http: ErrInvalidRequestParameters", ErrInvalidRequestParameters, wantType[*InvalidRequestParametersError]},
+		{"http: ErrNonPointerTarget", ErrNonPointerTarget, wantType[*NonPointerTargetError]},
+		{"http: ErrResponseBodyIsNil", ErrResponseBodyIsNil, wantType[*ResponseBodyIsNilError]},
+		{"http: ErrUnexpected", ErrUnexpected, wantType[*UnexpectedError]},
+		{"location: ErrLocationNotSet", ErrLocationNotSet, wantType[*LocationNotSetError]},
+		{"logger: ErrLoggerRequired", ErrLoggerRequired, wantType[*LoggerRequiredError]},
 		{
 			"render: ErrFailedToRenderErrorResponse", ErrFailedToRenderErrorResponse,
-			wantType[*failedToRenderErrResponseError],
+			wantType[*FailedToRenderErrResponseError],
 		},
 	}
 	for _, test := range tests {

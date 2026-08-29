@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/wneessen/localweather/internal/apperror"
 	"github.com/wneessen/localweather/internal/http"
 	"github.com/wneessen/localweather/internal/log"
 	"github.com/wneessen/localweather/internal/types"
@@ -127,10 +128,10 @@ type response struct {
 
 func New(http *http.Client, log *log.Logger, unit string) (*OpenMeteo, error) {
 	if http == nil {
-		return nil, fmt.Errorf("http client is required")
+		return nil, apperror.ErrHTTPClientRequired
 	}
 	if log == nil {
-		return nil, fmt.Errorf("logger is required")
+		return nil, apperror.ErrLoggerRequired
 	}
 
 	return &OpenMeteo{unit: unit, http: http, log: log}, nil

@@ -15,6 +15,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/wneessen/localweather/internal/apperror"
 	"github.com/wneessen/localweather/internal/geobus"
 	"github.com/wneessen/localweather/internal/geobus/lookupstream"
 	"github.com/wneessen/localweather/internal/http"
@@ -86,7 +87,7 @@ type WirelessNetwork struct {
 
 func NewICHNAEAProvider(http *http.Client, log *log.Logger) (*Provider, error) {
 	if http == nil {
-		return nil, fmt.Errorf("http client is required")
+		return nil, apperror.ErrHTTPClientRequired
 	}
 	wlan, err := wifi.New()
 	if err != nil {

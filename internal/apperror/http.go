@@ -1,32 +1,39 @@
 package apperror
 
-type unexpectedError struct{}
+type UnexpectedError struct{}
 
-func (*unexpectedError) Error() string {
+func (*UnexpectedError) Error() string {
 	return "unexpected error or internal server error"
 }
 
-type invalidRequestParametersError struct{}
+type InvalidRequestParametersError struct{}
 
-func (*invalidRequestParametersError) Error() string {
+func (*InvalidRequestParametersError) Error() string {
 	return "invalid request parameters"
 }
 
-type nonPointerTargetError struct{}
+type NonPointerTargetError struct{}
 
-func (*nonPointerTargetError) Error() string {
+func (*NonPointerTargetError) Error() string {
 	return "target must be a non-nil pointer"
 }
 
-type responseBodyIsNilError struct{}
+type ResponseBodyIsNilError struct{}
 
-func (*responseBodyIsNilError) Error() string {
+func (*ResponseBodyIsNilError) Error() string {
 	return "response is nil"
 }
 
+type HTTPClientRequiredError struct{}
+
+func (*HTTPClientRequiredError) Error() string {
+	return "http client is required"
+}
+
 var (
-	ErrInvalidRequestParameters = new(invalidRequestParametersError)
-	ErrNonPointerTarget         = new(nonPointerTargetError)
-	ErrResponseBodyIsNil        = new(responseBodyIsNilError)
-	ErrUnexpected               = new(unexpectedError)
+	ErrHTTPClientRequired       = new(HTTPClientRequiredError)
+	ErrInvalidRequestParameters = new(InvalidRequestParametersError)
+	ErrNonPointerTarget         = new(NonPointerTargetError)
+	ErrResponseBodyIsNil        = new(ResponseBodyIsNilError)
+	ErrUnexpected               = new(UnexpectedError)
 )

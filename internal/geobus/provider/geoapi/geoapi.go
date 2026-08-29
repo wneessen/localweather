@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/wneessen/localweather/internal/apperror"
 	"github.com/wneessen/localweather/internal/geobus"
 	"github.com/wneessen/localweather/internal/geobus/lookupstream"
 	"github.com/wneessen/localweather/internal/http"
@@ -52,7 +53,7 @@ type APIResult struct {
 
 func NewGeoAPIProvider(http *http.Client, log *log.Logger) (*Provider, error) {
 	if http == nil {
-		return nil, fmt.Errorf("http client is required")
+		return nil, apperror.ErrHTTPClientRequired
 	}
 	provider := &Provider{
 		name:   name,

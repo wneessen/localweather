@@ -1,9 +1,9 @@
 package apperror
 
-type geoCoderRequiredError struct{}
+type GeoCoderRequiredError struct{}
 
-func (*geoCoderRequiredError) Error() string {
+func (*GeoCoderRequiredError) Error() string {
 	return "function requires a geocoder"
 }
 
-var ErrGeoCoderRequired = new(geoCoderRequiredError)
+var ErrGeoCoderRequired = new(GeoCoderRequiredError)
