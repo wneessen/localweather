@@ -11,19 +11,21 @@ import (
 )
 
 const addressByCoords = `-- name: AddressByCoords :one
-SELECT id, latitude, longitude, lat_trunc, lon_trunc, altitude, accuracy, display_name, country, state, municipality, city_district, postcode, city, suburb, street, house_number, provider, created_at
+SELECT id, latitude, longitude, lat_trunc, lon_trunc, altitude, accuracy, display_name, country, state, municipality, city_district, postcode, city, suburb, street, house_number, provider, locale, created_at
 FROM addresses
 WHERE lat_trunc = ?
   AND lon_trunc = ?
+  AND locale = ?
 `
 
 type AddressByCoordsParams struct {
 	LatTrunc float64
 	LonTrunc float64
+	Locale   string
 }
 
 func (q *Queries) AddressByCoords(ctx context.Context, arg AddressByCoordsParams) (Address, error) {
-	row := q.db.QueryRowContext(ctx, addressByCoords, arg.LatTrunc, arg.LonTrunc)
+	row := q.db.QueryRowContext(ctx, addressByCoords, arg.LatTrunc, arg.LonTrunc, arg.Locale)
 	var i Address
 	err := row.Scan(
 		&i.ID,
@@ -44,6 +46,7 @@ func (q *Queries) AddressByCoords(ctx context.Context, arg AddressByCoordsParams
 		&i.Street,
 		&i.HouseNumber,
 		&i.Provider,
+		&i.Locale,
 		&i.CreatedAt,
 	)
 	return i, err
@@ -60,7 +63,7 @@ func (q *Queries) ClearCurrentAddress(ctx context.Context) error {
 }
 
 const currentAddress = `-- name: CurrentAddress :one
-SELECT lock, address_id, updated_at, current_address.created_at, id, latitude, longitude, lat_trunc, lon_trunc, altitude, accuracy, display_name, country, state, municipality, city_district, postcode, city, suburb, street, house_number, provider, addresses.created_at
+SELECT lock, address_id, updated_at, current_address.created_at, id, latitude, longitude, lat_trunc, lon_trunc, altitude, accuracy, display_name, country, state, municipality, city_district, postcode, city, suburb, street, house_number, provider, locale, addresses.created_at
 FROM current_address
          JOIN addresses ON addresses.id = current_address.address_id
 LIMIT 1
@@ -89,6 +92,7 @@ type CurrentAddressRow struct {
 	Street       sql.NullString
 	HouseNumber  sql.NullString
 	Provider     string
+	Locale       string
 	CreatedAt_2  int64
 }
 
@@ -118,6 +122,7 @@ func (q *Queries) CurrentAddress(ctx context.Context) (CurrentAddressRow, error)
 		&i.Street,
 		&i.HouseNumber,
 		&i.Provider,
+		&i.Locale,
 		&i.CreatedAt_2,
 	)
 	return i, err
@@ -127,9 +132,9 @@ const newAddress = `-- name: NewAddress :one
 INSERT INTO addresses
 (latitude, longitude, lat_trunc, lon_trunc, altitude, accuracy, display_name, country, state, municipality,
  city_district, postcode, city,
- suburb, street, house_number, provider)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-RETURNING id, latitude, longitude, lat_trunc, lon_trunc, altitude, accuracy, display_name, country, state, municipality, city_district, postcode, city, suburb, street, house_number, provider, created_at
+ suburb, street, house_number, provider, locale, created_at)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+RETURNING id, latitude, longitude, lat_trunc, lon_trunc, altitude, accuracy, display_name, country, state, municipality, city_district, postcode, city, suburb, street, house_number, provider, locale, created_at
 `
 
 type NewAddressParams struct {
@@ -150,6 +155,8 @@ type NewAddressParams struct {
 	Street       sql.NullString
 	HouseNumber  sql.NullString
 	Provider     string
+	Locale       string
+	CreatedAt    int64
 }
 
 func (q *Queries) NewAddress(ctx context.Context, arg NewAddressParams) (Address, error) {
@@ -171,6 +178,8 @@ func (q *Queries) NewAddress(ctx context.Context, arg NewAddressParams) (Address
 		arg.Street,
 		arg.HouseNumber,
 		arg.Provider,
+		arg.Locale,
+		arg.CreatedAt,
 	)
 	var i Address
 	err := row.Scan(
@@ -192,19 +201,27 @@ func (q *Queries) NewAddress(ctx context.Context, arg NewAddressParams) (Address
 		&i.Street,
 		&i.HouseNumber,
 		&i.Provider,
+		&i.Locale,
 		&i.CreatedAt,
 	)
 	return i, err
 }
 
 const updateCurrentAddress = `-- name: UpdateCurrentAddress :exec
-INSERT INTO current_address (address_id)
-VALUES (?)
-ON CONFLICT (lock) DO UPDATE SET address_id = excluded.address_id,
-                                 updated_at = unixepoch()
+INSERT INTO current_address (address_id, created_at, updated_at)
+VALUES (?, ?, ?)
+ON CONFLICT (lock) DO UPDATE SET
+                                 address_id = excluded.address_id,
+                                 updated_at = excluded.updated_at
 `
 
-func (q *Queries) UpdateCurrentAddress(ctx context.Context, addressID int64) error {
-	_, err := q.db.ExecContext(ctx, updateCurrentAddress, addressID)
+type UpdateCurrentAddressParams struct {
+	AddressID int64
+	CreatedAt int64
+	UpdatedAt int64
+}
+
+func (q *Queries) UpdateCurrentAddress(ctx context.Context, arg UpdateCurrentAddressParams) error {
+	_, err := q.db.ExecContext(ctx, updateCurrentAddress, arg.AddressID, arg.CreatedAt, arg.UpdatedAt)
 	return err
 }

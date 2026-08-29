@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"time"
 
 	"modernc.org/sqlite"
 
@@ -27,7 +28,12 @@ func (s *Server) updateCurrentLocation(ctx context.Context, coords types.Coordin
 		return nil
 	}
 
-	if err = s.queries.UpdateCurrentAddress(ctx, location.ID); err != nil {
+	params := model.UpdateCurrentAddressParams{
+		AddressID: location.ID,
+		CreatedAt: time.Now().UnixMicro(),
+		UpdatedAt: time.Now().UnixMicro(),
+	}
+	if err = s.queries.UpdateCurrentAddress(ctx, params); err != nil {
 		return fmt.Errorf("failed to set current address: %w", err)
 	}
 
@@ -42,6 +48,7 @@ func (s *Server) addressByCoords(ctx context.Context, coords types.Coordinate, p
 	address, err := s.queries.AddressByCoords(ctx, model.AddressByCoordsParams{
 		LatTrunc: latTrunc,
 		LonTrunc: lonTrunc,
+		Locale:   s.t.Language().String(),
 	})
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		return address, fmt.Errorf("failed to retrieve location from database: %w", err)
@@ -77,6 +84,8 @@ func (s *Server) addressByCoords(ctx context.Context, coords types.Coordinate, p
 		Street:       sql.NullString{String: lookup.Street, Valid: true},
 		HouseNumber:  sql.NullString{String: lookup.HouseNumber, Valid: true},
 		Provider:     provider,
+		Locale:       s.t.Language().String(),
+		CreatedAt:    time.Now().UnixMicro(),
 	}
 	address, err = s.queries.NewAddress(ctx, params)
 	if err != nil {
