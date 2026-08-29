@@ -14,6 +14,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/wneessen/localweather/internal/apperror"
 	"github.com/wneessen/localweather/internal/config"
 	"github.com/wneessen/localweather/internal/log"
 	"github.com/wneessen/localweather/internal/testhelper"
@@ -88,8 +89,8 @@ func TestClient_Get(t *testing.T) {
 		if err == nil {
 			t.Fatal("expected get to fail")
 		}
-		if !errors.Is(err, ErrNonPointerTarget) {
-			t.Errorf("expected error to be %s, got %s", ErrNonPointerTarget, err)
+		if _, ok := errors.AsType[*apperror.NonPointerTargetError](err); !ok {
+			t.Errorf("expected error to be %s, got %s", apperror.ErrNonPointerTarget, err)
 		}
 	})
 	t.Run("parsing an invalid url should fail", func(t *testing.T) {
