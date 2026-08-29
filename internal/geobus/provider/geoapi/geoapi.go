@@ -114,11 +114,11 @@ func (p *Provider) locate(ctx context.Context) (types.Coordinate, error) {
 	var err error
 	coords.Latitude, err = strconv.ParseFloat(result.Location.Coordinates.Latitude, 64)
 	if err != nil {
-		return coords, fmt.Errorf("failed to parse latitude from API response: %w", err)
+		return coords, &apperror.CoordinateParsingError{Val: "latitude", Err: err}
 	}
 	coords.Longitude, err = strconv.ParseFloat(result.Location.Coordinates.Longitude, 64)
 	if err != nil {
-		return coords, fmt.Errorf("failed to parse longitude from API response: %w", err)
+		return coords, &apperror.CoordinateParsingError{Val: "longitude", Err: err}
 	}
 
 	return coords, nil
