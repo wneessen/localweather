@@ -58,7 +58,7 @@ func (c *Client) Poll(ctx context.Context) (types.Coordinate, error) {
 	dialer := &net.Dialer{}
 	conn, err := dialer.DialContext(ctx, "tcp", c.Addr)
 	if err != nil {
-		if _, ok := errors.AsType[*net.OpError](err); ok {
+		if _, ok := errors.AsType[*net.OpError](err); ok && !errors.Is(err, context.Canceled) {
 			return zero, nil
 		}
 		return zero, fmt.Errorf("failed to connect to GPSd: %w", err)
