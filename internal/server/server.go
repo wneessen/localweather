@@ -11,6 +11,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-co-op/gocron/v2"
+	"github.com/vorlif/spreak"
 
 	"github.com/wneessen/localweather/internal/config"
 	"github.com/wneessen/localweather/internal/database/model"
@@ -34,13 +35,15 @@ type Server struct {
 	queries     *model.Queries
 	weather     weather.Provider
 	weatherLock sync.RWMutex
+	t           *spreak.Localizer
 }
 
 type Params struct {
-	Cron    gocron.Scheduler
-	DB      *sql.DB
-	Log     *log.Logger
-	Queries *model.Queries
+	Cron      gocron.Scheduler
+	DB        *sql.DB
+	Log       *log.Logger
+	Queries   *model.Queries
+	Localizer *spreak.Localizer
 }
 
 func New(params Params, conf *config.Config) *Server {
@@ -55,6 +58,7 @@ func New(params Params, conf *config.Config) *Server {
 		log:     params.Log,
 		mux:     chi.NewMux(),
 		queries: params.Queries,
+		t:       params.Localizer,
 	}
 
 	server.httpserv = &http.Server{

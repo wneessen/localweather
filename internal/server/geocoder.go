@@ -22,7 +22,7 @@ const (
 
 // initGeocoder initializes the geocoding provider and assigns it to the server, using the configuration and logger.
 func (s *Server) initGeocoder() error {
-	geocodeProvider, err := s.selectGeocodeProvider(language.English) // TODO: Integrate i18n
+	geocodeProvider, err := s.selectGeocodeProvider(s.t.Language())
 	if err != nil {
 		return fmt.Errorf("failed to select geocoding provider: %w", err)
 	}

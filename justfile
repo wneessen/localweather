@@ -17,7 +17,6 @@ export LOCALWEATHER_DATABASE_PATH := db_path
 export LOCALWEATHER_GEOBUS_COORDINATES_FILE := coordinates_path
 export LOCALWEATHER_GEOBUS_CITYNAME_FILE := cityname_path
 #export LOCALWEATHER_GEOCODER_PROVIDER := "geocode-earth"
-
 [private]
 default:
     @just --list --unsorted
@@ -25,6 +24,10 @@ default:
 [group('run')]
 shell:
     secretspec run -- nix develop -c zsh
+
+[group('run')]
+i18n:
+  nix develop --command ~/go/bin/xspreak -D ./ -p ./internal/i18n/locale/ --copyright-holder 'Winni Neessen <wn@neessen.dev>' --package-name 'github.com/wneessen/localweather'
 
 [group('run')]
 lint:
@@ -40,5 +43,6 @@ server:
 
 [group('setup')]
 bootstrap:
-    mkdir -p {{ dev_dir }}
-    test -f .air.toml || nix develop -c 'air init'
+  @test -f ~/go/bin/xspreak || nix develop --command go install github.com/go-modulus/xspreak@latest
+  @test -d {{ dev_dir }} || mkdir -p {{ dev_dir }}
+  @test -f .air.toml || nix develop -c 'air init'
