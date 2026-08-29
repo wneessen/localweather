@@ -47,7 +47,7 @@ func start() error {
 	logger := log.New(conf)
 
 	// Initialize i18n
-	localizer, err := i18n.New(conf.Locale)
+	t, err := i18n.New(conf.Locale)
 	if err != nil {
 		logger.Error("failed to initialize localizer", log.ErrAttr(err))
 		os.Exit(1)
@@ -98,7 +98,7 @@ func start() error {
 	s := server.New(server.Params{
 		Cron:      cron,
 		DB:        db,
-		Localizer: localizer,
+		Localizer: t,
 		Log:       logger,
 		Queries:   queries,
 	}, conf)
@@ -115,6 +115,6 @@ func start() error {
 		return err
 	}
 
-	logger.Info("localweather successfully shut down")
+	logger.Info(t.Get("localweather successfully shut down"))
 	return nil
 }
