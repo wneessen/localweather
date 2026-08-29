@@ -1,18 +1,32 @@
 package apperror
 
-type UnexpectedError struct{}
+type unexpectedError struct{}
 
-func (*UnexpectedError) Error() string {
+func (*unexpectedError) Error() string {
 	return "unexpected error or internal server error"
 }
 
-type InvalidRequestParametersError struct{}
+type invalidRequestParametersError struct{}
 
-func (*InvalidRequestParametersError) Error() string {
+func (*invalidRequestParametersError) Error() string {
 	return "invalid request parameters"
 }
 
+type nonPointerTargetError struct{}
+
+func (*nonPointerTargetError) Error() string {
+	return "target must be a non-nil pointer"
+}
+
+type responseBodyIsNilError struct{}
+
+func (*responseBodyIsNilError) Error() string {
+	return "response is nil"
+}
+
 var (
-	ErrInvalidRequestParameters = new(InvalidRequestParametersError)
-	ErrUnexpected               = new(UnexpectedError)
+	ErrInvalidRequestParameters = new(invalidRequestParametersError)
+	ErrNonPointerTarget         = new(nonPointerTargetError)
+	ErrResponseBodyIsNil        = new(responseBodyIsNilError)
+	ErrUnexpected               = new(unexpectedError)
 )

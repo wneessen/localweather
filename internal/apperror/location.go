@@ -1,9 +1,9 @@
 package apperror
 
-type LocationNotSetError struct{}
+type locationNotSetError struct{}
 
-func (*LocationNotSetError) Error() string {
+func (*locationNotSetError) Error() string {
 	return "no current location set"
 }
 
-var ErrLocationNotSet = new(LocationNotSetError)
+var ErrLocationNotSet = new(locationNotSetError)

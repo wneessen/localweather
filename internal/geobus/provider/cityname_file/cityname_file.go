@@ -13,6 +13,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/wneessen/localweather/internal/apperror"
 	"github.com/wneessen/localweather/internal/geobus"
 	"github.com/wneessen/localweather/internal/geobus/lookupstream"
 	"github.com/wneessen/localweather/internal/geocode"
@@ -46,7 +47,7 @@ type Provider struct {
 // interval and TTL settings.
 func NewCitynameFileProvider(path string, coder geocode.Geocoder, log *log.Logger) (*Provider, error) {
 	if coder == nil {
-		return nil, errors.New("geocoder is required")
+		return nil, apperror.ErrGeoCoderRequired
 	}
 	provider := &Provider{
 		coder:  coder,
