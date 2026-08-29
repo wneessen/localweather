@@ -1,0 +1,42 @@
+units  = "imperial"
+locale = "en_US"
+
+[database]
+path            = "/tmp/storage.db"
+busy_timeout    = "5s"
+max_connections = 10
+
+[geobus]
+coordinates_file          = "/tmp/coordinates"
+cityname_file             = "/tmp/cityname"
+disable_geoip             = true
+disable_geoapi            = true
+disable_coordinates_file  = false
+disable_cityname_file     = false
+disable_ichnaea           = true
+disable_gpsd              = true
+
+[geocoder]
+provider = "opencage"
+apikey   = "test-api-key-1234"
+
+[log]
+format = "json"
+output = "stderr"
+level  = "debug"
+
+[server]
+bindaddr = "0.0.0.0"
+port     = 8080
+timeout  = "15s"
+dev_env  = true
+
+[scheduler]
+maintenance_interval = "30m"
+
+[weather]
+provider       = "open-meteo"
+forecast_hours = 12
+cold_threshold = -5.0
+hot_threshold  = 35.0
+
