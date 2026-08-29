@@ -27,6 +27,7 @@ type Address struct {
 	Street       sql.NullString
 	HouseNumber  sql.NullString
 	Provider     string
+	Locale       string
 	CreatedAt    int64
 }
 

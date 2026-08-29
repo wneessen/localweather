@@ -38,7 +38,7 @@ func (s *Server) handlerLocationCurrentGet(w http.ResponseWriter, r *http.Reques
 		Latitude:    address.Latitude,
 		Longitude:   address.Longitude,
 		DisplayName: address.DisplayName,
-		LastSeen:    time.Unix(address.UpdatedAt, 0),
+		LastSeen:    time.UnixMicro(address.UpdatedAt),
 		Provider:    address.Provider,
 	}
 	resp := NewResponse(http.StatusOK, "current location", data)
