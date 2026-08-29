@@ -15,7 +15,7 @@ import (
 // Provider is implemented by each weather API backend.
 type Provider interface {
 	Name() string
-	GetWeather(ctx context.Context, coords types.Coordinate) (*Data, error)
+	Fetch(ctx context.Context, coords types.Coordinate) (*Data, error)
 }
 
 type Data struct {

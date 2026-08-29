@@ -30,7 +30,7 @@ func (s *Server) cronjobWeatherdataUpdate(ctx context.Context) {
 		return
 	}
 
-	data, err := s.weather.GetWeather(ctx,
+	data, err := s.weather.Fetch(ctx,
 		types.Coordinate{Latitude: location.Latitude, Longitude: location.Longitude})
 	if err != nil {
 		s.logJobCompletionWithError(action, now, fmt.Errorf("failed to retrieve weather data: %w", err))

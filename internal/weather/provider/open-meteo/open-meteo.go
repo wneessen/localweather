@@ -141,7 +141,7 @@ func (o *OpenMeteo) Name() string {
 	return name
 }
 
-func (o *OpenMeteo) GetWeather(ctx context.Context, coords types.Coordinate) (*weather.Data, error) {
+func (o *OpenMeteo) Fetch(ctx context.Context, coords types.Coordinate) (*weather.Data, error) {
 	res := new(response)
 	data := weather.NewData()
 	tz := time.Local.String()
