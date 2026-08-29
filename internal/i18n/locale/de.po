@@ -3,22 +3,22 @@
 # This file is distributed under the same license as the
 # github.com/wneessen/localweather package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
-# 
+#
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: github.com/wneessen/localweather\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-08-29 14:08+0200\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
+"PO-Revision-Date: 2026-08-29 14:12+0200\n"
+"Last-Translator: Winni Neessen <wn@neessen.dev>\n"
+"Language-Team: \n"
+"Language: de\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 3.9\n"
 
 #: ../../../cmd/server/server.go:118
 msgid "localweather successfully shut down"
-msgstr ""
-
+msgstr "localweather erfolgreich heruntergefahren"
