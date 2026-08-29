@@ -14,6 +14,7 @@ import (
 	"github.com/wneessen/localweather/internal/config"
 	"github.com/wneessen/localweather/internal/database"
 	"github.com/wneessen/localweather/internal/database/model"
+	"github.com/wneessen/localweather/internal/i18n"
 	"github.com/wneessen/localweather/internal/log"
 	"github.com/wneessen/localweather/internal/server"
 )
@@ -44,6 +45,13 @@ func start() error {
 
 	// Initialize logger
 	logger := log.New(conf)
+
+	// Initialize i18n
+	localizer, err := i18n.New(conf.Locale)
+	if err != nil {
+		logger.Error("failed to initialize localizer", log.ErrAttr(err))
+		os.Exit(1)
+	}
 
 	// Catch signals to gracefully shut down the app
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGTERM, os.Interrupt)
@@ -88,10 +96,11 @@ func start() error {
 
 	// Create a new http.Server instance
 	s := server.New(server.Params{
-		Cron:    cron,
-		DB:      db,
-		Log:     logger,
-		Queries: queries,
+		Cron:      cron,
+		DB:        db,
+		Localizer: localizer,
+		Log:       logger,
+		Queries:   queries,
 	}, conf)
 
 	// Use an errgroup to wait for separate goroutines which can error

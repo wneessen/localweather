@@ -3,6 +3,7 @@ module github.com/wneessen/localweather
 go 1.27.0
 
 require (
+	github.com/Xuanwo/go-locale v1.1.3
 	github.com/go-chi/chi/v5 v5.3.2
 	github.com/go-chi/httplog/v3 v3.4.0
 	github.com/go-chi/render v1.0.3
@@ -10,6 +11,7 @@ require (
 	github.com/kkyr/fig v0.5.0
 	github.com/mdlayher/wifi v0.9.0
 	github.com/pressly/goose/v3 v3.27.3
+	github.com/vorlif/spreak v1.0.0
 	golang.org/x/sync v0.22.0
 	golang.org/x/text v0.40.0
 	modernc.org/sqlite v1.57.0
