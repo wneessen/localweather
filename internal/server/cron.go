@@ -7,11 +7,31 @@ import (
 	"time"
 
 	"github.com/go-co-op/gocron/v2"
+
+	"github.com/wneessen/localweather/internal/log"
 )
 
 func (s *Server) cronjobs(ctx context.Context) error {
-	if err := s.newCronjob(ctx, "maintenance", s.conf.Scheduler.MaintenanceInterval, s.cronjobMaintenance); err != nil {
-		return fmt.Errorf("failed to set up maintenance job: %w", err)
+	jobs := []struct {
+		name     string
+		interval time.Duration
+		fn       func(context.Context)
+	}{
+		{
+			name:     "maintenance",
+			interval: s.conf.Scheduler.MaintenanceInterval,
+			fn:       s.cronjobMaintenance,
+		},
+		{
+			name:     "weatherdata_update",
+			interval: s.conf.Scheduler.WeatherUpdateInterval,
+			fn:       s.cronjobWeatherdataUpdate,
+		},
+	}
+	for _, job := range jobs {
+		if err := s.newCronjob(ctx, job.name, job.interval, job.fn); err != nil {
+			return fmt.Errorf("failed to set up cron job %q: %w", job.name, err)
+		}
 	}
 
 	return nil
@@ -51,7 +71,6 @@ func (s *Server) logJobCompletion(name string, startTime time.Time, failed bool)
 	)
 }
 
-/*
 func (s *Server) logJobCompletionWithError(name string, startTime time.Time, err error) {
 	s.log.Info("scheduled job completed",
 		slog.Group("job_details",
@@ -63,5 +82,3 @@ func (s *Server) logJobCompletionWithError(name string, startTime time.Time, err
 		),
 	)
 }
-
-*/
