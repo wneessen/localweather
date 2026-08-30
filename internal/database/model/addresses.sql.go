@@ -19,9 +19,9 @@ WHERE lat_trunc = ?
 `
 
 type AddressByCoordsParams struct {
-	LatTrunc float64
-	LonTrunc float64
-	Locale   string
+	LatTrunc float64 `json:"lat_trunc"`
+	LonTrunc float64 `json:"lon_trunc"`
+	Locale   string  `json:"locale"`
 }
 
 func (q *Queries) AddressByCoords(ctx context.Context, arg AddressByCoordsParams) (Address, error) {
@@ -70,30 +70,30 @@ LIMIT 1
 `
 
 type CurrentAddressRow struct {
-	Lock         int64
-	AddressID    int64
-	UpdatedAt    int64
-	CreatedAt    int64
-	ID           int64
-	Latitude     float64
-	Longitude    float64
-	LatTrunc     float64
-	LonTrunc     float64
-	Altitude     sql.NullFloat64
-	Accuracy     float64
-	DisplayName  string
-	Country      sql.NullString
-	State        sql.NullString
-	Municipality sql.NullString
-	CityDistrict sql.NullString
-	Postcode     sql.NullString
-	City         sql.NullString
-	Suburb       sql.NullString
-	Street       sql.NullString
-	HouseNumber  sql.NullString
-	Provider     string
-	Locale       string
-	CreatedAt_2  int64
+	Lock         int64           `json:"lock"`
+	AddressID    int64           `json:"address_id"`
+	UpdatedAt    int64           `json:"updated_at"`
+	CreatedAt    int64           `json:"created_at"`
+	ID           int64           `json:"id"`
+	Latitude     float64         `json:"latitude"`
+	Longitude    float64         `json:"longitude"`
+	LatTrunc     float64         `json:"lat_trunc"`
+	LonTrunc     float64         `json:"lon_trunc"`
+	Altitude     sql.NullFloat64 `json:"altitude"`
+	Accuracy     float64         `json:"accuracy"`
+	DisplayName  string          `json:"display_name"`
+	Country      sql.NullString  `json:"country"`
+	State        sql.NullString  `json:"state"`
+	Municipality sql.NullString  `json:"municipality"`
+	CityDistrict sql.NullString  `json:"city_district"`
+	Postcode     sql.NullString  `json:"postcode"`
+	City         sql.NullString  `json:"city"`
+	Suburb       sql.NullString  `json:"suburb"`
+	Street       sql.NullString  `json:"street"`
+	HouseNumber  sql.NullString  `json:"house_number"`
+	Provider     string          `json:"provider"`
+	Locale       string          `json:"locale"`
+	CreatedAt_2  int64           `json:"created_at_2"`
 }
 
 func (q *Queries) CurrentAddress(ctx context.Context) (CurrentAddressRow, error) {
@@ -138,25 +138,25 @@ RETURNING id, latitude, longitude, lat_trunc, lon_trunc, altitude, accuracy, dis
 `
 
 type NewAddressParams struct {
-	Latitude     float64
-	Longitude    float64
-	LatTrunc     float64
-	LonTrunc     float64
-	Altitude     sql.NullFloat64
-	Accuracy     float64
-	DisplayName  string
-	Country      sql.NullString
-	State        sql.NullString
-	Municipality sql.NullString
-	CityDistrict sql.NullString
-	Postcode     sql.NullString
-	City         sql.NullString
-	Suburb       sql.NullString
-	Street       sql.NullString
-	HouseNumber  sql.NullString
-	Provider     string
-	Locale       string
-	CreatedAt    int64
+	Latitude     float64         `json:"latitude"`
+	Longitude    float64         `json:"longitude"`
+	LatTrunc     float64         `json:"lat_trunc"`
+	LonTrunc     float64         `json:"lon_trunc"`
+	Altitude     sql.NullFloat64 `json:"altitude"`
+	Accuracy     float64         `json:"accuracy"`
+	DisplayName  string          `json:"display_name"`
+	Country      sql.NullString  `json:"country"`
+	State        sql.NullString  `json:"state"`
+	Municipality sql.NullString  `json:"municipality"`
+	CityDistrict sql.NullString  `json:"city_district"`
+	Postcode     sql.NullString  `json:"postcode"`
+	City         sql.NullString  `json:"city"`
+	Suburb       sql.NullString  `json:"suburb"`
+	Street       sql.NullString  `json:"street"`
+	HouseNumber  sql.NullString  `json:"house_number"`
+	Provider     string          `json:"provider"`
+	Locale       string          `json:"locale"`
+	CreatedAt    int64           `json:"created_at"`
 }
 
 func (q *Queries) NewAddress(ctx context.Context, arg NewAddressParams) (Address, error) {
@@ -216,9 +216,9 @@ ON CONFLICT (lock) DO UPDATE SET
 `
 
 type UpdateCurrentAddressParams struct {
-	AddressID int64
-	CreatedAt int64
-	UpdatedAt int64
+	AddressID int64 `json:"address_id"`
+	CreatedAt int64 `json:"created_at"`
+	UpdatedAt int64 `json:"updated_at"`
 }
 
 func (q *Queries) UpdateCurrentAddress(ctx context.Context, arg UpdateCurrentAddressParams) error {

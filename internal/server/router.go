@@ -44,4 +44,7 @@ func (s *Server) httpRoutes(_ context.Context) {
 	s.mux.Route("/location", func(r chi.Router) {
 		r.Get("/current", s.handlerLocationCurrentGet)
 	})
+	s.mux.Route("/weather", func(r chi.Router) {
+		r.Get("/current", s.handlerWeatherCurrentGet)
+	})
 }

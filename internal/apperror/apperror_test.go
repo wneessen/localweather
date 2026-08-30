@@ -11,25 +11,29 @@ func TestApperrors(t *testing.T) {
 		err   error
 		match func(error) (error, bool)
 	}{
-		{"geobus: ErrNoGeobusProvider", ErrNoGeobusProvider, wantType[*NoGeobusEnabledError]},
-		{"geobus: ErrNoValidCoordinates", ErrNoValidCoordinates, wantType[*NoValidCoordinatesFoundError]},
-		{"geocoder: ErrGeoCoderRequired", ErrGeoCoderRequired, wantType[*GeoCoderRequiredError]},
 		{"coordinates: CoordinateParsingError", &CoordinateParsingError{}, wantType[*CoordinateParsingError]},
 		{
 			"coordinates: NoCoordinatesFoundForAddressError", &NoCoordinatesFoundForAddressError{},
 			wantType[*NoCoordinatesFoundForAddressError],
 		},
+		{"geobus: ErrNoGeobusProvider", ErrNoGeobusProvider, wantType[*NoGeobusEnabledError]},
+		{"geobus: ErrNoValidCoordinates", ErrNoValidCoordinates, wantType[*NoValidCoordinatesFoundError]},
+		{"geocoder: ErrGeoCoderRequired", ErrGeoCoderRequired, wantType[*GeoCoderRequiredError]},
 		{"location: GeoLocationAPIFetchError", &GeoLocationAPIFetchError{}, wantType[*GeoLocationAPIFetchError]},
+		{"location: ErrCurrentLocationNotSet", ErrCurrentLocationNotSet, wantType[*CurrentLocationNotSetError]},
+		{"logger: ErrLoggerRequired", ErrLoggerRequired, wantType[*LoggerRequiredError]},
 		{"http: ErrHTTPClientRequired", ErrHTTPClientRequired, wantType[*HTTPClientRequiredError]},
 		{"http: ErrInvalidRequestParameters", ErrInvalidRequestParameters, wantType[*InvalidRequestParametersError]},
 		{"http: ErrNonPointerTarget", ErrNonPointerTarget, wantType[*NonPointerTargetError]},
 		{"http: ErrResponseBodyIsNil", ErrResponseBodyIsNil, wantType[*ResponseBodyIsNilError]},
 		{"http: ErrUnexpected", ErrUnexpected, wantType[*UnexpectedError]},
-		{"location: ErrLocationNotSet", ErrLocationNotSet, wantType[*LocationNotSetError]},
-		{"logger: ErrLoggerRequired", ErrLoggerRequired, wantType[*LoggerRequiredError]},
 		{
 			"render: ErrFailedToRenderErrorResponse", ErrFailedToRenderErrorResponse,
 			wantType[*FailedToRenderErrResponseError],
+		},
+		{
+			"weather: ErrCurrentWeatherdataNotFound", ErrCurrentWeatherdataNotFound,
+			wantType[*CurrentWeatherdataNotFoundError],
 		},
 	}
 	for _, test := range tests {

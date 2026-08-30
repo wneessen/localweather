@@ -26,7 +26,7 @@ func (s *Server) cronjobWeatherdataUpdate(ctx context.Context) {
 		return
 	}
 	if location.ID == 0 {
-		s.logJobCompletionWithError(action, now, apperror.ErrLocationNotSet)
+		s.logJobCompletionWithError(action, now, apperror.ErrCurrentLocationNotSet)
 		return
 	}
 

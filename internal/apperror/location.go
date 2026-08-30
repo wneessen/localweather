@@ -2,9 +2,9 @@ package apperror
 
 import "fmt"
 
-type LocationNotSetError struct{}
+type CurrentLocationNotSetError struct{}
 
-func (*LocationNotSetError) Error() string {
+func (*CurrentLocationNotSetError) Error() string {
 	return "no current location set"
 }
 
@@ -16,4 +16,4 @@ func (e *GeoLocationAPIFetchError) Error() string {
 	return fmt.Sprintf("failed to fetch geolocation data from API: %s", e.Err)
 }
 
-var ErrLocationNotSet = new(LocationNotSetError)
+var ErrCurrentLocationNotSet = new(CurrentLocationNotSetError)
