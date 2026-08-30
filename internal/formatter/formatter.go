@@ -15,6 +15,7 @@ import (
 )
 
 type Formatter struct {
+	conf          *config.Config
 	localizer     *spreak.Localizer
 	humanizer     *humanize.Humanizer
 	printer       *message.Printer
@@ -24,9 +25,13 @@ type Formatter struct {
 // Supported languages for humanize
 var supportedHumanizers = []*humanize.LocaleData{de.New()}
 
+// iconURLFormat defines the format string for constructing the URL path to access SVG icons
+// stored in a public directory.
+const iconURLFormat = "/public/icons/%s/%s.svg"
+
 // New initializes and returns a new Formatter instance with the provided configuration and localizer
 func New(conf *config.Config, loc *spreak.Localizer) (*Formatter, error) {
-	formatter := &Formatter{localizer: loc}
+	formatter := &Formatter{conf: conf, localizer: loc}
 
 	// Create humanizer
 	collection, err := humanize.New(humanize.WithLocale(supportedHumanizers...))
@@ -77,6 +82,14 @@ func (f *Formatter) WeatherSymbol(code int, isDay bool) string {
 		return symbol
 	}
 	return "󰨹 "
+}
+
+func (f *Formatter) WeatherSymbolURL(code int, isDay bool) string {
+	nightDayTag := "day"
+	if !isDay {
+		nightDayTag = "night"
+	}
+	return fmt.Sprintf(iconURLFormat, f.conf.Weather.IconSet, fmt.Sprintf("wmo-%d-%s", code, nightDayTag))
 }
 
 func (f *Formatter) WindDirectionSymbol(deg vartype.VarFloat64) string {

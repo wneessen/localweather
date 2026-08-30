@@ -109,6 +109,7 @@ func (s *Server) Start(ctx context.Context) error {
 
 	s.log.Info("starting http backend", "listen_addr", s.conf.ListenAddr())
 	s.httpRoutes(ctx)
+	s.fileServer(s.mux, "/public", http.Dir("./public"))
 	if err := s.httpserv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 		return fmt.Errorf("failed to start http server: %w", err)
 	}
