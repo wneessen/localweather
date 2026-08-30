@@ -25,6 +25,7 @@ func (s *Server) handlerWeatherCurrentGet(w http.ResponseWriter, r *http.Request
 		Condition           string  `json:"condition,omitempty"`
 		Category            string  `json:"category,omitempty"`
 		Icon                string  `json:"icon,omitempty"`
+		IconURL             string  `json:"icon_url,omitempty"`
 		WinddirIcon         string  `json:"winddir_icon"`
 		WinddirText         string  `json:"winddir_text"`
 		IsDay               bool    `json:"is_day,omitempty"`
@@ -43,6 +44,8 @@ func (s *Server) handlerWeatherCurrentGet(w http.ResponseWriter, r *http.Request
 		Longitude           float64 `json:"longitude"`
 		City                string  `json:"city,omitempty"`
 		Country             string  `json:"country,omitempty"`
+		LocationProvider    string  `json:"location_provider"`
+		WeatherProvider     string  `json:"weather_provider"`
 	}
 
 	address, err := s.queries.CurrentAddress(r.Context())
@@ -74,6 +77,8 @@ func (s *Server) handlerWeatherCurrentGet(w http.ResponseWriter, r *http.Request
 		Latitude:           address.Latitude,
 		Longitude:          address.Longitude,
 		DisplayName:        address.DisplayName,
+		WeatherProvider:    s.weather.Name(),
+		LocationProvider:   address.Provider,
 	}
 	if data.Temperature.Valid {
 		params.Temperature = data.Temperature.Float64
@@ -88,6 +93,7 @@ func (s *Server) handlerWeatherCurrentGet(w http.ResponseWriter, r *http.Request
 		params.Condition = data.Condition
 		params.Icon = data.Icon
 		params.Category = data.Category
+		params.IconURL = s.fmt.WeatherSymbolURL(params.WeatherCode, data.IsDay.Valid && data.IsDay.Bool)
 	}
 	if data.WindSpeed.Valid {
 		params.WindSpeed = data.WindSpeed.Float64

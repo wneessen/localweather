@@ -48,6 +48,7 @@ type Config struct {
 	}
 	Weather struct {
 		Provider string `fig:"provider" default:"open-meteo"`
+		IconSet  string `fig:"iconset" default:"meteocons"`
 
 		// Cold and hot class thresholds (Defaults are based on °C)
 		// Defaults are based on suggestions for dangerous driving conditions and uncomfortable heat.
