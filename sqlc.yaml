@@ -7,3 +7,11 @@ sql:
       go:
         package: "model"
         out: "internal/database/model"
+        emit_json_tags: true
+        overrides:
+          - column: "current_weather.address_id"
+            go_struct_tag: 'json:"-"'
+          - column: "current_weather.timestamp"
+            go_struct_tag: 'json:"timestamp_unix"'
+          - column: "current_weather.updated_at"
+            go_struct_tag: 'json:"updated_at_unix"'

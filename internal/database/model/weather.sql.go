@@ -75,18 +75,18 @@ WHERE excluded.timestamp > current_weather.timestamp
 `
 
 type UpdateCurrentWeatherParams struct {
-	AddressID           int64
-	Timestamp           int64
-	Temperature         float64
-	ApparentTemperature float64
-	WeatherCode         int64
-	WindSpeed           float64
-	WindGusts           float64
-	WindDirection       float64
-	RelativeHumidity    float64
-	PressureMsl         float64
-	IsDay               bool
-	UpdatedAt           int64
+	AddressID           int64   `json:"-"`
+	Timestamp           int64   `json:"timestamp_unix"`
+	Temperature         float64 `json:"temperature"`
+	ApparentTemperature float64 `json:"apparent_temperature"`
+	WeatherCode         int64   `json:"weather_code"`
+	WindSpeed           float64 `json:"wind_speed"`
+	WindGusts           float64 `json:"wind_gusts"`
+	WindDirection       float64 `json:"wind_direction"`
+	RelativeHumidity    float64 `json:"relative_humidity"`
+	PressureMsl         float64 `json:"pressure_msl"`
+	IsDay               bool    `json:"is_day"`
+	UpdatedAt           int64   `json:"updated_at_unix"`
 }
 
 func (q *Queries) UpdateCurrentWeather(ctx context.Context, arg UpdateCurrentWeatherParams) error {

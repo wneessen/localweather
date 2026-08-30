@@ -26,7 +26,7 @@ func (s *Server) handlerLocationCurrentGet(w http.ResponseWriter, r *http.Reques
 	if err != nil {
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
-			s.renderErr(w, r, http.StatusNotFound, apperror.ErrLocationNotSet)
+			s.renderErr(w, r, http.StatusNotFound, apperror.ErrCurrentLocationNotSet)
 		default:
 			s.log.Error("failed to get current address from database", log.ErrAttr(err))
 			s.renderErr(w, r, http.StatusInternalServerError, apperror.ErrUnexpected)
@@ -42,7 +42,7 @@ func (s *Server) handlerLocationCurrentGet(w http.ResponseWriter, r *http.Reques
 		Provider:    address.Provider,
 	}
 	resp := NewResponse(http.StatusOK, "current location", data)
-	if err := render.Render(w, r, resp); err != nil {
-		s.log.Error("failed to render healthz JSON", log.ErrAttr(err))
+	if err = render.Render(w, r, resp); err != nil {
+		s.log.Error("failed to render current address response", log.ErrAttr(err))
 	}
 }
