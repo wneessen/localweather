@@ -16,6 +16,7 @@ import (
 
 	"github.com/wneessen/localweather/internal/config"
 	"github.com/wneessen/localweather/internal/database/model"
+	"github.com/wneessen/localweather/internal/formatter"
 	"github.com/wneessen/localweather/internal/geobus"
 	"github.com/wneessen/localweather/internal/geocode"
 	"github.com/wneessen/localweather/internal/log"
@@ -27,6 +28,7 @@ type Server struct {
 	conf         *config.Config
 	cron         gocron.Scheduler
 	db           *sql.DB
+	fmt          *formatter.Formatter
 	geobus       *geobus.Service
 	geocoder     geocode.Geocoder
 	geobusUnsub  func()
@@ -78,25 +80,32 @@ func New(params Params, conf *config.Config) *Server {
 func (s *Server) Start(ctx context.Context) error {
 	s.log.Info("starting localweather service")
 
-	s.log.Info("starting cron scheduler")
+	s.log.Debug("starting cron scheduler")
 	if err := s.cronjobs(ctx); err != nil {
 		return fmt.Errorf("failed to set up cron jobs: %w", err)
 	}
 
-	s.log.Info("selecting geocoder provider")
+	s.log.Debug("selecting geocoder provider")
 	if err := s.initGeocoder(); err != nil {
 		return fmt.Errorf("failed to select geocoding provider: %w", err)
 	}
 
-	s.log.Info("selecting weather provider")
+	s.log.Debug("selecting weather provider")
 	if err := s.initWeather(); err != nil {
 		return fmt.Errorf("failed to select weather provider: %w", err)
 	}
 
-	s.log.Info("starting geobus service")
+	s.log.Debug("starting geobus service")
 	if err := s.startGeobus(ctx); err != nil {
 		return fmt.Errorf("failed to start geobus provider: %w", err)
 	}
+
+	s.log.Debug("creating formatter")
+	form, err := formatter.New(s.conf, s.t)
+	if err != nil {
+		return fmt.Errorf("failed to create formatter: %w", err)
+	}
+	s.fmt = form
 
 	s.log.Info("starting http backend", "listen_addr", s.conf.ListenAddr())
 	s.httpRoutes(ctx)

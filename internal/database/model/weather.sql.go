@@ -7,10 +7,11 @@ package model
 
 import (
 	"context"
+	"database/sql"
 )
 
 const currentWeatherByAddressID = `-- name: CurrentWeatherByAddressID :one
-SELECT address_id, timestamp, temperature, apparent_temperature, weather_code, wind_speed, wind_gusts, wind_direction, relative_humidity, pressure_msl, is_day, updated_at
+SELECT address_id, timestamp, temperature, apparent_temperature, weather_code, wind_speed, wind_gusts, wind_direction, relative_humidity, pressure_msl, is_day, condition, category, icon, winddir_icon, winddir_text, temp_unit, windspeed_unit, humidity_unit, pressure_unit, winddir_unit, updated_at
 FROM current_weather
 WHERE address_id = ?
 `
@@ -30,12 +31,49 @@ func (q *Queries) CurrentWeatherByAddressID(ctx context.Context, addressID int64
 		&i.RelativeHumidity,
 		&i.PressureMsl,
 		&i.IsDay,
+		&i.Condition,
+		&i.Category,
+		&i.Icon,
+		&i.WinddirIcon,
+		&i.WinddirText,
+		&i.TempUnit,
+		&i.WindspeedUnit,
+		&i.HumidityUnit,
+		&i.PressureUnit,
+		&i.WinddirUnit,
 		&i.UpdatedAt,
 	)
 	return i, err
 }
 
 const updateCurrentWeather = `-- name: UpdateCurrentWeather :exec
+/*
+address_id           INTEGER NOT NULL REFERENCES addresses (id) ON DELETE CASCADE,
+    timestamp            INTEGER,
+    temperature          REAL,
+    apparent_temperature REAL,
+    weather_code         INTEGER,
+    wind_speed           REAL,
+    wind_gusts           REAL,
+    wind_direction       REAL,
+    relative_humidity    REAL,
+    pressure_msl         REAL,
+    humidity             REAL,
+    is_day               BOOLEAN,
+    condition            TEXT    NOT NULL,
+    category             TEXT    NOT NULL,
+    icon                 TEXT    NOT NULL,
+    winddir_icon         TEXT    NOT NULL,
+    winddir_text         TEXT    NOT NULL,
+    temp_unit            TEXT,
+    windspeed_unit       TEXT,
+    humidity_unit        TEXT,
+    pressure_unit        TEXT,
+    winddir_unit         TEXT,
+    updated_at           INTEGER NOT NULL
+
+ */
+
 INSERT INTO current_weather (address_id,
                              timestamp,
                              temperature,
@@ -47,6 +85,16 @@ INSERT INTO current_weather (address_id,
                              relative_humidity,
                              pressure_msl,
                              is_day,
+                             condition,
+                             category,
+                             icon,
+                             winddir_icon,
+                             winddir_text,
+                             temp_unit,
+                             windspeed_unit,
+                             humidity_unit,
+                             pressure_unit,
+                             winddir_unit,
                              updated_at)
 VALUES (?1,
         ?2,
@@ -59,7 +107,17 @@ VALUES (?1,
         ?9,
         ?10,
         ?11,
-        ?12)
+        ?12,
+        ?13,
+        ?14,
+        ?15,
+        ?16,
+        ?17,
+        ?18,
+        ?19,
+        ?20,
+        ?21,
+        ?22)
 ON CONFLICT (address_id) DO UPDATE SET timestamp            = excluded.timestamp,
                                        temperature          = excluded.temperature,
                                        apparent_temperature = excluded.apparent_temperature,
@@ -70,23 +128,43 @@ ON CONFLICT (address_id) DO UPDATE SET timestamp            = excluded.timestamp
                                        relative_humidity    = excluded.relative_humidity,
                                        pressure_msl         = excluded.pressure_msl,
                                        is_day               = excluded.is_day,
+                                       condition            = excluded.condition,
+                                       category             = excluded.category,
+                                       icon                 = excluded.icon,
+                                       winddir_icon         = excluded.winddir_icon,
+                                       winddir_text         = excluded.winddir_text,
+                                       temp_unit            = excluded.temp_unit,
+                                       windspeed_unit       = excluded.windspeed_unit,
+                                       humidity_unit        = excluded.humidity_unit,
+                                       pressure_unit        = excluded.pressure_unit,
+                                       winddir_unit         = excluded.winddir_unit,
                                        updated_at           = excluded.updated_at
 WHERE excluded.timestamp > current_weather.timestamp
 `
 
 type UpdateCurrentWeatherParams struct {
-	AddressID           int64   `json:"-"`
-	Timestamp           int64   `json:"timestamp_unix"`
-	Temperature         float64 `json:"temperature"`
-	ApparentTemperature float64 `json:"apparent_temperature"`
-	WeatherCode         int64   `json:"weather_code"`
-	WindSpeed           float64 `json:"wind_speed"`
-	WindGusts           float64 `json:"wind_gusts"`
-	WindDirection       float64 `json:"wind_direction"`
-	RelativeHumidity    float64 `json:"relative_humidity"`
-	PressureMsl         float64 `json:"pressure_msl"`
-	IsDay               bool    `json:"is_day"`
-	UpdatedAt           int64   `json:"updated_at_unix"`
+	AddressID           int64           `json:"-"`
+	Timestamp           sql.NullInt64   `json:"timestamp_unix"`
+	Temperature         sql.NullFloat64 `json:"temperature"`
+	ApparentTemperature sql.NullFloat64 `json:"apparent_temperature"`
+	WeatherCode         sql.NullInt64   `json:"weather_code"`
+	WindSpeed           sql.NullFloat64 `json:"wind_speed"`
+	WindGusts           sql.NullFloat64 `json:"wind_gusts"`
+	WindDirection       sql.NullFloat64 `json:"wind_direction"`
+	RelativeHumidity    sql.NullFloat64 `json:"relative_humidity"`
+	PressureMsl         sql.NullFloat64 `json:"pressure_msl"`
+	IsDay               sql.NullBool    `json:"is_day"`
+	Condition           string          `json:"condition"`
+	Category            string          `json:"category"`
+	Icon                string          `json:"icon"`
+	WinddirIcon         string          `json:"winddir_icon"`
+	WinddirText         string          `json:"winddir_text"`
+	TempUnit            string          `json:"temp_unit"`
+	WindspeedUnit       string          `json:"windspeed_unit"`
+	HumidityUnit        string          `json:"humidity_unit"`
+	PressureUnit        string          `json:"pressure_unit"`
+	WinddirUnit         string          `json:"winddir_unit"`
+	UpdatedAt           int64           `json:"updated_at_unix"`
 }
 
 func (q *Queries) UpdateCurrentWeather(ctx context.Context, arg UpdateCurrentWeatherParams) error {
@@ -102,6 +180,16 @@ func (q *Queries) UpdateCurrentWeather(ctx context.Context, arg UpdateCurrentWea
 		arg.RelativeHumidity,
 		arg.PressureMsl,
 		arg.IsDay,
+		arg.Condition,
+		arg.Category,
+		arg.Icon,
+		arg.WinddirIcon,
+		arg.WinddirText,
+		arg.TempUnit,
+		arg.WindspeedUnit,
+		arg.HumidityUnit,
+		arg.PressureUnit,
+		arg.WinddirUnit,
 		arg.UpdatedAt,
 	)
 	return err
