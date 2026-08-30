@@ -9,8 +9,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: github.com/wneessen/localweather\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-29 14:08+0200\n"
-"PO-Revision-Date: 2026-08-29 14:12+0200\n"
+"POT-Creation-Date: 2026-08-30 17:55+0200\n"
+"PO-Revision-Date: 2026-08-30 18:01+0200\n"
 "Last-Translator: Winni Neessen <wn@neessen.dev>\n"
 "Language-Team: \n"
 "Language: de\n"
@@ -19,6 +19,150 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Poedit 3.9\n"
 
-#: ../../../cmd/server/server.go:118
+#: ../../../cmd/server/server.go:122
 msgid "localweather successfully shut down"
 msgstr "localweather erfolgreich heruntergefahren"
+
+#: ../../formatter/maps.go:26
+msgid "Clear sky"
+msgstr "Klarer Himmel"
+
+#: ../../formatter/maps.go:27
+msgid "Mainly clear"
+msgstr "Überwiegend klar"
+
+#: ../../formatter/maps.go:28
+msgid "Partly cloudy"
+msgstr "Teilweise bewölkt"
+
+#: ../../formatter/maps.go:29
+msgid "Overcast"
+msgstr "Bewölkt"
+
+#: ../../formatter/maps.go:30
+msgid "Fog"
+msgstr "Nebel"
+
+#: ../../formatter/maps.go:31
+msgid "Depositing rime fog"
+msgstr "Raureif-Nebel Bildung"
+
+#: ../../formatter/maps.go:32
+msgid "Light drizzle"
+msgstr "Leichter Nieselregen"
+
+#: ../../formatter/maps.go:33
+msgid "Moderate drizzle"
+msgstr "Mäßiger Nieselregen"
+
+#: ../../formatter/maps.go:34
+msgid "Dense drizzle"
+msgstr "Dichter Nieselregen"
+
+#: ../../formatter/maps.go:35
+msgid "Light freezing drizzle"
+msgstr "Leichter gefrierender Nieselregen"
+
+#: ../../formatter/maps.go:36
+msgid "Dense freezing drizzle"
+msgstr "Dichter, eisiger Nieselregen"
+
+#: ../../formatter/maps.go:37
+msgid "Slight rain"
+msgstr "Leichter Regen"
+
+#: ../../formatter/maps.go:38
+msgid "Moderate rain"
+msgstr "Mäßiger Regen"
+
+#: ../../formatter/maps.go:39
+msgid "Heavy rain"
+msgstr "Starker Regen"
+
+#: ../../formatter/maps.go:40
+msgid "Light freezing rain"
+msgstr "Leichter Eisregen"
+
+#: ../../formatter/maps.go:41
+msgid "Heavy freezing rain"
+msgstr "Starker Eisregen"
+
+#: ../../formatter/maps.go:42
+msgid "Slight snow fall"
+msgstr "Leichter Schneefall"
+
+#: ../../formatter/maps.go:43
+msgid "Moderate snow fall"
+msgstr "Mäßiger Schneefall"
+
+#: ../../formatter/maps.go:44
+msgid "Heavy snow fall"
+msgstr "Starker Schneefall"
+
+#: ../../formatter/maps.go:45
+msgid "Snow grains"
+msgstr "Schneekörner"
+
+#: ../../formatter/maps.go:46
+msgid "Slight rain showers"
+msgstr "Leichte Regenschauer"
+
+#: ../../formatter/maps.go:47
+msgid "Moderate rain showers"
+msgstr "Mäßige Regenschauer"
+
+#: ../../formatter/maps.go:48
+msgid "Violent rain showers"
+msgstr "Heftige Regenschauer"
+
+#: ../../formatter/maps.go:49
+msgid "Slight snow showers"
+msgstr "Leichte Schneeschauer"
+
+#: ../../formatter/maps.go:50
+msgid "Heavy snow showers"
+msgstr "Starke Schneeschauer"
+
+#: ../../formatter/maps.go:51
+msgid "Thunderstorm"
+msgstr "Gewitter"
+
+#: ../../formatter/maps.go:52
+msgid "Thunderstorm with slight hail"
+msgstr "Gewitter mit leichtem Hagel"
+
+#: ../../formatter/maps.go:53
+msgid "Thunderstorm with heavy hail"
+msgstr "Gewitter mit starkem Hagel"
+
+#: ../../formatter/maps.go:173
+msgid "New moon"
+msgstr "Neumond"
+
+#: ../../formatter/maps.go:174
+msgid "Waxing crescent"
+msgstr "Zunehmender Halbmond"
+
+#: ../../formatter/maps.go:175
+msgid "First quarter"
+msgstr "Erstes Quartal"
+
+#: ../../formatter/maps.go:176
+msgid "Waxing gibbous"
+msgstr "Zunehmender Mond"
+
+#: ../../formatter/maps.go:177
+msgid "Full moon"
+msgstr "Vollmond"
+
+#: ../../formatter/maps.go:178
+msgid "Waning gibbous"
+msgstr "Abnehmender Mond"
+
+#: ../../formatter/maps.go:179
+msgid "Third quarter"
+msgstr "Drittes Quartal"
+
+#: ../../formatter/maps.go:180
+msgid "Waning crescent"
+msgstr "Abnehmender Halbmond"

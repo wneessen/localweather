@@ -39,16 +39,26 @@ type CurrentAddress struct {
 }
 
 type CurrentWeather struct {
-	AddressID           int64   `json:"-"`
-	Timestamp           int64   `json:"timestamp_unix"`
-	Temperature         float64 `json:"temperature"`
-	ApparentTemperature float64 `json:"apparent_temperature"`
-	WeatherCode         int64   `json:"weather_code"`
-	WindSpeed           float64 `json:"wind_speed"`
-	WindGusts           float64 `json:"wind_gusts"`
-	WindDirection       float64 `json:"wind_direction"`
-	RelativeHumidity    float64 `json:"relative_humidity"`
-	PressureMsl         float64 `json:"pressure_msl"`
-	IsDay               bool    `json:"is_day"`
-	UpdatedAt           int64   `json:"updated_at_unix"`
+	AddressID           int64           `json:"-"`
+	Timestamp           sql.NullInt64   `json:"timestamp_unix"`
+	Temperature         sql.NullFloat64 `json:"temperature"`
+	ApparentTemperature sql.NullFloat64 `json:"apparent_temperature"`
+	WeatherCode         sql.NullInt64   `json:"weather_code"`
+	WindSpeed           sql.NullFloat64 `json:"wind_speed"`
+	WindGusts           sql.NullFloat64 `json:"wind_gusts"`
+	WindDirection       sql.NullFloat64 `json:"wind_direction"`
+	RelativeHumidity    sql.NullFloat64 `json:"relative_humidity"`
+	PressureMsl         sql.NullFloat64 `json:"pressure_msl"`
+	IsDay               sql.NullBool    `json:"is_day"`
+	Condition           string          `json:"condition"`
+	Category            string          `json:"category"`
+	Icon                string          `json:"icon"`
+	WinddirIcon         string          `json:"winddir_icon"`
+	WinddirText         string          `json:"winddir_text"`
+	TempUnit            string          `json:"temp_unit"`
+	WindspeedUnit       string          `json:"windspeed_unit"`
+	HumidityUnit        string          `json:"humidity_unit"`
+	PressureUnit        string          `json:"pressure_unit"`
+	WinddirUnit         string          `json:"winddir_unit"`
+	UpdatedAt           int64           `json:"updated_at_unix"`
 }

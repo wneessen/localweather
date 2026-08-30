@@ -38,19 +38,63 @@ func (s *Server) cronjobWeatherdataUpdate(ctx context.Context) {
 	}
 
 	currentDB := model.UpdateCurrentWeatherParams{
-		AddressID:           location.ID,
-		Timestamp:           data.Current.InstantTime.UnixMicro(),
-		Temperature:         data.Current.Temperature.Value(),
-		ApparentTemperature: data.Current.ApparentTemperature.Value(),
-		WeatherCode:         int64(data.Current.WeatherCode.Value()),
-		WindSpeed:           data.Current.WindSpeed.Value(),
-		WindGusts:           data.Current.WindGusts.Value(),
-		WindDirection:       data.Current.WindDirection.Value(),
-		RelativeHumidity:    data.Current.RelativeHumidity.Value(),
-		PressureMsl:         data.Current.PressureMSL.Value(),
-		IsDay:               data.Current.IsDay.Value(),
-		UpdatedAt:           time.Now().UnixMicro(),
+		AddressID: location.ID,
+		UpdatedAt: time.Now().UnixMicro(),
+		Timestamp: sql.NullInt64{Int64: data.Current.InstantTime.UnixMicro(), Valid: true},
+		Temperature: sql.NullFloat64{
+			Float64: data.Current.Temperature.Value(),
+			Valid:   data.Current.Temperature.IsSet(),
+		},
+		ApparentTemperature: sql.NullFloat64{
+			Float64: data.Current.ApparentTemperature.Value(),
+			Valid:   data.Current.ApparentTemperature.IsSet(),
+		},
+		WindSpeed: sql.NullFloat64{
+			Float64: data.Current.WindSpeed.Value(),
+			Valid:   data.Current.WindSpeed.IsSet(),
+		},
+		WindGusts: sql.NullFloat64{
+			Float64: data.Current.WindGusts.Value(),
+			Valid:   data.Current.WindGusts.IsSet(),
+		},
+		RelativeHumidity: sql.NullFloat64{
+			Float64: data.Current.RelativeHumidity.Value(),
+			Valid:   data.Current.RelativeHumidity.IsSet(),
+		},
+		PressureMsl: sql.NullFloat64{
+			Float64: data.Current.PressureMSL.Value(),
+			Valid:   data.Current.PressureMSL.IsSet(),
+		},
+		IsDay: sql.NullBool{
+			Bool:  data.Current.IsDay.Value(),
+			Valid: data.Current.IsDay.IsSet(),
+		},
+		TempUnit:      data.Current.Units.Temperature,
+		WinddirUnit:   data.Current.Units.WindDirection,
+		HumidityUnit:  data.Current.Units.Humidity,
+		PressureUnit:  data.Current.Units.Pressure,
+		WindspeedUnit: data.Current.Units.WindSpeed,
 	}
+	if data.Current.WeatherCode.IsSet() {
+		val := data.Current.WeatherCode.Value()
+		currentDB.WeatherCode = sql.NullInt64{
+			Int64: int64(val),
+			Valid: true,
+		}
+		currentDB.Condition = s.t.Get(s.fmt.WeatherCondition(val))
+		currentDB.Category = s.fmt.WeatherCategory(val)
+		currentDB.Icon = s.fmt.WeatherSymbol(val, data.Current.IsDay.Value())
+
+	}
+	if data.Current.WindDirection.IsSet() {
+		currentDB.WindDirection = sql.NullFloat64{
+			Float64: data.Current.WindDirection.Value(),
+			Valid:   true,
+		}
+		currentDB.WinddirIcon = s.fmt.WindDirectionSymbol(data.Current.WindDirection)
+		currentDB.WinddirText = s.fmt.DegToString(data.Current.WindDirection)
+	}
+
 	if err = s.queries.UpdateCurrentWeather(ctx, currentDB); err != nil {
 		s.logJobCompletionWithError(action, now, fmt.Errorf("failed to update current weather in database: %w", err))
 	}
