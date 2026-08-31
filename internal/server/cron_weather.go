@@ -10,6 +10,7 @@ import (
 	"github.com/wneessen/localweather/internal/apperror"
 	"github.com/wneessen/localweather/internal/database/model"
 	"github.com/wneessen/localweather/internal/types"
+	"github.com/wneessen/localweather/internal/weather"
 )
 
 func (s *Server) cronjobWeatherdataUpdate(ctx context.Context) {
@@ -93,6 +94,28 @@ func (s *Server) cronjobWeatherdataUpdate(ctx context.Context) {
 		}
 		currentDB.WinddirIcon = s.fmt.WindDirectionSymbol(data.Current.WindDirection)
 		currentDB.WinddirText = s.fmt.DegToString(data.Current.WindDirection)
+	}
+
+	today := weather.NewDay(time.Now())
+	if val, ok := data.Daily[today]; ok {
+		if val.TemperatureMin.IsSet() {
+			currentDB.TempDayMin = sql.NullFloat64{
+				Float64: val.TemperatureMin.Value(),
+				Valid:   true,
+			}
+		}
+		if val.TemperatureMax.IsSet() {
+			currentDB.TempDayMax = sql.NullFloat64{
+				Float64: val.TemperatureMax.Value(),
+				Valid:   true,
+			}
+		}
+		if val.UVIndex.IsSet() {
+			currentDB.UvIndex = sql.NullFloat64{
+				Float64: val.UVIndex.Value(),
+				Valid:   true,
+			}
+		}
 	}
 
 	if err = s.queries.UpdateCurrentWeather(ctx, currentDB); err != nil {

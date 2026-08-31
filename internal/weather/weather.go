@@ -46,6 +46,7 @@ type DailyInstant struct {
 	InstantTime    time.Time
 	TemperatureMin vartype.VarFloat64
 	TemperatureMax vartype.VarFloat64
+	UVIndex        vartype.VarFloat64
 }
 
 type Units struct {

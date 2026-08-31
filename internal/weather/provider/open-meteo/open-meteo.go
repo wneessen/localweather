@@ -225,8 +225,10 @@ func (o *OpenMeteo) Fetch(ctx context.Context, coords types.Coordinate) (*weathe
 	for i := range res.Daily.Time {
 		timePos := weather.NewDay(res.Daily.Time[i].Time)
 		instant := weather.DailyInstant{
+			InstantTime:    timePos.Time(),
 			TemperatureMin: vartype.NewVariable(res.Daily.TemperatureMin[i]),
 			TemperatureMax: vartype.NewVariable(res.Daily.TemperatureMax[i]),
+			UVIndex:        vartype.NewVariable(res.Daily.UVIndex[i]),
 		}
 		data.Daily[timePos] = instant
 	}
