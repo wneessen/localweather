@@ -14,7 +14,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/wneessen/localweather/internal/apperror"
 	"github.com/wneessen/localweather/internal/geobus"
 	"github.com/wneessen/localweather/internal/geobus/lookupstream"
 	"github.com/wneessen/localweather/internal/log"
@@ -116,5 +115,6 @@ func (p *Provider) readFile(_ context.Context) (types.Coordinate, error) {
 
 		return coords, nil
 	}
-	return coords, apperror.ErrNoValidCoordinates
+	coords.Accuracy = types.AccuracyUnknown
+	return coords, nil
 }
