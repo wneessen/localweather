@@ -49,6 +49,9 @@ type CurrentWeather struct {
 	WindDirection       sql.NullFloat64 `json:"wind_direction"`
 	RelativeHumidity    sql.NullFloat64 `json:"relative_humidity"`
 	PressureMsl         sql.NullFloat64 `json:"pressure_msl"`
+	TempDayMin          sql.NullFloat64 `json:"temp_day_min"`
+	TempDayMax          sql.NullFloat64 `json:"temp_day_max"`
+	UvIndex             sql.NullFloat64 `json:"uv_index"`
 	IsDay               sql.NullBool    `json:"is_day"`
 	Condition           string          `json:"condition"`
 	Category            string          `json:"category"`

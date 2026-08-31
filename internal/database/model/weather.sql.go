@@ -11,7 +11,7 @@ import (
 )
 
 const currentWeatherByAddressID = `-- name: CurrentWeatherByAddressID :one
-SELECT address_id, timestamp, temperature, apparent_temperature, weather_code, wind_speed, wind_gusts, wind_direction, relative_humidity, pressure_msl, is_day, condition, category, icon, winddir_icon, winddir_text, temp_unit, windspeed_unit, humidity_unit, pressure_unit, winddir_unit, updated_at
+SELECT address_id, timestamp, temperature, apparent_temperature, weather_code, wind_speed, wind_gusts, wind_direction, relative_humidity, pressure_msl, temp_day_min, temp_day_max, uv_index, is_day, condition, category, icon, winddir_icon, winddir_text, temp_unit, windspeed_unit, humidity_unit, pressure_unit, winddir_unit, updated_at
 FROM current_weather
 WHERE address_id = ?
 `
@@ -30,6 +30,9 @@ func (q *Queries) CurrentWeatherByAddressID(ctx context.Context, addressID int64
 		&i.WindDirection,
 		&i.RelativeHumidity,
 		&i.PressureMsl,
+		&i.TempDayMin,
+		&i.TempDayMax,
+		&i.UvIndex,
 		&i.IsDay,
 		&i.Condition,
 		&i.Category,
@@ -84,6 +87,9 @@ INSERT INTO current_weather (address_id,
                              wind_direction,
                              relative_humidity,
                              pressure_msl,
+                             temp_day_min,
+                             temp_day_max,
+                             uv_index,
                              is_day,
                              condition,
                              category,
@@ -117,7 +123,10 @@ VALUES (?1,
         ?19,
         ?20,
         ?21,
-        ?22)
+        ?22,
+        ?23,
+        ?24,
+        ?25)
 ON CONFLICT (address_id) DO UPDATE SET timestamp            = excluded.timestamp,
                                        temperature          = excluded.temperature,
                                        apparent_temperature = excluded.apparent_temperature,
@@ -127,6 +136,9 @@ ON CONFLICT (address_id) DO UPDATE SET timestamp            = excluded.timestamp
                                        wind_direction       = excluded.wind_direction,
                                        relative_humidity    = excluded.relative_humidity,
                                        pressure_msl         = excluded.pressure_msl,
+                                       temp_day_min         = excluded.temp_day_min,
+                                       temp_day_max         = excluded.temp_day_max,
+                                       uv_index             = excluded.uv_index,
                                        is_day               = excluded.is_day,
                                        condition            = excluded.condition,
                                        category             = excluded.category,
@@ -153,6 +165,9 @@ type UpdateCurrentWeatherParams struct {
 	WindDirection       sql.NullFloat64 `json:"wind_direction"`
 	RelativeHumidity    sql.NullFloat64 `json:"relative_humidity"`
 	PressureMsl         sql.NullFloat64 `json:"pressure_msl"`
+	TempDayMin          sql.NullFloat64 `json:"temp_day_min"`
+	TempDayMax          sql.NullFloat64 `json:"temp_day_max"`
+	UvIndex             sql.NullFloat64 `json:"uv_index"`
 	IsDay               sql.NullBool    `json:"is_day"`
 	Condition           string          `json:"condition"`
 	Category            string          `json:"category"`
@@ -179,6 +194,9 @@ func (q *Queries) UpdateCurrentWeather(ctx context.Context, arg UpdateCurrentWea
 		arg.WindDirection,
 		arg.RelativeHumidity,
 		arg.PressureMsl,
+		arg.TempDayMin,
+		arg.TempDayMax,
+		arg.UvIndex,
 		arg.IsDay,
 		arg.Condition,
 		arg.Category,
