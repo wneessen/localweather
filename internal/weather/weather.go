@@ -19,8 +19,10 @@ type Provider interface {
 }
 
 type Data struct {
-	GeneratedAt time.Time
-	Coordinates types.Coordinate
+	GeneratedAt          time.Time
+	Coordinates          types.Coordinate
+	Timezone             string
+	TimezoneAbbreviation string
 
 	Current  Instant
 	Forecast map[DayHour]Instant

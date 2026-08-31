@@ -178,6 +178,8 @@ func (o *OpenMeteo) Fetch(ctx context.Context, coords types.Coordinate) (*weathe
 
 	data.GeneratedAt = time.Now()
 	data.Coordinates = coords
+	data.Timezone = res.Timezone
+	data.TimezoneAbbreviation = res.TimezoneAbbreviation
 	data.Current = weather.Instant{
 		InstantTime:         res.Current.Time.Time,
 		Temperature:         vartype.NewVariable(res.Current.Temperature),

@@ -11,7 +11,7 @@ import (
 )
 
 const currentWeatherByAddressID = `-- name: CurrentWeatherByAddressID :one
-SELECT address_id, timestamp, temperature, apparent_temperature, weather_code, wind_speed, wind_gusts, wind_direction, relative_humidity, pressure_msl, temp_day_min, temp_day_max, uv_index, is_day, condition, category, icon, winddir_icon, winddir_text, temp_unit, windspeed_unit, humidity_unit, pressure_unit, winddir_unit, updated_at
+SELECT address_id, timestamp, temperature, apparent_temperature, weather_code, wind_speed, wind_gusts, wind_direction, relative_humidity, pressure_msl, temp_day_min, temp_day_max, uv_index, is_day, condition, category, icon, winddir_icon, winddir_text, temp_unit, windspeed_unit, humidity_unit, pressure_unit, winddir_unit, timezone, timezone_abbr, updated_at
 FROM current_weather
 WHERE address_id = ?
 `
@@ -44,6 +44,8 @@ func (q *Queries) CurrentWeatherByAddressID(ctx context.Context, addressID int64
 		&i.HumidityUnit,
 		&i.PressureUnit,
 		&i.WinddirUnit,
+		&i.Timezone,
+		&i.TimezoneAbbr,
 		&i.UpdatedAt,
 	)
 	return i, err
@@ -101,6 +103,8 @@ INSERT INTO current_weather (address_id,
                              humidity_unit,
                              pressure_unit,
                              winddir_unit,
+                             timezone,
+                             timezone_abbr,
                              updated_at)
 VALUES (?1,
         ?2,
@@ -126,7 +130,9 @@ VALUES (?1,
         ?22,
         ?23,
         ?24,
-        ?25)
+        ?25,
+        ?26,
+        ?27)
 ON CONFLICT (address_id) DO UPDATE SET timestamp            = excluded.timestamp,
                                        temperature          = excluded.temperature,
                                        apparent_temperature = excluded.apparent_temperature,
@@ -150,6 +156,8 @@ ON CONFLICT (address_id) DO UPDATE SET timestamp            = excluded.timestamp
                                        humidity_unit        = excluded.humidity_unit,
                                        pressure_unit        = excluded.pressure_unit,
                                        winddir_unit         = excluded.winddir_unit,
+                                       timezone             = excluded.timezone,
+                                       timezone_abbr        = excluded.timezone_abbr,
                                        updated_at           = excluded.updated_at
 WHERE excluded.timestamp > current_weather.timestamp
 `
@@ -179,6 +187,8 @@ type UpdateCurrentWeatherParams struct {
 	HumidityUnit        string          `json:"humidity_unit"`
 	PressureUnit        string          `json:"pressure_unit"`
 	WinddirUnit         string          `json:"winddir_unit"`
+	Timezone            string          `json:"timezone"`
+	TimezoneAbbr        sql.NullString  `json:"timezone_abbr"`
 	UpdatedAt           int64           `json:"updated_at_unix"`
 }
 
@@ -208,6 +218,8 @@ func (q *Queries) UpdateCurrentWeather(ctx context.Context, arg UpdateCurrentWea
 		arg.HumidityUnit,
 		arg.PressureUnit,
 		arg.WinddirUnit,
+		arg.Timezone,
+		arg.TimezoneAbbr,
 		arg.UpdatedAt,
 	)
 	return err

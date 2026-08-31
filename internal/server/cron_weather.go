@@ -39,9 +39,11 @@ func (s *Server) cronjobWeatherdataUpdate(ctx context.Context) {
 	}
 
 	currentDB := model.UpdateCurrentWeatherParams{
-		AddressID: location.ID,
-		UpdatedAt: time.Now().UnixMicro(),
-		Timestamp: sql.NullInt64{Int64: data.Current.InstantTime.UnixMicro(), Valid: true},
+		AddressID:    location.ID,
+		UpdatedAt:    time.Now().UnixMicro(),
+		Timestamp:    sql.NullInt64{Int64: data.Current.InstantTime.UnixMicro(), Valid: true},
+		Timezone:     data.Timezone,
+		TimezoneAbbr: sql.NullString{String: data.TimezoneAbbreviation, Valid: data.TimezoneAbbreviation != ""},
 		Temperature: sql.NullFloat64{
 			Float64: data.Current.Temperature.Value(),
 			Valid:   data.Current.Temperature.IsSet(),
