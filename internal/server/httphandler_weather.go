@@ -47,6 +47,7 @@ type weatherResponse struct {
 	Longitude           float64 `json:"longitude"`
 	City                string  `json:"city,omitempty"`
 	Country             string  `json:"country,omitempty"`
+	Timezone            string  `json:"timezone"`
 	LocationProvider    string  `json:"location_provider"`
 	WeatherProvider     string  `json:"weather_provider"`
 }
@@ -90,7 +91,11 @@ func (s *Server) buildWeatherResponse(data model.CurrentWeather, address model.C
 		Longitude:          address.Longitude,
 		DisplayName:        address.DisplayName,
 		WeatherProvider:    s.weather.Name(),
+		Timezone:           data.Timezone,
 		LocationProvider:   address.Provider,
+	}
+	if data.TimezoneAbbr.Valid {
+		resp.Timezone = resp.Timezone + " (" + data.TimezoneAbbr.String + ")"
 	}
 	if data.Temperature.Valid {
 		resp.Temperature = data.Temperature.Float64

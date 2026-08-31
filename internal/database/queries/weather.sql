@@ -55,6 +55,8 @@ INSERT INTO current_weather (address_id,
                              humidity_unit,
                              pressure_unit,
                              winddir_unit,
+                             timezone,
+                             timezone_abbr,
                              updated_at)
 VALUES (:address_id,
         :timestamp,
@@ -80,6 +82,8 @@ VALUES (:address_id,
         :humidity_unit,
         :pressure_unit,
         :winddir_unit,
+        :timezone,
+        :timezone_abbr,
         :updated_at)
 ON CONFLICT (address_id) DO UPDATE SET timestamp            = excluded.timestamp,
                                        temperature          = excluded.temperature,
@@ -104,6 +108,8 @@ ON CONFLICT (address_id) DO UPDATE SET timestamp            = excluded.timestamp
                                        humidity_unit        = excluded.humidity_unit,
                                        pressure_unit        = excluded.pressure_unit,
                                        winddir_unit         = excluded.winddir_unit,
+                                       timezone             = excluded.timezone,
+                                       timezone_abbr        = excluded.timezone_abbr,
                                        updated_at           = excluded.updated_at
 WHERE excluded.timestamp > current_weather.timestamp;
 

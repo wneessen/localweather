@@ -25,6 +25,8 @@ CREATE TABLE current_weather
     humidity_unit        TEXT    NOT NULL,
     pressure_unit        TEXT    NOT NULL,
     winddir_unit         TEXT    NOT NULL,
+    timezone             TEXT    NOT NULL,
+    timezone_abbr        TEXT,
     updated_at           INTEGER NOT NULL
 );
 CREATE UNIQUE INDEX idx_current_weather_address ON current_weather (address_id);
