@@ -9,7 +9,9 @@ const (
 	AccuracyRegion  Accuracy = 100000
 	AccuracyCity    Accuracy = 15000
 	AccuracyZip     Accuracy = 3000
+	AccuracyStreet  Accuracy = 500
 	AccuracyExact   Accuracy = 5
+	AccuracyManual  Accuracy = 1
 	AccuracyUnknown Accuracy = 1000000
 )
 

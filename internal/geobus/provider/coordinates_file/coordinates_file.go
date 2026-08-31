@@ -23,7 +23,6 @@ import (
 
 const (
 	name     = "coordinates_file"
-	accuracy = types.AccuracyExact
 	ttlTime  = time.Hour * 12
 	pollTime = time.Minute * 5
 )
@@ -113,7 +112,7 @@ func (p *Provider) readFile(_ context.Context) (types.Coordinate, error) {
 				continue
 			}
 		}
-		coords.Accuracy = accuracy
+		coords.Accuracy = types.AccuracyManual
 
 		return coords, nil
 	}

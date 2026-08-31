@@ -142,15 +142,27 @@ func TestResult_BetterThan(t *testing.T) {
 		better bool
 	}{
 		{
-			name:   "same result, no difference",
-			new:    Result{Key: "test", Coordinates: types.Coordinate{Latitude: 1, Longitude: 1, Accuracy: 1}},
-			prev:   Result{Key: "test", Coordinates: types.Coordinate{Latitude: 1, Longitude: 1, Accuracy: 1}},
+			name: "same result, no difference",
+			new: Result{Key: "test", Coordinates: types.Coordinate{
+				Latitude: 1, Longitude: 1,
+				Accuracy: types.AccuracyManual,
+			}},
+			prev: Result{Key: "test", Coordinates: types.Coordinate{
+				Latitude: 1, Longitude: 1,
+				Accuracy: types.AccuracyManual,
+			}},
 			better: false,
 		},
 		{
-			name:   "previous result had no key",
-			new:    Result{Key: "test", Coordinates: types.Coordinate{Latitude: 1, Longitude: 1, Accuracy: 1}},
-			prev:   Result{Coordinates: types.Coordinate{Latitude: 1, Longitude: 1, Accuracy: 1}},
+			name: "previous result had no key",
+			new: Result{Key: "test", Coordinates: types.Coordinate{
+				Latitude: 1, Longitude: 1,
+				Accuracy: types.AccuracyManual,
+			}},
+			prev: Result{Coordinates: types.Coordinate{
+				Latitude: 1, Longitude: 1,
+				Accuracy: types.AccuracyManual,
+			}},
 			better: true,
 		},
 		{
@@ -162,7 +174,7 @@ func TestResult_BetterThan(t *testing.T) {
 		{
 			name:   "new result is more accurate",
 			new:    Result{Key: "test", Coordinates: types.Coordinate{Accuracy: types.AccuracyZip}},
-			prev:   Result{Key: "test", Coordinates: types.Coordinate{Accuracy: types.AccuracyCity}},
+			prev:   Result{Key: "test", Coordinates: types.Coordinate{Accuracy: types.AccuracyStreet}},
 			better: true,
 		},
 		{
