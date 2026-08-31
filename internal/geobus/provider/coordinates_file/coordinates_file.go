@@ -24,7 +24,7 @@ import (
 const (
 	name     = "coordinates_file"
 	ttlTime  = time.Hour * 12
-	pollTime = time.Minute * 5
+	pollTime = time.Minute
 )
 
 // Provider reads geolocation data from a file and emits updates via a stream.

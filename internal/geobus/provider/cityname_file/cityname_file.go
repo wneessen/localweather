@@ -24,7 +24,7 @@ import (
 const (
 	name     = "cityname_file"
 	ttlTime  = time.Hour * 12
-	pollTime = time.Minute * 5
+	pollTime = time.Minute
 )
 
 var ErrNoCoordinates = fmt.Errorf("no valid city name found in cityname file")
@@ -113,5 +113,6 @@ func (p *Provider) readFile(ctx context.Context) (types.Coordinate, error) {
 		coords.Accuracy = types.AccuracyManual
 		return coords, nil
 	}
-	return coords, ErrNoCoordinates
+	coords.Accuracy = types.AccuracyUnknown
+	return coords, nil
 }
