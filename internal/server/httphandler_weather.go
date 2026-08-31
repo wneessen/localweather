@@ -14,42 +14,46 @@ import (
 )
 
 type weatherResponse struct {
-	Temperature         float64 `json:"temperature,omitempty"`
-	ApparentTemperature float64 `json:"apparent_temperature,omitempty"`
-	WeatherCode         int     `json:"wmo_weather_code,omitempty"`
-	WindSpeed           float64 `json:"wind_speed,omitempty"`
-	WindGusts           float64 `json:"wind_gusts,omitempty"`
-	WindDirection       float64 `json:"wind_direction,omitempty"`
-	RelativeHumidity    float64 `json:"relative_humidity,omitempty"`
-	PressureMSL         float64 `json:"pressure_msl,omitempty"`
-	TempDayMin          float64 `json:"temp_day_min,omitempty"`
-	TempDayMax          float64 `json:"temp_day_max,omitempty"`
-	UVIndex             float64 `json:"uv_index,omitempty"`
-	Condition           string  `json:"condition,omitempty"`
-	Category            string  `json:"category,omitempty"`
-	Icon                string  `json:"icon,omitempty"`
-	IconURL             string  `json:"icon_url,omitempty"`
-	WinddirIcon         string  `json:"winddir_icon"`
-	WinddirText         string  `json:"winddir_text"`
-	IsDay               bool    `json:"is_day,omitempty"`
-	TempUnit            string  `json:"temperature_unit"`
-	WindDirUnit         string  `json:"wind_direction_unit"`
-	HumidityUnit        string  `json:"humidity_unit"`
-	PressureUnit        string  `json:"pressure_unit"`
-	WindspeedUnit       string  `json:"wind_speed_unit"`
-	Timestamp           int64   `json:"timestamp_unix,omitempty"`
-	TimestampString     string  `json:"timestamp_local,omitempty"`
-	TimestampStringUTC  string  `json:"timestamp_utc,omitempty"`
-	UpdatedAtString     string  `json:"updated_at_local"`
-	UpdatedAtStringUTC  string  `json:"updated_at_utc"`
-	DisplayName         string  `json:"display_name"`
-	Latitude            float64 `json:"latitude"`
-	Longitude           float64 `json:"longitude"`
-	City                string  `json:"city,omitempty"`
-	Country             string  `json:"country,omitempty"`
-	Timezone            string  `json:"timezone"`
-	LocationProvider    string  `json:"location_provider"`
-	WeatherProvider     string  `json:"weather_provider"`
+	Temperature         float64   `json:"temperature,omitempty"`
+	ApparentTemperature float64   `json:"apparent_temperature,omitempty"`
+	WeatherCode         int       `json:"wmo_weather_code,omitempty"`
+	WindSpeed           float64   `json:"wind_speed,omitempty"`
+	WindGusts           float64   `json:"wind_gusts,omitempty"`
+	WindDirection       float64   `json:"wind_direction,omitempty"`
+	RelativeHumidity    float64   `json:"relative_humidity,omitempty"`
+	PressureMSL         float64   `json:"pressure_msl,omitempty"`
+	TempDayMin          float64   `json:"temp_day_min,omitempty"`
+	TempDayMax          float64   `json:"temp_day_max,omitempty"`
+	UVIndex             float64   `json:"uv_index,omitempty"`
+	Condition           string    `json:"condition,omitempty"`
+	Category            string    `json:"category,omitempty"`
+	Icon                string    `json:"icon,omitempty"`
+	IconURL             string    `json:"icon_url,omitempty"`
+	WinddirIcon         string    `json:"winddir_icon"`
+	WinddirText         string    `json:"winddir_text"`
+	IsDay               bool      `json:"is_day,omitempty"`
+	Sunrise             time.Time `json:"sunrise"`
+	Sunset              time.Time `json:"sunset"`
+	SunriseUTC          time.Time `json:"sunrise_utc"`
+	SunsetUTC           time.Time `json:"sunset_utc"`
+	TempUnit            string    `json:"temperature_unit"`
+	WindDirUnit         string    `json:"wind_direction_unit"`
+	HumidityUnit        string    `json:"humidity_unit"`
+	PressureUnit        string    `json:"pressure_unit"`
+	WindspeedUnit       string    `json:"wind_speed_unit"`
+	Timestamp           int64     `json:"timestamp_unix,omitempty"`
+	TimestampString     string    `json:"timestamp_local,omitempty"`
+	TimestampStringUTC  string    `json:"timestamp_utc,omitempty"`
+	UpdatedAtString     string    `json:"updated_at_local"`
+	UpdatedAtStringUTC  string    `json:"updated_at_utc"`
+	DisplayName         string    `json:"display_name"`
+	Latitude            float64   `json:"latitude"`
+	Longitude           float64   `json:"longitude"`
+	City                string    `json:"city,omitempty"`
+	Country             string    `json:"country,omitempty"`
+	Timezone            string    `json:"timezone"`
+	LocationProvider    string    `json:"location_provider"`
+	WeatherProvider     string    `json:"weather_provider"`
 }
 
 func (s *Server) handlerWeatherCurrentGet(w http.ResponseWriter, r *http.Request) {
@@ -93,6 +97,10 @@ func (s *Server) buildWeatherResponse(data model.CurrentWeather, address model.C
 		WeatherProvider:    s.weather.Name(),
 		Timezone:           data.Timezone,
 		LocationProvider:   address.Provider,
+		SunriseUTC:         time.UnixMicro(data.SunriseUtc).UTC(),
+		SunsetUTC:          time.UnixMicro(data.SunsetUtc).UTC(),
+		Sunrise:            time.UnixMicro(data.SunriseUtc).In(time.Local),
+		Sunset:             time.UnixMicro(data.SunsetUtc).In(time.Local),
 	}
 	if data.TimezoneAbbr.Valid {
 		resp.Timezone = resp.Timezone + " (" + data.TimezoneAbbr.String + ")"

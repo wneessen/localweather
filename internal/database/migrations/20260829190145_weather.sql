@@ -15,6 +15,8 @@ CREATE TABLE current_weather
     temp_day_max         REAL,
     uv_index             REAL,
     is_day               BOOLEAN,
+    sunrise_utc          INTEGER NOT NULL,
+    sunset_utc           INTEGER NOT NULL,
     condition            TEXT    NOT NULL,
     category             TEXT    NOT NULL,
     icon                 TEXT    NOT NULL,

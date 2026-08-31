@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/nathan-osman/go-sunrise"
+
 	"github.com/wneessen/localweather/internal/apperror"
 	"github.com/wneessen/localweather/internal/database/model"
 	"github.com/wneessen/localweather/internal/types"
@@ -38,12 +40,16 @@ func (s *Server) cronjobWeatherdataUpdate(ctx context.Context) {
 		return
 	}
 
+	sunriseTimeUTC, sunsetTimeUTC := sunrise.SunriseSunset(location.Latitude, location.Longitude, now.Year(),
+		now.Month(), now.Day())
 	currentDB := model.UpdateCurrentWeatherParams{
 		AddressID:    location.ID,
-		UpdatedAt:    time.Now().UnixMicro(),
 		Timestamp:    sql.NullInt64{Int64: data.Current.InstantTime.UnixMicro(), Valid: true},
 		Timezone:     data.Timezone,
 		TimezoneAbbr: sql.NullString{String: data.TimezoneAbbreviation, Valid: data.TimezoneAbbreviation != ""},
+		UpdatedAt:    now.UnixMicro(),
+		SunriseUtc:   sunriseTimeUTC.UTC().UnixMicro(),
+		SunsetUtc:    sunsetTimeUTC.UTC().UnixMicro(),
 		Temperature: sql.NullFloat64{
 			Float64: data.Current.Temperature.Value(),
 			Valid:   data.Current.Temperature.IsSet(),

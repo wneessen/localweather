@@ -53,6 +53,8 @@ type CurrentWeather struct {
 	TempDayMax          sql.NullFloat64 `json:"temp_day_max"`
 	UvIndex             sql.NullFloat64 `json:"uv_index"`
 	IsDay               sql.NullBool    `json:"is_day"`
+	SunriseUtc          int64           `json:"sunrise_utc"`
+	SunsetUtc           int64           `json:"sunset_utc"`
 	Condition           string          `json:"condition"`
 	Category            string          `json:"category"`
 	Icon                string          `json:"icon"`

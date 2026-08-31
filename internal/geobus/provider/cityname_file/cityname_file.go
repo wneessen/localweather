@@ -110,7 +110,7 @@ func (p *Provider) readFile(ctx context.Context) (types.Coordinate, error) {
 		if err != nil {
 			return coords, fmt.Errorf("failed to look up city %q: %w", line, err)
 		}
-		coords.Accuracy = types.AccuracyCity
+		coords.Accuracy = types.AccuracyManual
 		return coords, nil
 	}
 	return coords, ErrNoCoordinates
