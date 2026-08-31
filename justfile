@@ -16,6 +16,8 @@ export LOCALWEATHER_GEOCODER_PROVIDER := "opencage"
 export LOCALWEATHER_DATABASE_PATH := db_path
 export LOCALWEATHER_GEOBUS_COORDINATES_FILE := coordinates_path
 export LOCALWEATHER_GEOBUS_CITYNAME_FILE := cityname_path
+export LOCALWEATHER_GEOBUS_DISABLE_GEOAPI := "true"
+export LOCALWEATHER_GEOBUS_DISABLE_GEOIP := "true"
 #export LOCALWEATHER_GEOCODER_PROVIDER := "geocode-earth"
 [private]
 default:
