@@ -30,6 +30,7 @@ type weatherResponse struct {
 	Location             responseAddress `json:"location"`
 	LocationProvider     string          `json:"location_provider"`
 	WeatherProvider      string          `json:"weather_provider"`
+	Locale               string          `json:"locale"`
 }
 
 type responseData struct {
@@ -114,6 +115,7 @@ func (s *Server) buildWeatherResponse(data model.CurrentWeather, address model.C
 		LocationProvider: address.Provider,
 		Timestamp:        data.Timestamp.Int64,
 		WeatherProvider:  s.weather.Name(),
+		Locale:           s.t.Language().Parent().String(),
 	}
 
 	if data.WeatherCode.Valid {
