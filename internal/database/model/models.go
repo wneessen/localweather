@@ -67,5 +67,6 @@ type CurrentWeather struct {
 	WinddirUnit         string          `json:"winddir_unit"`
 	Timezone            string          `json:"timezone"`
 	TimezoneAbbr        sql.NullString  `json:"timezone_abbr"`
+	BaseUnit            string          `json:"base_unit"`
 	UpdatedAt           int64           `json:"updated_at_unix"`
 }

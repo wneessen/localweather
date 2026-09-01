@@ -29,9 +29,10 @@ CREATE TABLE current_weather
     winddir_unit         TEXT    NOT NULL,
     timezone             TEXT    NOT NULL,
     timezone_abbr        TEXT,
+    base_unit            TEXT    NOT NULL,
     updated_at           INTEGER NOT NULL
 );
-CREATE UNIQUE INDEX idx_current_weather_address ON current_weather (address_id);
+CREATE UNIQUE INDEX idx_current_weather_address_unit ON current_weather (address_id, base_unit);
 
 
 -- +goose Down

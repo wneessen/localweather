@@ -3,6 +3,7 @@ package server
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -14,46 +15,59 @@ import (
 )
 
 type weatherResponse struct {
-	Temperature         float64   `json:"temperature,omitempty"`
-	ApparentTemperature float64   `json:"apparent_temperature,omitempty"`
-	WeatherCode         int       `json:"wmo_weather_code,omitempty"`
-	WindSpeed           float64   `json:"wind_speed,omitempty"`
-	WindGusts           float64   `json:"wind_gusts,omitempty"`
-	WindDirection       float64   `json:"wind_direction,omitempty"`
-	RelativeHumidity    float64   `json:"relative_humidity,omitempty"`
-	PressureMSL         float64   `json:"pressure_msl,omitempty"`
-	TempDayMin          float64   `json:"temp_day_min,omitempty"`
-	TempDayMax          float64   `json:"temp_day_max,omitempty"`
-	UVIndex             float64   `json:"uv_index,omitempty"`
-	Condition           string    `json:"condition,omitempty"`
-	Category            string    `json:"category,omitempty"`
-	Icon                string    `json:"icon,omitempty"`
-	IconURL             string    `json:"icon_url,omitempty"`
-	WinddirIcon         string    `json:"winddir_icon"`
-	WinddirText         string    `json:"winddir_text"`
-	IsDay               bool      `json:"is_day,omitempty"`
-	Sunrise             time.Time `json:"sunrise"`
-	Sunset              time.Time `json:"sunset"`
-	SunriseUTC          time.Time `json:"sunrise_utc"`
-	SunsetUTC           time.Time `json:"sunset_utc"`
-	TempUnit            string    `json:"temperature_unit"`
-	WindDirUnit         string    `json:"wind_direction_unit"`
-	HumidityUnit        string    `json:"humidity_unit"`
-	PressureUnit        string    `json:"pressure_unit"`
-	WindspeedUnit       string    `json:"wind_speed_unit"`
-	Timestamp           int64     `json:"timestamp_unix,omitempty"`
-	TimestampString     string    `json:"timestamp_local,omitempty"`
-	TimestampStringUTC  string    `json:"timestamp_utc,omitempty"`
-	UpdatedAtString     string    `json:"updated_at_local"`
-	UpdatedAtStringUTC  string    `json:"updated_at_utc"`
-	DisplayName         string    `json:"display_name"`
-	Latitude            float64   `json:"latitude"`
-	Longitude           float64   `json:"longitude"`
-	City                string    `json:"city,omitempty"`
-	Country             string    `json:"country,omitempty"`
-	Timezone            string    `json:"timezone"`
-	LocationProvider    string    `json:"location_provider"`
-	WeatherProvider     string    `json:"weather_provider"`
+	WeatherDataRAW       responseData    `json:"weather_data_raw"`
+	WeatherDataLocalized responseData    `json:"weather_data_localized"`
+	WeatherCode          int             `json:"wmo_weather_code,omitempty"`
+	Condition            string          `json:"condition,omitempty"`
+	Category             string          `json:"category,omitempty"`
+	Icon                 string          `json:"icon,omitempty"`
+	IconURL              string          `json:"icon_url,omitempty"`
+	WinddirIcon          string          `json:"winddir_icon"`
+	WinddirText          string          `json:"winddir_text"`
+	IsDay                bool            `json:"is_day,omitempty"`
+	Timestamp            int64           `json:"timestamp_unix,omitempty"`
+	Units                responseUnits   `json:"units"`
+	Location             responseAddress `json:"location"`
+	LocationProvider     string          `json:"location_provider"`
+	WeatherProvider      string          `json:"weather_provider"`
+}
+
+type responseData struct {
+	Temperature         string `json:"temperature,omitempty"`
+	ApparentTemperature string `json:"apparent_temperature,omitempty"`
+	WindSpeed           string `json:"wind_speed,omitempty"`
+	WindGusts           string `json:"wind_gusts,omitempty"`
+	WindDirection       string `json:"wind_direction,omitempty"`
+	RelativeHumidity    string `json:"relative_humidity,omitempty"`
+	PressureMSL         string `json:"pressure_msl,omitempty"`
+	TempDayMin          string `json:"temp_day_min,omitempty"`
+	TempDayMax          string `json:"temp_day_max,omitempty"`
+	UVIndex             string `json:"uv_index,omitempty"`
+	Sunrise             string `json:"sunrise"`
+	Sunset              string `json:"sunset"`
+	SunriseUTC          string `json:"sunrise_utc"`
+	SunsetUTC           string `json:"sunset_utc"`
+	TimestampString     string `json:"timestamp_local,omitempty"`
+	TimestampStringUTC  string `json:"timestamp_utc,omitempty"`
+	UpdatedAtString     string `json:"updated_at_local"`
+	UpdatedAtStringUTC  string `json:"updated_at_utc"`
+}
+
+type responseUnits struct {
+	TempUnit      string `json:"temperature_unit"`
+	WindDirUnit   string `json:"wind_direction_unit"`
+	HumidityUnit  string `json:"humidity_unit"`
+	PressureUnit  string `json:"pressure_unit"`
+	WindspeedUnit string `json:"wind_speed_unit"`
+}
+
+type responseAddress struct {
+	DisplayName string  `json:"display_name"`
+	Latitude    float64 `json:"latitude"`
+	Longitude   float64 `json:"longitude"`
+	City        string  `json:"city,omitempty"`
+	Country     string  `json:"country,omitempty"`
+	Timezone    string  `json:"timezone"`
 }
 
 func (s *Server) handlerWeatherCurrentGet(w http.ResponseWriter, r *http.Request) {
@@ -68,7 +82,12 @@ func (s *Server) handlerWeatherCurrentGet(w http.ResponseWriter, r *http.Request
 		}
 		return
 	}
-	data, err := s.queries.CurrentWeatherByAddressID(r.Context(), address.ID)
+
+	query := model.CurrentWeatherByAddressIDAndBaseUnitParams{
+		AddressID: address.ID,
+		BaseUnit:  s.conf.Units,
+	}
+	data, err := s.queries.CurrentWeatherByAddressIDAndBaseUnit(r.Context(), query)
 	if err != nil {
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
@@ -89,83 +108,111 @@ func (s *Server) handlerWeatherCurrentGet(w http.ResponseWriter, r *http.Request
 
 func (s *Server) buildWeatherResponse(data model.CurrentWeather, address model.CurrentAddressRow) *weatherResponse {
 	resp := &weatherResponse{
-		UpdatedAtString:    time.UnixMicro(data.UpdatedAt).Format(time.RFC3339),
-		UpdatedAtStringUTC: time.UnixMicro(data.UpdatedAt).UTC().Format(time.RFC3339),
-		Latitude:           address.Latitude,
-		Longitude:          address.Longitude,
-		DisplayName:        address.DisplayName,
-		WeatherProvider:    s.weather.Name(),
-		Timezone:           data.Timezone,
-		LocationProvider:   address.Provider,
-		SunriseUTC:         time.UnixMicro(data.SunriseUtc).UTC(),
-		SunsetUTC:          time.UnixMicro(data.SunsetUtc).UTC(),
-		Sunrise:            time.UnixMicro(data.SunriseUtc).In(time.Local),
-		Sunset:             time.UnixMicro(data.SunsetUtc).In(time.Local),
+		Condition:        data.Condition,
+		Category:         data.Category,
+		Icon:             data.Icon,
+		LocationProvider: address.Provider,
+		Timestamp:        data.Timestamp.Int64,
+		WeatherProvider:  s.weather.Name(),
 	}
-	if data.TimezoneAbbr.Valid {
-		resp.Timezone = resp.Timezone + " (" + data.TimezoneAbbr.String + ")"
-	}
-	if data.Temperature.Valid {
-		resp.Temperature = data.Temperature.Float64
-		resp.TempUnit = data.TempUnit
-	}
-	if data.ApparentTemperature.Valid {
-		resp.ApparentTemperature = data.ApparentTemperature.Float64
-		resp.TempUnit = data.TempUnit
-	}
-	if data.TempDayMin.Valid {
-		resp.TempDayMin = data.TempDayMin.Float64
-		resp.TempUnit = data.TempUnit
-	}
-	if data.TempDayMax.Valid {
-		resp.TempDayMax = data.TempDayMax.Float64
-		resp.TempUnit = data.TempUnit
-	}
-	if data.UvIndex.Valid {
-		resp.UVIndex = data.UvIndex.Float64
-	}
+
 	if data.WeatherCode.Valid {
 		resp.WeatherCode = int(data.WeatherCode.Int64)
-		resp.Condition = data.Condition
-		resp.Icon = data.Icon
-		resp.Category = data.Category
 		resp.IconURL = s.fmt.WeatherSymbolURL(resp.WeatherCode, data.IsDay.Valid && data.IsDay.Bool)
 	}
-	if data.WindSpeed.Valid {
-		resp.WindSpeed = data.WindSpeed.Float64
-		resp.WindspeedUnit = data.WindspeedUnit
-	}
-	if data.WindGusts.Valid {
-		resp.WindGusts = data.WindGusts.Float64
-		resp.WindspeedUnit = data.WindspeedUnit
-	}
 	if data.WindDirection.Valid {
-		resp.WindDirection = data.WindDirection.Float64
 		resp.WinddirIcon = data.WinddirIcon
 		resp.WinddirText = data.WinddirText
-		resp.WindDirUnit = data.WinddirUnit
-	}
-	if data.RelativeHumidity.Valid {
-		resp.RelativeHumidity = data.RelativeHumidity.Float64
-		resp.HumidityUnit = data.HumidityUnit
-	}
-	if data.PressureMsl.Valid {
-		resp.PressureMSL = data.PressureMsl.Float64
-		resp.PressureUnit = data.PressureUnit
 	}
 	if data.IsDay.Valid {
 		resp.IsDay = data.IsDay.Bool
 	}
+
+	s.buildWeatherResponseUnits(data, resp)
+	s.buildWeatherRaw(data, resp)
+	s.buildWeatherLocation(data, address, resp)
+
+	return resp
+}
+
+func (s *Server) buildWeatherRaw(data model.CurrentWeather, weather *weatherResponse) {
+	resp := responseData{
+		SunriseUTC:         time.UnixMicro(data.SunriseUtc).UTC().Format(time.RFC3339),
+		SunsetUTC:          time.UnixMicro(data.SunsetUtc).UTC().Format(time.RFC3339),
+		Sunrise:            time.UnixMicro(data.SunriseUtc).In(time.Local).Format(time.RFC3339),
+		Sunset:             time.UnixMicro(data.SunsetUtc).In(time.Local).Format(time.RFC3339),
+		UpdatedAtString:    time.UnixMicro(data.UpdatedAt).Format(time.RFC3339),
+		UpdatedAtStringUTC: time.UnixMicro(data.UpdatedAt).UTC().Format(time.RFC3339),
+	}
+	loc := responseData{
+		SunriseUTC:         s.fmt.LocalizeTime(time.UnixMicro(data.SunriseUtc).UTC()),
+		SunsetUTC:          s.fmt.LocalizeTime(time.UnixMicro(data.SunsetUtc).UTC()),
+		Sunrise:            s.fmt.LocalizeTime(time.UnixMicro(data.SunriseUtc).In(time.Local)),
+		Sunset:             s.fmt.LocalizeTime(time.UnixMicro(data.SunsetUtc).In(time.Local)),
+		UpdatedAtString:    s.fmt.LocalizeTime(time.UnixMicro(data.UpdatedAt)),
+		UpdatedAtStringUTC: s.fmt.LocalizeTime(time.UnixMicro(data.UpdatedAt).UTC()),
+	}
+
 	if data.Timestamp.Valid {
-		resp.Timestamp = data.Timestamp.Int64
 		resp.TimestampString = time.UnixMicro(data.Timestamp.Int64).Format(time.RFC3339)
 		resp.TimestampStringUTC = time.UnixMicro(data.Timestamp.Int64).UTC().Format(time.RFC3339)
 	}
+
+	floats := []struct {
+		src    sql.NullFloat64
+		dst    *string
+		locdst *string
+	}{
+		{data.Temperature, &resp.Temperature, &loc.Temperature},
+		{data.ApparentTemperature, &resp.ApparentTemperature, &loc.ApparentTemperature},
+		{data.TempDayMin, &resp.TempDayMin, &loc.TempDayMin},
+		{data.TempDayMax, &resp.TempDayMax, &loc.TempDayMax},
+		{data.UvIndex, &resp.UVIndex, &loc.UVIndex},
+		{data.WindDirection, &resp.WindDirection, &loc.WindDirection},
+		{data.WindSpeed, &resp.WindSpeed, &loc.WindSpeed},
+		{data.WindGusts, &resp.WindGusts, &loc.WindGusts},
+		{data.RelativeHumidity, &resp.RelativeHumidity, &loc.RelativeHumidity},
+		{data.PressureMsl, &resp.PressureMSL, &loc.PressureMSL},
+	}
+	for _, entry := range floats {
+		if entry.src.Valid {
+			*entry.dst = fmt.Sprintf("%.1f", entry.src.Float64)
+			*entry.locdst = s.fmt.Humanize(entry.src.Float64)
+		}
+	}
+
+	weather.WeatherDataRAW = resp
+	weather.WeatherDataLocalized = loc
+}
+
+func (s *Server) buildWeatherResponseUnits(data model.CurrentWeather, weather *weatherResponse) {
+	units := responseUnits{
+		TempUnit:      data.TempUnit,
+		WindspeedUnit: data.WindspeedUnit,
+		HumidityUnit:  data.HumidityUnit,
+		PressureUnit:  data.PressureUnit,
+		WindDirUnit:   data.WinddirUnit,
+	}
+
+	weather.Units = units
+}
+
+func (s *Server) buildWeatherLocation(data model.CurrentWeather, address model.CurrentAddressRow, weather *weatherResponse) {
+	location := responseAddress{
+		DisplayName: address.DisplayName,
+		Latitude:    address.Latitude,
+		Longitude:   address.Longitude,
+		Timezone:    data.Timezone,
+	}
 	if address.City.Valid {
-		resp.City = address.City.String
+		location.City = address.City.String
 	}
 	if address.Country.Valid {
-		resp.Country = address.Country.String
+		location.Country = address.Country.String
 	}
-	return resp
+	if data.TimezoneAbbr.Valid {
+		location.Timezone = location.Timezone + " (" + data.TimezoneAbbr.String + ")"
+	}
+
+	weather.Location = location
 }
