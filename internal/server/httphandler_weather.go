@@ -108,6 +108,7 @@ func (s *Server) handlerWeatherCurrentGet(w http.ResponseWriter, r *http.Request
 }
 
 func (s *Server) buildWeatherResponse(data model.CurrentWeather, address model.CurrentAddressRow) *weatherResponse {
+	lang, _ := s.t.Language().Base()
 	resp := &weatherResponse{
 		Condition:        data.Condition,
 		Category:         data.Category,
@@ -115,7 +116,7 @@ func (s *Server) buildWeatherResponse(data model.CurrentWeather, address model.C
 		LocationProvider: address.Provider,
 		Timestamp:        data.Timestamp.Int64,
 		WeatherProvider:  s.weather.Name(),
-		Locale:           s.t.Language().Parent().String(),
+		Locale:           lang.String(),
 	}
 
 	if data.WeatherCode.Valid {
