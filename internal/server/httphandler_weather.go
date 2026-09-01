@@ -54,11 +54,11 @@ type responseData struct {
 }
 
 type responseUnits struct {
-	TempUnit      string `json:"temperature_unit"`
-	WindDirUnit   string `json:"wind_direction_unit"`
-	HumidityUnit  string `json:"humidity_unit"`
-	PressureUnit  string `json:"pressure_unit"`
-	WindspeedUnit string `json:"wind_speed_unit"`
+	TempUnit      string `json:"temperature"`
+	WindDirUnit   string `json:"wind_direction"`
+	HumidityUnit  string `json:"humidity"`
+	PressureUnit  string `json:"pressure"`
+	WindspeedUnit string `json:"wind_speed"`
 }
 
 type responseAddress struct {
@@ -152,10 +152,11 @@ func (s *Server) buildWeatherRaw(data model.CurrentWeather, weather *weatherResp
 		UpdatedAtString:    s.fmt.LocalizeTime(time.UnixMicro(data.UpdatedAt)),
 		UpdatedAtStringUTC: s.fmt.LocalizeTime(time.UnixMicro(data.UpdatedAt).UTC()),
 	}
-
 	if data.Timestamp.Valid {
 		resp.TimestampString = time.UnixMicro(data.Timestamp.Int64).Format(time.RFC3339)
 		resp.TimestampStringUTC = time.UnixMicro(data.Timestamp.Int64).UTC().Format(time.RFC3339)
+		loc.TimestampString = s.fmt.LocalizeTime(time.UnixMicro(data.Timestamp.Int64))
+		loc.TimestampStringUTC = s.fmt.LocalizeTime(time.UnixMicro(data.Timestamp.Int64).UTC())
 	}
 
 	floats := []struct {
