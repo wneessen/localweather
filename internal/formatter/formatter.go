@@ -46,25 +46,32 @@ func New(conf *config.Config, loc *spreak.Localizer) (*Formatter, error) {
 	return formatter, nil
 }
 
-// WeatherCategory categorizes a weather code into general weather conditions such as clear, cloudy, rain, snow, etc.
+// WeatherCategory categorizes a WMO 4677 present-weather code (ww, 00-99) into
+// general weather conditions such as clear, cloudy, rain, snow, etc.
 func (f *Formatter) WeatherCategory(code int) string {
 	switch code {
 	case 0, 1:
 		return "clear"
-	case 2, 3:
+	case 2, 3, 14:
 		return "cloudy"
-	case 45, 48:
+	case 4, 5:
+		return "haze"
+	case 6, 7, 8, 9, 30, 31, 32, 33, 34, 35:
+		return "dust"
+	case 10, 11, 12, 28, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49:
 		return "fog"
-	case 51, 53, 55,
-		56, 57,
-		61, 63, 65,
-		66, 67,
-		80, 81, 82:
+	case 18, 19:
+		return "wind"
+	case 15, 16,
+		20, 21, 24, 25, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 80, 81, 82:
 		return "rain"
-	case 71, 73, 75, 77, 85, 86:
+	case 22, 23, 26, 36, 37, 38, 39, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 83, 84, 85, 86:
 		return "snow"
-	case 95, 96, 99:
+	case 27, 87, 88, 89, 90:
+		return "hail"
+	case 13, 17, 29, 91, 92, 93, 94, 95, 96, 97, 98, 99:
 		return "thunderstorm"
+
 	default:
 		return ""
 	}

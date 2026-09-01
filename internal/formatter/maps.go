@@ -23,150 +23,206 @@ var MoonPhaseIcon = map[string]string{
 
 // WMOWeatherCodes maps WMO weather code integers to their descriptions
 var WMOWeatherCodes = map[int]localize.MsgID{
-	0:  "Clear sky",
+	0:  "Clear",
 	1:  "Mainly clear",
 	2:  "Partly cloudy",
 	3:  "Overcast",
+	4:  "Smoke",
+	5:  "Haze",
+	6:  "Dust",
+	7:  "Blowing dust",
+	8:  "Dust whirls",
+	9:  "Duststorm",
+	10: "Mist",
+	11: "Fog patches",
+	12: "Shallow fog",
+	13: "Lightning",
+	14: "Virga",
+	15: "Distant rain",
+	16: "Nearby rain",
+	17: "Thunderstorm",
+	18: "Squalls",
+	19: "Funnel cloud",
+	20: "Recent drizzle",
+	21: "Recent rain",
+	22: "Recent snow",
+	23: "Recent sleet",
+	24: "Recent freezing rain",
+	25: "Recent showers",
+	26: "Recent snow showers",
+	27: "Recent hail",
+	30: "Duststorm easing",
+	31: "Duststorm",
+	32: "Duststorm building",
+	33: "Severe duststorm easing",
+	34: "Severe duststorm",
+	35: "Severe duststorm building",
+	36: "Blowing snow",
+	37: "Heavy blowing snow",
+	38: "Blowing snow",
+	39: "Heavy blowing snow",
+	40: "Distant fog",
+	41: "Fog patches",
+	42: "Fog clearing",
+	43: "Fog clearing",
+	44: "Fog",
 	45: "Fog",
-	48: "Depositing rime fog",
+	46: "Fog thickening",
+	47: "Fog thickening",
+	48: "Rime fog",
+	49: "Rime fog",
+	50: "Light drizzle",
 	51: "Light drizzle",
-	53: "Moderate drizzle",
-	55: "Dense drizzle",
-	56: "Light freezing drizzle",
-	57: "Dense freezing drizzle",
-	61: "Slight rain",
-	63: "Moderate rain",
+	52: "Drizzle",
+	53: "Drizzle",
+	54: "Heavy drizzle",
+	55: "Heavy drizzle",
+	56: "Freezing drizzle",
+	57: "Freezing drizzle",
+	58: "Drizzle and rain",
+	59: "Drizzle and rain",
+	60: "Light rain",
+	61: "Light rain",
+	62: "Rain",
+	63: "Rain",
+	64: "Heavy rain",
 	65: "Heavy rain",
-	66: "Light freezing rain",
-	67: "Heavy freezing rain",
-	71: "Slight snow fall",
-	73: "Moderate snow fall",
-	75: "Heavy snow fall",
+	66: "Freezing rain",
+	67: "Freezing rain",
+	68: "Sleet",
+	69: "Heavy sleet",
+	70: "Light snow",
+	71: "Light snow",
+	72: "Snow",
+	73: "Snow",
+	74: "Heavy snow",
+	75: "Heavy snow",
+	76: "Diamond dust",
 	77: "Snow grains",
-	80: "Slight rain showers",
-	81: "Moderate rain showers",
-	82: "Violent rain showers",
-	85: "Slight snow showers",
-	86: "Heavy snow showers",
+	78: "Snow crystals",
+	79: "Ice pellets",
+	80: "Light showers",
+	81: "Showers",
+	82: "Heavy showers",
+	83: "Sleet showers",
+	84: "Heavy sleet showers",
+	85: "Light snow showers",
+	86: "Snow showers",
+	87: "Snow pellets",
+	88: "Heavy snow pellets",
+	89: "Hail",
+	90: "Thunderstorm",
+	91: "Recent thunderstorm",
+	92: "Heavy thunderstorm",
+	93: "Recent thunderstorm",
+	94: "Thunderstorm with hail",
 	95: "Thunderstorm",
-	96: "Thunderstorm with slight hail",
-	99: "Thunderstorm with heavy hail",
+	96: "Thunderstorm with hail",
+	97: "Recent thunderstorm",
+	98: "Thunderstorm with dust",
+	99: "Thunderstorm with hail",
 }
 
 // WMOWeatherIcons maps WMO weather codes to single emoji icons for day (1) and night (0)
 var WMOWeatherIcons = map[int]map[bool]string{
-	0: {
-		true:  "☀️", // Clear sky (day)
-		false: "🌙",
-	},
-	1: {
-		true:  "🌤️", // Mainly clear (day)
-		false: "🌙",
-	},
-	2: {
-		true:  "⛅", // Partly cloudy
-		false: "☁️",
-	},
-	3: {
-		true:  "☁️", // Overcast
-		false: "☁️",
-	},
-	45: {
-		true:  "🌫️", // Fog
-		false: "🌫️",
-	},
-	48: {
-		true:  "🌫️", // Depositing rime fog
-		false: "🌫️",
-	},
-	51: {
-		true:  "🌦️", // Drizzle: Light
-		false: "🌧️",
-	},
-	53: {
-		true:  "🌧️", // Drizzle: Moderate
-		false: "🌧️",
-	},
-	55: {
-		true:  "🌧️", // Drizzle: Dense intensity
-		false: "🌧️",
-	},
-	56: {
-		true:  "🌨️", // Freezing drizzle: Light
-		false: "🌨️",
-	},
-	57: {
-		true:  "🌨️", // Freezing drizzle: Dense intensity
-		false: "🌨️",
-	},
-	61: {
-		true:  "🌦️", // Rain: Slight
-		false: "🌧️",
-	},
-	63: {
-		true:  "🌧️", // Rain: Moderate
-		false: "🌧️",
-	},
-	65: {
-		true:  "🌧️", // Rain: Heavy
-		false: "🌧️",
-	},
-	66: {
-		true:  "🌨️", // Freezing rain: Light
-		false: "🌨️",
-	},
-	67: {
-		true:  "🌨️", // Freezing rain: Heavy
-		false: "🌨️",
-	},
-	71: {
-		true:  "🌨️", // Snow fall: Slight
-		false: "🌨️",
-	},
-	73: {
-		true:  "🌨️", // Snow fall: Moderate
-		false: "🌨️",
-	},
-	75: {
-		true:  "🌨️", // Snow fall: Heavy
-		false: "🌨️",
-	},
-	77: {
-		true:  "🌨️", // Snow grains
-		false: "🌨️",
-	},
-	80: {
-		true:  "🌦️", // Rain showers: Slight
-		false: "🌧️",
-	},
-	81: {
-		true:  "🌧️", // Rain showers: Moderate
-		false: "🌧️",
-	},
-	82: {
-		true:  "🌧️", // Rain showers: Violent
-		false: "🌧️",
-	},
-	85: {
-		true:  "🌨️", // Snow showers: Slight
-		false: "🌨️",
-	},
-	86: {
-		true:  "🌨️", // Snow showers: Heavy
-		false: "🌨️",
-	},
-	95: {
-		true:  "🌩️", // Thunderstorm: Slight or moderate
-		false: "🌩️",
-	},
-	96: {
-		true:  "⛈️", // Thunderstorm with slight hail
-		false: "⛈️",
-	},
-	99: {
-		true:  "⛈️", // Thunderstorm with heavy hail
-		false: "⛈️",
-	},
+	0:  {true: "☀️", false: "🌙"},
+	1:  {true: "🌤️", false: "🌙"},
+	2:  {true: "⛅", false: "☁️"},
+	3:  {true: "☁️", false: "☁️"},
+	4:  {true: "🌫️", false: "🌫️"},
+	5:  {true: "🌫️", false: "🌫️"},
+	6:  {true: "🌫️", false: "🌫️"},
+	7:  {true: "💨", false: "💨"},
+	8:  {true: "🌪️", false: "🌪️"},
+	9:  {true: "💨", false: "💨"},
+	10: {true: "🌫️", false: "🌫️"},
+	11: {true: "🌫️", false: "🌫️"},
+	12: {true: "🌫️", false: "🌫️"},
+	13: {true: "⚡", false: "⚡"},
+	14: {true: "🌦️", false: "🌧️"},
+	15: {true: "🌦️", false: "🌧️"},
+	16: {true: "🌦️", false: "🌧️"},
+	17: {true: "🌩️", false: "🌩️"},
+	18: {true: "💨", false: "💨"},
+	19: {true: "🌪️", false: "🌪️"},
+	20: {true: "🌦️", false: "🌧️"},
+	21: {true: "🌧️", false: "🌧️"},
+	22: {true: "🌨️", false: "🌨️"},
+	23: {true: "🌨️", false: "🌨️"},
+	24: {true: "🌨️", false: "🌨️"},
+	25: {true: "🌧️", false: "🌧️"},
+	26: {true: "🌨️", false: "🌨️"},
+	27: {true: "🧊", false: "🧊"},
+	30: {true: "💨", false: "💨"},
+	31: {true: "💨", false: "💨"},
+	32: {true: "💨", false: "💨"},
+	33: {true: "💨", false: "💨"},
+	34: {true: "💨", false: "💨"},
+	35: {true: "💨", false: "💨"},
+	36: {true: "🌨️", false: "🌨️"},
+	37: {true: "🌨️", false: "🌨️"},
+	38: {true: "🌨️", false: "🌨️"},
+	39: {true: "🌨️", false: "🌨️"},
+	40: {true: "🌫️", false: "🌫️"},
+	41: {true: "🌫️", false: "🌫️"},
+	42: {true: "🌫️", false: "🌫️"},
+	43: {true: "🌫️", false: "🌫️"},
+	44: {true: "🌫️", false: "🌫️"},
+	45: {true: "🌫️", false: "🌫️"},
+	46: {true: "🌫️", false: "🌫️"},
+	47: {true: "🌫️", false: "🌫️"},
+	48: {true: "🌫️", false: "🌫️"},
+	49: {true: "🌫️", false: "🌫️"},
+	50: {true: "🌦️", false: "🌧️"},
+	51: {true: "🌦️", false: "🌧️"},
+	52: {true: "🌧️", false: "🌧️"},
+	53: {true: "🌧️", false: "🌧️"},
+	54: {true: "🌧️", false: "🌧️"},
+	55: {true: "🌧️", false: "🌧️"},
+	56: {true: "🌨️", false: "🌨️"},
+	57: {true: "🌨️", false: "🌨️"},
+	58: {true: "🌧️", false: "🌧️"},
+	59: {true: "🌧️", false: "🌧️"},
+	60: {true: "🌦️", false: "🌧️"},
+	61: {true: "🌦️", false: "🌧️"},
+	62: {true: "🌧️", false: "🌧️"},
+	63: {true: "🌧️", false: "🌧️"},
+	64: {true: "🌧️", false: "🌧️"},
+	65: {true: "🌧️", false: "🌧️"},
+	66: {true: "🌨️", false: "🌨️"},
+	67: {true: "🌨️", false: "🌨️"},
+	68: {true: "🌨️", false: "🌨️"},
+	69: {true: "🌨️", false: "🌨️"},
+	70: {true: "🌨️", false: "🌨️"},
+	71: {true: "🌨️", false: "🌨️"},
+	72: {true: "🌨️", false: "🌨️"},
+	73: {true: "🌨️", false: "🌨️"},
+	74: {true: "🌨️", false: "🌨️"},
+	75: {true: "🌨️", false: "🌨️"},
+	76: {true: "🌨️", false: "🌨️"},
+	77: {true: "🌨️", false: "🌨️"},
+	78: {true: "🌨️", false: "🌨️"},
+	79: {true: "🧊", false: "🧊"},
+	80: {true: "🌦️", false: "🌧️"},
+	81: {true: "🌧️", false: "🌧️"},
+	82: {true: "🌧️", false: "🌧️"},
+	83: {true: "🌨️", false: "🌨️"},
+	84: {true: "🌨️", false: "🌨️"},
+	85: {true: "🌨️", false: "🌨️"},
+	86: {true: "🌨️", false: "🌨️"},
+	87: {true: "🌨️", false: "🌨️"},
+	88: {true: "🌨️", false: "🌨️"},
+	89: {true: "🧊", false: "🧊"},
+	90: {true: "🌩️", false: "🌩️"},
+	91: {true: "🌩️", false: "🌩️"},
+	92: {true: "🌩️", false: "🌩️"},
+	93: {true: "⛈️", false: "⛈️"},
+	94: {true: "⛈️", false: "⛈️"},
+	95: {true: "🌩️", false: "🌩️"},
+	96: {true: "⛈️", false: "⛈️"},
+	97: {true: "⛈️", false: "⛈️"},
+	98: {true: "🌩️", false: "🌩️"},
+	99: {true: "⛈️", false: "⛈️"},
 }
 
 var i18nVars = map[string]localize.MsgID{
