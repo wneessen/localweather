@@ -10,14 +10,20 @@ import (
 	"database/sql"
 )
 
-const currentWeatherByAddressID = `-- name: CurrentWeatherByAddressID :one
-SELECT address_id, timestamp, temperature, apparent_temperature, weather_code, wind_speed, wind_gusts, wind_direction, relative_humidity, pressure_msl, temp_day_min, temp_day_max, uv_index, is_day, sunrise_utc, sunset_utc, condition, category, icon, winddir_icon, winddir_text, temp_unit, windspeed_unit, humidity_unit, pressure_unit, winddir_unit, timezone, timezone_abbr, updated_at
+const currentWeatherByAddressIDAndBaseUnit = `-- name: CurrentWeatherByAddressIDAndBaseUnit :one
+SELECT address_id, timestamp, temperature, apparent_temperature, weather_code, wind_speed, wind_gusts, wind_direction, relative_humidity, pressure_msl, temp_day_min, temp_day_max, uv_index, is_day, sunrise_utc, sunset_utc, condition, category, icon, winddir_icon, winddir_text, temp_unit, windspeed_unit, humidity_unit, pressure_unit, winddir_unit, timezone, timezone_abbr, base_unit, updated_at
 FROM current_weather
 WHERE address_id = ?
+  AND base_unit = ?
 `
 
-func (q *Queries) CurrentWeatherByAddressID(ctx context.Context, addressID int64) (CurrentWeather, error) {
-	row := q.db.QueryRowContext(ctx, currentWeatherByAddressID, addressID)
+type CurrentWeatherByAddressIDAndBaseUnitParams struct {
+	AddressID int64  `json:"-"`
+	BaseUnit  string `json:"base_unit"`
+}
+
+func (q *Queries) CurrentWeatherByAddressIDAndBaseUnit(ctx context.Context, arg CurrentWeatherByAddressIDAndBaseUnitParams) (CurrentWeather, error) {
+	row := q.db.QueryRowContext(ctx, currentWeatherByAddressIDAndBaseUnit, arg.AddressID, arg.BaseUnit)
 	var i CurrentWeather
 	err := row.Scan(
 		&i.AddressID,
@@ -48,39 +54,13 @@ func (q *Queries) CurrentWeatherByAddressID(ctx context.Context, addressID int64
 		&i.WinddirUnit,
 		&i.Timezone,
 		&i.TimezoneAbbr,
+		&i.BaseUnit,
 		&i.UpdatedAt,
 	)
 	return i, err
 }
 
 const updateCurrentWeather = `-- name: UpdateCurrentWeather :exec
-/*
-address_id           INTEGER NOT NULL REFERENCES addresses (id) ON DELETE CASCADE,
-    timestamp            INTEGER,
-    temperature          REAL,
-    apparent_temperature REAL,
-    weather_code         INTEGER,
-    wind_speed           REAL,
-    wind_gusts           REAL,
-    wind_direction       REAL,
-    relative_humidity    REAL,
-    pressure_msl         REAL,
-    humidity             REAL,
-    is_day               BOOLEAN,
-    condition            TEXT    NOT NULL,
-    category             TEXT    NOT NULL,
-    icon                 TEXT    NOT NULL,
-    winddir_icon         TEXT    NOT NULL,
-    winddir_text         TEXT    NOT NULL,
-    temp_unit            TEXT,
-    windspeed_unit       TEXT,
-    humidity_unit        TEXT,
-    pressure_unit        TEXT,
-    winddir_unit         TEXT,
-    updated_at           INTEGER NOT NULL
-
- */
-
 INSERT INTO current_weather (address_id,
                              timestamp,
                              temperature,
@@ -109,6 +89,7 @@ INSERT INTO current_weather (address_id,
                              winddir_unit,
                              timezone,
                              timezone_abbr,
+                             base_unit,
                              updated_at)
 VALUES (?1,
         ?2,
@@ -138,35 +119,37 @@ VALUES (?1,
         ?26,
         ?27,
         ?28,
-        ?29)
-ON CONFLICT (address_id) DO UPDATE SET timestamp            = excluded.timestamp,
-                                       temperature          = excluded.temperature,
-                                       apparent_temperature = excluded.apparent_temperature,
-                                       weather_code         = excluded.weather_code,
-                                       wind_speed           = excluded.wind_speed,
-                                       wind_gusts           = excluded.wind_gusts,
-                                       wind_direction       = excluded.wind_direction,
-                                       relative_humidity    = excluded.relative_humidity,
-                                       pressure_msl         = excluded.pressure_msl,
-                                       temp_day_min         = excluded.temp_day_min,
-                                       temp_day_max         = excluded.temp_day_max,
-                                       uv_index             = excluded.uv_index,
-                                       is_day               = excluded.is_day,
-                                       sunrise_utc          = excluded.sunrise_utc,
-                                       sunset_utc           = excluded.sunset_utc,
-                                       condition            = excluded.condition,
-                                       category             = excluded.category,
-                                       icon                 = excluded.icon,
-                                       winddir_icon         = excluded.winddir_icon,
-                                       winddir_text         = excluded.winddir_text,
-                                       temp_unit            = excluded.temp_unit,
-                                       windspeed_unit       = excluded.windspeed_unit,
-                                       humidity_unit        = excluded.humidity_unit,
-                                       pressure_unit        = excluded.pressure_unit,
-                                       winddir_unit         = excluded.winddir_unit,
-                                       timezone             = excluded.timezone,
-                                       timezone_abbr        = excluded.timezone_abbr,
-                                       updated_at           = excluded.updated_at
+        ?29,
+        ?30)
+ON CONFLICT (address_id, base_unit) DO UPDATE SET timestamp            = excluded.timestamp,
+                                                  temperature          = excluded.temperature,
+                                                  apparent_temperature = excluded.apparent_temperature,
+                                                  weather_code         = excluded.weather_code,
+                                                  wind_speed           = excluded.wind_speed,
+                                                  wind_gusts           = excluded.wind_gusts,
+                                                  wind_direction       = excluded.wind_direction,
+                                                  relative_humidity    = excluded.relative_humidity,
+                                                  pressure_msl         = excluded.pressure_msl,
+                                                  temp_day_min         = excluded.temp_day_min,
+                                                  temp_day_max         = excluded.temp_day_max,
+                                                  uv_index             = excluded.uv_index,
+                                                  is_day               = excluded.is_day,
+                                                  sunrise_utc          = excluded.sunrise_utc,
+                                                  sunset_utc           = excluded.sunset_utc,
+                                                  condition            = excluded.condition,
+                                                  category             = excluded.category,
+                                                  icon                 = excluded.icon,
+                                                  winddir_icon         = excluded.winddir_icon,
+                                                  winddir_text         = excluded.winddir_text,
+                                                  temp_unit            = excluded.temp_unit,
+                                                  windspeed_unit       = excluded.windspeed_unit,
+                                                  humidity_unit        = excluded.humidity_unit,
+                                                  pressure_unit        = excluded.pressure_unit,
+                                                  winddir_unit         = excluded.winddir_unit,
+                                                  timezone             = excluded.timezone,
+                                                  timezone_abbr        = excluded.timezone_abbr,
+                                                  base_unit            = excluded.base_unit,
+                                                  updated_at           = excluded.updated_at
 WHERE excluded.timestamp > current_weather.timestamp
 `
 
@@ -199,6 +182,7 @@ type UpdateCurrentWeatherParams struct {
 	WinddirUnit         string          `json:"winddir_unit"`
 	Timezone            string          `json:"timezone"`
 	TimezoneAbbr        sql.NullString  `json:"timezone_abbr"`
+	BaseUnit            string          `json:"base_unit"`
 	UpdatedAt           int64           `json:"updated_at_unix"`
 }
 
@@ -232,6 +216,7 @@ func (q *Queries) UpdateCurrentWeather(ctx context.Context, arg UpdateCurrentWea
 		arg.WinddirUnit,
 		arg.Timezone,
 		arg.TimezoneAbbr,
+		arg.BaseUnit,
 		arg.UpdatedAt,
 	)
 	return err

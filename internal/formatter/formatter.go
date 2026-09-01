@@ -3,6 +3,7 @@ package formatter
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/vorlif/spreak"
 	"github.com/vorlif/spreak/humanize"
@@ -44,6 +45,14 @@ func New(conf *config.Config, loc *spreak.Localizer) (*Formatter, error) {
 	formatter.printer = message.NewPrinter(loc.Language())
 
 	return formatter, nil
+}
+
+func (f *Formatter) Humanize[V float64](val V) string {
+	return f.printer.Sprintf("%.1f", val)
+}
+
+func (f *Formatter) LocalizeTime(val time.Time) string {
+	return f.humanizer.FormatTime(val, humanize.TimeFormat)
 }
 
 // WeatherCategory categorizes a WMO 4677 present-weather code (ww, 00-99) into

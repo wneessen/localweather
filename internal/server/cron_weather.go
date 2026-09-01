@@ -47,6 +47,7 @@ func (s *Server) cronjobWeatherdataUpdate(ctx context.Context) {
 		Timestamp:    sql.NullInt64{Int64: data.Current.InstantTime.UnixMicro(), Valid: true},
 		Timezone:     data.Timezone,
 		TimezoneAbbr: sql.NullString{String: data.TimezoneAbbreviation, Valid: data.TimezoneAbbreviation != ""},
+		BaseUnit:     s.conf.Units,
 		UpdatedAt:    now.UnixMicro(),
 		SunriseUtc:   sunriseTimeUTC.UTC().UnixMicro(),
 		SunsetUtc:    sunsetTimeUTC.UTC().UnixMicro(),
