@@ -20,7 +20,7 @@ import (
 	"github.com/wneessen/localweather/internal/geobus"
 	"github.com/wneessen/localweather/internal/geocode"
 	"github.com/wneessen/localweather/internal/log"
-	"github.com/wneessen/localweather/internal/server/static"
+	"github.com/wneessen/localweather/internal/static"
 	"github.com/wneessen/localweather/internal/weather"
 )
 
