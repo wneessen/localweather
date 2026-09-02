@@ -10,7 +10,7 @@ msgstr ""
 "Project-Id-Version: github.com/wneessen/localweather\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-09-02 11:33+0200\n"
-"PO-Revision-Date: 2026-09-02 11:39+0200\n"
+"PO-Revision-Date: 2026-09-02 18:20+0200\n"
 "Last-Translator: Winni Neessen <wn@neessen.dev>\n"
 "Language-Team: \n"
 "Language: de\n"
@@ -105,48 +105,40 @@ msgid "Funnel cloud"
 msgstr "Trichterwolke"
 
 #: ../../formatter/maps.go:46
-#, fuzzy
-#| msgid "Dense drizzle"
 msgid "Recent drizzle"
-msgstr "Dichter Nieselregen"
+msgstr "Kürzlicher Nieselregen"
 
 #: ../../formatter/maps.go:47
 msgid "Recent rain"
-msgstr ""
+msgstr "Kürzlicher Regen"
 
 #: ../../formatter/maps.go:48
 msgid "Recent snow"
-msgstr ""
+msgstr "Kürzlicher Schneefall"
 
 #: ../../formatter/maps.go:49
 msgid "Recent sleet"
-msgstr ""
+msgstr "Kürzlicher Schneeregen"
 
 #: ../../formatter/maps.go:50
-#, fuzzy
-#| msgid "Light freezing rain"
 msgid "Recent freezing rain"
-msgstr "Leichter Eisregen"
+msgstr "Kürzlicher Eisregen"
 
 #: ../../formatter/maps.go:51
-#, fuzzy
-#| msgid "Violent rain showers"
 msgid "Recent showers"
-msgstr "Heftige Regenschauer"
+msgstr "Kürzliche Regenschauer"
 
 #: ../../formatter/maps.go:52
-#, fuzzy
-#| msgid "Heavy snow showers"
 msgid "Recent snow showers"
-msgstr "Starke Schneeschauer"
+msgstr "Kürzliche Schneeschauer"
 
 #: ../../formatter/maps.go:53
 msgid "Recent hail"
-msgstr ""
+msgstr "Kürzlicher Hagel"
 
 #: ../../formatter/maps.go:54
 msgid "Duststorm easing"
-msgstr ""
+msgstr "Nachlassender Staubsturm"
 
 #: ../../formatter/maps.go:56
 msgid "Duststorm building"
