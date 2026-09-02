@@ -1,6 +1,6 @@
 module github.com/wneessen/localweather
 
-go 1.27.0
+go 1.27.1
 
 require (
 	github.com/Xuanwo/go-locale v1.1.3
