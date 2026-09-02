@@ -17,11 +17,12 @@ COPY ["docker-files/passwd", "/etc/passwd"]
 COPY ["docker-files/group", "/etc/group"]
 COPY --from=gobuilder ["/etc/ssl/certs/ca-certificates.crt", "/etc/ssl/cert.pem"]
 
+RUN mkdir /app && chown 1000:1000 /app && mkdir /app/data && chown 1000:1000 /app/data
 WORKDIR /app
 COPY etc/app.toml ./etc/app.toml
 COPY --from=gobuilder /app/server ./
 
-EXPOSE 8855
+EXPOSE 10001
 USER 1000
 
 ENTRYPOINT ["./server"]
