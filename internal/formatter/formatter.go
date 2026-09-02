@@ -28,7 +28,7 @@ var supportedHumanizers = []*humanize.LocaleData{de.New()}
 
 // iconURLFormat defines the format string for constructing the URL path to access SVG icons
 // stored in a public directory.
-const iconURLFormat = "/public/icons/%s/%s.svg"
+const iconURLFormat = "/static/icons/%s/%s.svg"
 
 // New initializes and returns a new Formatter instance with the provided configuration and localizer
 func New(conf *config.Config, loc *spreak.Localizer) (*Formatter, error) {

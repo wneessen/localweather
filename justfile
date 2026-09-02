@@ -12,6 +12,7 @@ export GOOSE_MIGRATION_DIR := root / "internal/database/migrations"
 
 ## App-specific development environment
 export LOCALWEATHER_LOG_LEVEL := "debug"
+export LOCALWEATHER_LOCALE := "de"
 export LOCALWEATHER_GEOCODER_PROVIDER := "opencage"
 export LOCALWEATHER_DATABASE_PATH := db_path
 export LOCALWEATHER_GEOBUS_COORDINATES_FILE := coordinates_path

@@ -20,6 +20,7 @@ import (
 	"github.com/wneessen/localweather/internal/geobus"
 	"github.com/wneessen/localweather/internal/geocode"
 	"github.com/wneessen/localweather/internal/log"
+	"github.com/wneessen/localweather/internal/server/static"
 	"github.com/wneessen/localweather/internal/weather"
 )
 
@@ -109,7 +110,7 @@ func (s *Server) Start(ctx context.Context) error {
 
 	s.log.Info("starting http backend", "listen_addr", s.conf.ListenAddr())
 	s.httpRoutes(ctx)
-	s.fileServer(s.mux, "/public", http.Dir("./public"))
+	s.fileServer(s.mux, "/static", http.FS(static.FS))
 	if err := s.httpserv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 		return fmt.Errorf("failed to start http server: %w", err)
 	}
