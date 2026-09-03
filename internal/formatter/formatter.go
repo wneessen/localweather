@@ -26,9 +26,12 @@ type Formatter struct {
 // Supported languages for humanize
 var supportedHumanizers = []*humanize.LocaleData{de.New()}
 
-// iconURLFormat defines the format string for constructing the URL path to access SVG icons
-// stored in a public directory.
-const iconURLFormat = "/static/icons/%s/%s.svg"
+const (
+	// iconURLFormat defines the format string for constructing the URL path to access SVG icons
+	// stored in a public directory.
+	iconURLFormat     = "/static/icons/%s/%s.svg"
+	moonIconURLFormat = "/static/icons/%s/%s.svg"
+)
 
 // New initializes and returns a new Formatter instance with the provided configuration and localizer
 func New(conf *config.Config, loc *spreak.Localizer) (*Formatter, error) {
@@ -49,6 +52,14 @@ func New(conf *config.Config, loc *spreak.Localizer) (*Formatter, error) {
 
 func (f *Formatter) Humanize[V float64](val V) string {
 	return f.printer.Sprintf("%.1f", val)
+}
+
+func (f *Formatter) Localize(val string) localize.MsgID {
+	want := strings.ToLower(val)
+	if i18n, ok := i18nVars[want]; ok {
+		return i18n
+	}
+	return val
 }
 
 func (f *Formatter) LocalizeTime(val time.Time) string {
@@ -106,6 +117,14 @@ func (f *Formatter) WeatherSymbolURL(code int, isDay bool) string {
 		nightDayTag = "night"
 	}
 	return fmt.Sprintf(iconURLFormat, f.conf.Weather.IconSet, fmt.Sprintf("wmo-%d-%s", code, nightDayTag))
+}
+
+func (f *Formatter) MoonphaseIconURL(phase string) string {
+	filename, ok := MoonPhaseIconURL[phase]
+	if !ok {
+		return ""
+	}
+	return fmt.Sprintf(moonIconURLFormat, f.conf.Weather.IconSet, fmt.Sprintf("%s", filename))
 }
 
 func (f *Formatter) WindDirectionSymbol(deg vartype.VarFloat64) string {

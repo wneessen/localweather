@@ -6,7 +6,6 @@ package formatter
 
 import "github.com/vorlif/spreak/localize"
 
-/*
 // MoonPhaseIcon is a map where moon phase names are keys and their corresponding emoji representations are values.
 var MoonPhaseIcon = map[string]string{
 	"New Moon":        "🌑",
@@ -19,7 +18,17 @@ var MoonPhaseIcon = map[string]string{
 	"Waning Crescent": "🌘",
 }
 
-*/
+// MoonPhaseIconURL is a map where moon phase names are keys and their corresponding value is the filename to the icon
+var MoonPhaseIconURL = map[string]string{
+	"New Moon":        "moon-new",
+	"Waxing Crescent": "moon-waxing-crescent",
+	"First Quarter":   "moon-first-quarter",
+	"Waxing Gibbous":  "moon-waxing-gibbous",
+	"Full Moon":       "moon-full",
+	"Waning Gibbous":  "moon-waning-gibbous",
+	"Third Quarter":   "moon-last-quarter",
+	"Waning Crescent": "moon-waning-crescent",
+}
 
 // WMOWeatherCodes maps WMO weather code integers to their descriptions
 var WMOWeatherCodes = map[int]localize.MsgID{

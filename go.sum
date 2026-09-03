@@ -68,6 +68,8 @@ github.com/stretchr/testify v1.11.1 h1:7s2iGBzp5EwR7/aIZr8ao5+dra3wiQyKjjFuvgVKu
 github.com/stretchr/testify v1.11.1/go.mod h1:wZwfW3scLgRK+23gO65QZefKpKQRnfz6sD981Nm4B6U=
 github.com/vorlif/spreak v1.0.0 h1:SUaD/p+cWcGgLAdHi73cTmBBejpPpztlgM5I4kPSewY=
 github.com/vorlif/spreak v1.0.0/go.mod h1:oJ0AuinQV2XPy8WkdkbGejGDHQ3dCoB9brQMj5dsEyc=
+github.com/wneessen/go-moonphase v0.0.0-20251108174843-0043855bd40d h1:DURVLjTC4cF8q+m8Vy2ixli+/vOSj7FTUexeFYgiYmM=
+github.com/wneessen/go-moonphase v0.0.0-20251108174843-0043855bd40d/go.mod h1:MsfMTRN772dbfPpJTSSygAVr5qt+hDab2+L74VTvBCc=
 go.uber.org/goleak v1.3.0 h1:2K3zAYmnTNqV73imy9J1T3WC+gmCePx2hEGkimedGto=
 go.uber.org/goleak v1.3.0/go.mod h1:CoHD4mav9JJNrW/WLlf7HGZPjdw8EucARQHekz1X6bE=
 go.uber.org/multierr v1.11.0 h1:blXXJkSxSSfBVBlC76pxqeO+LN3aDfLQo+309xJstO0=

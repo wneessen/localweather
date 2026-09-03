@@ -48,6 +48,9 @@ type responseData struct {
 	Sunset              string `json:"sunset"`
 	SunriseUTC          string `json:"sunrise_utc"`
 	SunsetUTC           string `json:"sunset_utc"`
+	Moonphase           string `json:"moonphase"`
+	MoonphaseIcon       string `json:"moonphase_icon"`
+	MoonphaseIconURL    string `json:"moonphase_icon_url"`
 	TimestampString     string `json:"timestamp_local,omitempty"`
 	TimestampStringUTC  string `json:"timestamp_utc,omitempty"`
 	UpdatedAtString     string `json:"updated_at_local"`
@@ -204,6 +207,22 @@ func (s *Server) buildWeatherRaw(data model.CurrentWeather, weather *weatherResp
 		if entry.src.Valid {
 			*entry.dst = fmt.Sprintf("%.1f", entry.src.Float64)
 			*entry.locdst = s.fmt.Humanize(entry.src.Float64)
+		}
+	}
+
+	strings := []struct {
+		src    sql.NullString
+		dst    *string
+		locdst *string
+	}{
+		{data.Moonphase, &resp.Moonphase, &loc.Moonphase},
+		{data.MoonphaseIcon, &resp.MoonphaseIcon, &loc.MoonphaseIcon},
+		{data.MoonphaseIconUrl, &resp.MoonphaseIconURL, &loc.MoonphaseIconURL},
+	}
+	for _, entry := range strings {
+		if entry.src.Valid {
+			*entry.dst = entry.src.String
+			*entry.locdst = s.t.Get(s.fmt.Localize(entry.src.String))
 		}
 	}
 

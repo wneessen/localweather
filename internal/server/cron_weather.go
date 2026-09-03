@@ -8,9 +8,11 @@ import (
 	"time"
 
 	"github.com/nathan-osman/go-sunrise"
+	"github.com/wneessen/go-moonphase"
 
 	"github.com/wneessen/localweather/internal/apperror"
 	"github.com/wneessen/localweather/internal/database/model"
+	"github.com/wneessen/localweather/internal/formatter"
 	"github.com/wneessen/localweather/internal/types"
 	"github.com/wneessen/localweather/internal/weather"
 )
@@ -103,6 +105,19 @@ func (s *Server) cronjobWeatherdataUpdate(ctx context.Context) {
 		}
 		currentDB.WinddirIcon = s.fmt.WindDirectionSymbol(data.Current.WindDirection)
 		currentDB.WinddirText = s.fmt.DegToString(data.Current.WindDirection)
+	}
+
+	moon := moonphase.New(now.In(time.Local))
+	phase := moon.PhaseName()
+	if phase != "" {
+		currentDB.Moonphase = sql.NullString{String: phase, Valid: true}
+		icon, ok := formatter.MoonPhaseIcon[phase]
+		if ok {
+			currentDB.MoonphaseIcon = sql.NullString{String: icon, Valid: true}
+		}
+		if url := s.fmt.MoonphaseIconURL(phase); url != "" {
+			currentDB.MoonphaseIconUrl = sql.NullString{String: url, Valid: true}
+		}
 	}
 
 	today := weather.NewDay(time.Now())

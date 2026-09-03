@@ -14,6 +14,7 @@ require (
 	github.com/nathan-osman/go-sunrise v1.1.0
 	github.com/pressly/goose/v3 v3.27.3
 	github.com/vorlif/spreak v1.0.0
+	github.com/wneessen/go-moonphase v0.0.0-20251108174843-0043855bd40d
 	golang.org/x/sync v0.22.0
 	golang.org/x/text v0.40.0
 	modernc.org/sqlite v1.57.0
