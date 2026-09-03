@@ -107,6 +107,28 @@ func (s *Server) handlerWeatherCurrentGet(w http.ResponseWriter, r *http.Request
 	}
 }
 
+func (s *Server) handlerWeatherUpdateGet(w http.ResponseWriter, r *http.Request) {
+	type response struct {
+		UpdateSucceeded bool `json:"update_succeeded"`
+	}
+
+	for _, job := range s.cron.Jobs() {
+		if job.ID() == s.weatherJobID {
+			if err := job.RunNow(); err != nil {
+				s.log.Error("forced weather update job failed", log.ErrAttr(err))
+				s.renderErr(w, r, http.StatusInternalServerError, apperror.ErrUnexpected)
+				return
+			}
+		}
+	}
+
+	params := &response{UpdateSucceeded: true}
+	resp := NewResponse(http.StatusOK, "forced weather update", params)
+	if err := render.Render(w, r, resp); err != nil {
+		s.log.Error("failed to render current weather response", log.ErrAttr(err))
+	}
+}
+
 func (s *Server) buildWeatherResponse(data model.CurrentWeather, address model.CurrentAddressRow) *weatherResponse {
 	lang, _ := s.t.Language().Base()
 	resp := &weatherResponse{
