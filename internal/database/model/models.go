@@ -69,4 +69,7 @@ type CurrentWeather struct {
 	TimezoneAbbr        sql.NullString  `json:"timezone_abbr"`
 	BaseUnit            string          `json:"base_unit"`
 	UpdatedAt           int64           `json:"updated_at_unix"`
+	Moonphase           sql.NullString  `json:"moonphase"`
+	MoonphaseIcon       sql.NullString  `json:"moonphase_icon"`
+	MoonphaseIconUrl    sql.NullString  `json:"moonphase_icon_url"`
 }
