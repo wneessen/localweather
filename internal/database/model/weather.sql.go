@@ -11,7 +11,7 @@ import (
 )
 
 const currentWeatherByAddressIDAndBaseUnit = `-- name: CurrentWeatherByAddressIDAndBaseUnit :one
-SELECT address_id, timestamp, temperature, apparent_temperature, weather_code, wind_speed, wind_gusts, wind_direction, relative_humidity, pressure_msl, temp_day_min, temp_day_max, uv_index, is_day, sunrise_utc, sunset_utc, condition, category, icon, winddir_icon, winddir_text, temp_unit, windspeed_unit, humidity_unit, pressure_unit, winddir_unit, timezone, timezone_abbr, base_unit, updated_at
+SELECT address_id, timestamp, temperature, apparent_temperature, weather_code, wind_speed, wind_gusts, wind_direction, relative_humidity, pressure_msl, temp_day_min, temp_day_max, uv_index, is_day, sunrise_utc, sunset_utc, condition, category, icon, winddir_icon, winddir_text, temp_unit, windspeed_unit, humidity_unit, pressure_unit, winddir_unit, timezone, timezone_abbr, base_unit, updated_at, moonphase, moonphase_icon, moonphase_icon_url
 FROM current_weather
 WHERE address_id = ?
   AND base_unit = ?
@@ -56,6 +56,9 @@ func (q *Queries) CurrentWeatherByAddressIDAndBaseUnit(ctx context.Context, arg 
 		&i.TimezoneAbbr,
 		&i.BaseUnit,
 		&i.UpdatedAt,
+		&i.Moonphase,
+		&i.MoonphaseIcon,
+		&i.MoonphaseIconUrl,
 	)
 	return i, err
 }
@@ -77,6 +80,9 @@ INSERT INTO current_weather (address_id,
                              is_day,
                              sunrise_utc,
                              sunset_utc,
+                             moonphase,
+                             moonphase_icon,
+                             moonphase_icon_url,
                              condition,
                              category,
                              icon,
@@ -120,7 +126,10 @@ VALUES (?1,
         ?27,
         ?28,
         ?29,
-        ?30)
+        ?30,
+        ?31,
+        ?32,
+        ?33)
 ON CONFLICT (address_id, base_unit) DO UPDATE SET timestamp            = excluded.timestamp,
                                                   temperature          = excluded.temperature,
                                                   apparent_temperature = excluded.apparent_temperature,
@@ -136,6 +145,9 @@ ON CONFLICT (address_id, base_unit) DO UPDATE SET timestamp            = exclude
                                                   is_day               = excluded.is_day,
                                                   sunrise_utc          = excluded.sunrise_utc,
                                                   sunset_utc           = excluded.sunset_utc,
+                                                  moonphase            = excluded.moonphase,
+                                                  moonphase_icon       = excluded.moonphase_icon,
+                                                  moonphase_icon_url   = excluded.moonphase_icon_url,
                                                   condition            = excluded.condition,
                                                   category             = excluded.category,
                                                   icon                 = excluded.icon,
@@ -170,6 +182,9 @@ type UpdateCurrentWeatherParams struct {
 	IsDay               sql.NullBool    `json:"is_day"`
 	SunriseUtc          int64           `json:"sunrise_utc"`
 	SunsetUtc           int64           `json:"sunset_utc"`
+	Moonphase           sql.NullString  `json:"moonphase"`
+	MoonphaseIcon       sql.NullString  `json:"moonphase_icon"`
+	MoonphaseIconUrl    sql.NullString  `json:"moonphase_icon_url"`
 	Condition           string          `json:"condition"`
 	Category            string          `json:"category"`
 	Icon                string          `json:"icon"`
@@ -204,6 +219,9 @@ func (q *Queries) UpdateCurrentWeather(ctx context.Context, arg UpdateCurrentWea
 		arg.IsDay,
 		arg.SunriseUtc,
 		arg.SunsetUtc,
+		arg.Moonphase,
+		arg.MoonphaseIcon,
+		arg.MoonphaseIconUrl,
 		arg.Condition,
 		arg.Category,
 		arg.Icon,
