@@ -40,7 +40,7 @@ jobs:
             ghcr.io/${{ github.repository }}:latest
             ghcr.io/${{ github.repository }}:${{ github.sha }}
           cache-from: type=gha
-          cache-to: type=gha,mode=max# SPDX-FileCopyrightText: Winni Neessen <wn@neessen.dev>
+          cache-to: type=gha,mode=max
 
   goreleaser:
     runs-on: ubuntu-latest
