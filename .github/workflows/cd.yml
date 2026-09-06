@@ -1,4 +1,4 @@
-name: CD
+name: Continous Delivery
 
 permissions:
   contents: read
@@ -10,7 +10,7 @@ on:
 
 jobs:
   publish:
-    name: Publish
+    name: Docker publish
     runs-on: ubuntu-latest
 
     permissions:
@@ -40,4 +40,37 @@ jobs:
             ghcr.io/${{ github.repository }}:latest
             ghcr.io/${{ github.repository }}:${{ github.sha }}
           cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-to: type=gha,mode=max# SPDX-FileCopyrightText: Winni Neessen <wn@neessen.dev>
+
+  goreleaser:
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: read
+      releases: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: stable
+      - name: Import GPG key
+        id: import_gpg
+        uses: crazy-max/ghaction-import-gpg@v6
+        with:
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.PASSPHRASE }}
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v6
+        with:
+          distribution: goreleaser-pro
+          version: "~> v2"
+          args: release --clean
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
+          GORELEASER_KEY: ${{ secrets.GORELEASER_KEY }}
