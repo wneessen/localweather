@@ -4,6 +4,7 @@ db_path := dev_dir / "storage.db"
 cityname_path := dev_dir / "cityname"
 coordinates_path := dev_dir / "coordinates"
 
+
 ## Some exports for convenice
 export APP_URL := "http://127.0.0.1:10001"
 export GOOSE_DRIVER := "sqlite3"
@@ -39,6 +40,19 @@ lint:
 [group('run')]
 logs:
     tail -f {{ dev_dir }}/service.log | jq
+
+[group('run')]
+hashes:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    ver=$(nix eval --raw .#default.version)
+    base="https://github.com/wneessen/localweather/releases/download/v${ver}"
+    curl -fsSL "${base}/localweather_${ver}_checksums.txt" \
+      | grep -E '_(linux|darwin)_(amd64|arm64)\.tar\.gz$' \
+      | while read -r sum file; do
+          printf '%-45s %s\n' "$file" \
+            "$(nix hash convert --hash-algo sha256 --to sri "$sum")"
+        done
 
 [group('service')]
 server:
