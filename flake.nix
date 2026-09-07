@@ -79,6 +79,11 @@
       nixosModules.localweather = { config, lib, pkgs, ... }:
         let
           cfg = config.services.localweather;
+          tomlFormat = pkgs.formats.toml { };
+          configFile =
+            if cfg.configFile != null
+            then cfg.configFile
+            else tomlFormat.generate "localweather.toml" cfg.settings;
         in {
           options.services.localweather = {
             enable = lib.mkEnableOption "localweather";
@@ -87,6 +92,18 @@
               type = lib.types.package;
               default = self.packages.${pkgs.stdenv.hostPlatform.system}.default;
               description = "The localweather package to use.";
+            };
+
+            settings = lib.mkOption {
+              type = tomlFormat.type;
+              default = { };
+              description = "Configuration rendered to TOML and passed via APP_CONFIG_PATH.";
+            };
+
+            configFile = lib.mkOption {
+              type = lib.types.nullOr lib.types.path;
+              default = null;
+              description = "Path to an existing TOML config file, used instead of settings.";
             };
           };
 
@@ -97,6 +114,8 @@
               description = "localweather - A local weather web service with automatic geolocation lookup";
               wantedBy = [ "multi-user.target" ];
               after = [ "network.target" ];
+
+              environment.APP_CONFIG_PATH = toString configFile;
 
               serviceConfig = {
                 ExecStart = lib.getExe cfg.package;
