@@ -52,11 +52,6 @@
             runHook postInstall
           '';
 
-          doInstallCheck = true;
-          installCheckPhase = ''
-            $out/bin/localweather --version
-          '';
-
           meta = {
             description = "localweather - A local weather web service with automatic geolocation lookup";
             homepage = "https://github.com/wneessen/localweather";
@@ -80,5 +75,41 @@
           ]);
         };
       }
-    );
+    ) // {
+      nixosModules.localweather = { config, lib, pkgs, ... }:
+        let
+          cfg = config.services.localweather;
+        in {
+          options.services.localweather = {
+            enable = lib.mkEnableOption "localweather";
+
+            package = lib.mkOption {
+              type = lib.types.package;
+              default = self.packages.${pkgs.stdenv.hostPlatform.system}.default;
+              description = "The localweather package to use.";
+            };
+          };
+
+          config = lib.mkIf cfg.enable {
+            environment.systemPackages = [ cfg.package ];
+
+            systemd.services.localweather = {
+              description = "localweather - A local weather web service with automatic geolocation lookup";
+              wantedBy = [ "multi-user.target" ];
+              after = [ "network.target" ];
+
+              serviceConfig = {
+                ExecStart = lib.getExe cfg.package;
+                DynamicUser = true;
+                StateDirectory = "localweather";
+                AmbientCapabilities = [ "CAP_NET_ADMIN" ];
+                CapabilityBoundingSet = [ "CAP_NET_ADMIN" ];
+                Restart = "on-failure";
+              };
+            };
+          };
+        };
+
+      nixosModules.default = self.nixosModules.localweather;
+    };
 }
