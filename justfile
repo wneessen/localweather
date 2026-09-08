@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: Winni Neessen <wn@neessen.dev>
+#
+# SPDX-License-Identifier: MIT
+
 root := justfile_directory()
 dev_dir := root / ".dev"
 db_path := dev_dir / "storage.db"

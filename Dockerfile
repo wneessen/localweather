@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: Winni Neessen <wn@neessen.dev>
+#
+# SPDX-License-Identifier: MIT
+
 FROM --platform=${BUILDPLATFORM} golang:alpine AS gobuilder
 WORKDIR /app
 
