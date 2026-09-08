@@ -6,7 +6,7 @@ coordinates_path := dev_dir / "coordinates"
 
 
 ## Some exports for convenice
-export APP_URL := "http://127.0.0.1:10001"
+export APP_URL := "http://127.0.0.1:10002"
 export GOOSE_DRIVER := "sqlite3"
 export GOOSE_DBSTRING := db_path
 export GOOSE_MIGRATION_DIR := root / "internal/database/migrations"
@@ -14,6 +14,7 @@ export GOOSE_MIGRATION_DIR := root / "internal/database/migrations"
 ## App-specific development environment
 export LOCALWEATHER_LOG_LEVEL := "debug"
 export LOCALWEATHER_LOCALE := "de"
+export LOCALWEATHER_SERVER_PORT := "10002"
 export LOCALWEATHER_GEOCODER_PROVIDER := "opencage"
 export LOCALWEATHER_DATABASE_PATH := db_path
 export LOCALWEATHER_GEOBUS_COORDINATES_FILE := coordinates_path
