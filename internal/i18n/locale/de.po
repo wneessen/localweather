@@ -9,8 +9,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: github.com/wneessen/localweather\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-03 10:52+0200\n"
-"PO-Revision-Date: 2026-09-03 11:02+0200\n"
+"POT-Creation-Date: 2026-09-08 09:59+0200\n"
+"PO-Revision-Date: 2026-09-08 10:18+0200\n"
 "Last-Translator: Winni Neessen <wn@neessen.dev>\n"
 "Language-Team: \n"
 "Language: de\n"
@@ -142,37 +142,35 @@ msgstr "Nachlassender Staubsturm"
 
 #: ../../formatter/maps.go:65
 msgid "Duststorm building"
-msgstr ""
+msgstr "Aufziehender Staubsturm"
 
 #: ../../formatter/maps.go:66
 msgid "Severe duststorm easing"
-msgstr ""
+msgstr "Nachlassender schwerer Staubsturm"
 
 #: ../../formatter/maps.go:67
 msgid "Severe duststorm"
-msgstr ""
+msgstr "Schwerer Staubsturm"
 
 #: ../../formatter/maps.go:68
 msgid "Severe duststorm building"
-msgstr ""
+msgstr "Starker Staubsturm im Anzug"
 
 #: ../../formatter/maps.go:69 ../../formatter/maps.go:71
 msgid "Blowing snow"
-msgstr ""
+msgstr "Schneeverwehung"
 
 #: ../../formatter/maps.go:70 ../../formatter/maps.go:72
-#, fuzzy
-#| msgid "Heavy snow showers"
 msgid "Heavy blowing snow"
-msgstr "Starke Schneeschauer"
+msgstr "Heftige Schneeverwehungen"
 
 #: ../../formatter/maps.go:73
 msgid "Distant fog"
-msgstr ""
+msgstr "Entfernter Nebel"
 
 #: ../../formatter/maps.go:75 ../../formatter/maps.go:76
 msgid "Fog clearing"
-msgstr ""
+msgstr "Aufklarender Nebel"
 
 #: ../../formatter/maps.go:77 ../../formatter/maps.go:78
 msgid "Fog"
@@ -180,179 +178,141 @@ msgstr "Nebel"
 
 #: ../../formatter/maps.go:79 ../../formatter/maps.go:80
 msgid "Fog thickening"
-msgstr ""
+msgstr "Verdichtender Nebel"
 
 #: ../../formatter/maps.go:81 ../../formatter/maps.go:82
 msgid "Rime fog"
-msgstr ""
+msgstr "Gefrierender Nebel"
 
 #: ../../formatter/maps.go:83 ../../formatter/maps.go:84
 msgid "Light drizzle"
 msgstr "Leichter Nieselregen"
 
 #: ../../formatter/maps.go:85 ../../formatter/maps.go:86
-#, fuzzy
-#| msgid "Dense drizzle"
 msgid "Drizzle"
-msgstr "Dichter Nieselregen"
+msgstr "Nieselregen"
 
 #: ../../formatter/maps.go:87 ../../formatter/maps.go:88
 msgid "Heavy drizzle"
 msgstr "Starker Nieselregen"
 
 #: ../../formatter/maps.go:89 ../../formatter/maps.go:90
-#, fuzzy
-#| msgid "Light freezing drizzle"
 msgid "Freezing drizzle"
-msgstr "Leichter gefrierender Nieselregen"
+msgstr "Gefrierender Nieselregen"
 
 #: ../../formatter/maps.go:91 ../../formatter/maps.go:92
 msgid "Drizzle and rain"
-msgstr ""
+msgstr "Nieseln und Regenschauer"
 
 #: ../../formatter/maps.go:93 ../../formatter/maps.go:94
-#, fuzzy
-#| msgid "Slight rain"
 msgid "Light rain"
 msgstr "Leichter Regen"
 
 #: ../../formatter/maps.go:95 ../../formatter/maps.go:96
 msgid "Rain"
-msgstr ""
+msgstr "Regen"
 
 #: ../../formatter/maps.go:97 ../../formatter/maps.go:98
 msgid "Heavy rain"
 msgstr "Starker Regen"
 
 #: ../../formatter/maps.go:99 ../../formatter/maps.go:100
-#, fuzzy
-#| msgid "Light freezing rain"
 msgid "Freezing rain"
-msgstr "Leichter Eisregen"
+msgstr "Gefrierender Regen"
 
 #: ../../formatter/maps.go:101
 msgid "Sleet"
-msgstr ""
+msgstr "Schneeregen"
 
 #: ../../formatter/maps.go:102
-#, fuzzy
-#| msgid "Heavy snow fall"
 msgid "Heavy sleet"
-msgstr "Starker Schneefall"
+msgstr "Starker Schneeregen"
 
 #: ../../formatter/maps.go:103 ../../formatter/maps.go:104
-#, fuzzy
-#| msgid "Slight snow fall"
 msgid "Light snow"
 msgstr "Leichter Schneefall"
 
 #: ../../formatter/maps.go:105 ../../formatter/maps.go:106
 msgid "Snow"
-msgstr ""
+msgstr "Schneefall"
 
 #: ../../formatter/maps.go:107 ../../formatter/maps.go:108
-#, fuzzy
-#| msgid "Heavy snow fall"
 msgid "Heavy snow"
 msgstr "Starker Schneefall"
 
 #: ../../formatter/maps.go:109
 msgid "Diamond dust"
-msgstr ""
+msgstr "Polarschnee"
 
 #: ../../formatter/maps.go:110
 msgid "Snow grains"
-msgstr "Schneekörner"
+msgstr "Schneegriesel"
 
 #: ../../formatter/maps.go:111
-#, fuzzy
-#| msgid "Snow grains"
 msgid "Snow crystals"
-msgstr "Schneekörner"
+msgstr "Schneekristalle"
 
 #: ../../formatter/maps.go:112
 msgid "Ice pellets"
-msgstr ""
+msgstr "Graupel"
 
 #: ../../formatter/maps.go:113
-#, fuzzy
-#| msgid "Slight snow showers"
 msgid "Light showers"
-msgstr "Leichte Schneeschauer"
+msgstr "Leichte Regenschauer"
 
 #: ../../formatter/maps.go:114
 msgid "Showers"
-msgstr ""
+msgstr "Regenschauer"
 
 #: ../../formatter/maps.go:115
-#, fuzzy
-#| msgid "Heavy snow showers"
 msgid "Heavy showers"
-msgstr "Starke Schneeschauer"
+msgstr "Starke Regenschauer"
 
 #: ../../formatter/maps.go:116
-#, fuzzy
-#| msgid "Slight rain showers"
 msgid "Sleet showers"
-msgstr "Leichte Regenschauer"
+msgstr "Graupelschauer"
 
 #: ../../formatter/maps.go:117
-#, fuzzy
-#| msgid "Heavy snow showers"
 msgid "Heavy sleet showers"
-msgstr "Starke Schneeschauer"
+msgstr "Starke Graupelschauer"
 
 #: ../../formatter/maps.go:118
-#, fuzzy
-#| msgid "Slight snow showers"
 msgid "Light snow showers"
 msgstr "Leichte Schneeschauer"
 
 #: ../../formatter/maps.go:119
-#, fuzzy
-#| msgid "Slight snow showers"
 msgid "Snow showers"
-msgstr "Leichte Schneeschauer"
+msgstr "Schneeschauer"
 
 #: ../../formatter/maps.go:120
 msgid "Snow pellets"
-msgstr ""
+msgstr "Schneegriesel"
 
 #: ../../formatter/maps.go:121
-#, fuzzy
-#| msgid "Heavy snow fall"
 msgid "Heavy snow pellets"
-msgstr "Starker Schneefall"
+msgstr "Starker Schneegriesel"
 
 #: ../../formatter/maps.go:122
 msgid "Hail"
-msgstr ""
+msgstr "Hagel"
 
 #: ../../formatter/maps.go:124 ../../formatter/maps.go:126
 #: ../../formatter/maps.go:130
-#, fuzzy
-#| msgid "Thunderstorm"
 msgid "Recent thunderstorm"
-msgstr "Gewitter"
+msgstr "Kürzliches Gewitter"
 
 #: ../../formatter/maps.go:125
-#, fuzzy
-#| msgid "Thunderstorm"
 msgid "Heavy thunderstorm"
-msgstr "Gewitter"
+msgstr "Schweres Gewitter"
 
 #: ../../formatter/maps.go:127 ../../formatter/maps.go:129
 #: ../../formatter/maps.go:132
-#, fuzzy
-#| msgid "Thunderstorm with heavy hail"
 msgid "Thunderstorm with hail"
-msgstr "Gewitter mit starkem Hagel"
+msgstr "Hagelgewitter"
 
 #: ../../formatter/maps.go:131
-#, fuzzy
-#| msgid "Thunderstorm with slight hail"
 msgid "Thunderstorm with dust"
-msgstr "Gewitter mit leichtem Hagel"
+msgstr "Gewitter mit Staubentwicklung"
 
 #: ../../formatter/maps.go:238
 msgid "New moon"
