@@ -130,12 +130,8 @@ func (s *Server) processGeobusUpdate(ctx context.Context, sub <-chan geobus.Resu
 		}
 
 		// Run weather data update job based on the new location
-		for _, job := range s.cron.Jobs() {
-			if job.ID() == s.weatherJobID {
-				if err := job.RunNow(); err != nil {
-					s.log.Error("failed to run weather data update job", log.ErrAttr(err))
-				}
-			}
+		if err := s.forceWeatherUpdate(ctx); err != nil {
+			s.log.Error("failed to run weather data update job", log.ErrAttr(err))
 		}
 	}
 

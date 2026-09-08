@@ -26,8 +26,8 @@ const (
 	debounceWindow   = 2 * time.Second
 	retryDelay       = 5 * time.Second
 
-	// networkWakeupDelay gives DHCP/DNS a chance to settle before we hit the network.
-	networkWakeupDelay = 15 * time.Second
+	networkWaitTimeout = 15 * time.Second
+	pingRetryInterval  = time.Second
 )
 
 // monitorSleepResume watches logind's PrepareForSleep signal and refreshes the weather data
@@ -93,21 +93,27 @@ func isResumeSignal(sgn *dbus.Signal) bool {
 	return ok && !sleeping
 }
 
-// handleResume refreshes the weather data after the machine woke up.
+// handleResume waits for the weather service to become reachable after a wake-up and refreshes
+// the weather data. It gives up after networkWaitTimeout.
 func (s *Server) handleResume(ctx context.Context) {
-	if !wait(ctx, networkWakeupDelay) {
-		return
+	waitCtx, cancel := context.WithTimeout(ctx, networkWaitTimeout)
+	defer cancel()
+
+	for {
+		err := s.weather.Ping(waitCtx)
+		if err == nil {
+			break
+		}
+		if !wait(waitCtx, pingRetryInterval) {
+			s.log.Error("no connectivity after resume, skipping weather refresh", log.ErrAttr(err))
+			return
+		}
 	}
+
 	s.log.Debug("resumed from sleep, fetching latest weather data")
-
-	/*
-		s.weatherLock.Lock()
-		s.weatherIsSet = false
-		s.weatherLock.Unlock()
-
-		s.fetchWeather(ctx)
-		s.printWeather(ctx)
-	*/
+	if err := s.forceWeatherUpdate(ctx); err != nil {
+		s.log.Error("failed to run weather data update job", log.ErrAttr(err))
+	}
 }
 
 // wait sleeps for a given duration and reports whether it completed without ctx being canceled.
