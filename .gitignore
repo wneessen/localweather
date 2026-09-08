@@ -1,6 +1,7 @@
-# If you prefer the allow list template instead of the deny list, see community template:
-# https://github.com/github/gitignore/blob/main/community/Golang/Go.AllowList.gitignore
+# SPDX-FileCopyrightText: Winni Neessen <wn@neessen.dev>
 #
+# SPDX-License-Identifier: MIT
+
 # Binaries for programs and plugins
 *.exe
 *.exe~
@@ -27,9 +28,10 @@ go.work.sum
 # env file
 .env
 
-# Editor/IDE
+# Editors
 .idea/
-# .vscode/
+.vscode/
+.sonarlint/
 
 # Dev env
 .dev

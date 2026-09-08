@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: Winni Neessen <wn@neessen.dev>
+
+SPDX-License-Identifier: MIT
+//-->
+
 # localweather
 A local weather web service with automatic geolocation lookup
 
