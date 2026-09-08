@@ -119,14 +119,10 @@ func (s *Server) handlerWeatherUpdateGet(w http.ResponseWriter, r *http.Request)
 		UpdateSucceeded bool `json:"update_succeeded"`
 	}
 
-	for _, job := range s.cron.Jobs() {
-		if job.ID() == s.weatherJobID {
-			if err := job.RunNow(); err != nil {
-				s.log.Error("forced weather update job failed", log.ErrAttr(err))
-				s.renderErr(w, r, http.StatusInternalServerError, apperror.ErrUnexpected)
-				return
-			}
-		}
+	if err := s.forceWeatherUpdate(r.Context()); err != nil {
+		s.log.Error("forced weather update job failed", log.ErrAttr(err))
+		s.renderErr(w, r, http.StatusInternalServerError, apperror.ErrUnexpected)
+		return
 	}
 
 	params := &response{UpdateSucceeded: true}

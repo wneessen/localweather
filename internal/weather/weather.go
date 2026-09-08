@@ -16,6 +16,7 @@ import (
 type Provider interface {
 	Name() string
 	Fetch(ctx context.Context, coords types.Coordinate) (*Data, error)
+	Ping(ctx context.Context) error
 }
 
 type Data struct {

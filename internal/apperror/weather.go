@@ -10,4 +10,13 @@ func (*CurrentWeatherdataNotFoundError) Error() string {
 	return "no current weather data found"
 }
 
-var ErrCurrentWeatherdataNotFound = new(CurrentWeatherdataNotFoundError)
+type PingRequestFailedError struct{}
+
+func (*PingRequestFailedError) Error() string {
+	return "failed to ping weather provider"
+}
+
+var (
+	ErrCurrentWeatherdataNotFound = new(CurrentWeatherdataNotFoundError)
+	ErrPingRequestFailed          = new(PingRequestFailedError)
+)

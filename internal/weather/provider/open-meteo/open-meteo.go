@@ -142,6 +142,23 @@ func (o *OpenMeteo) Name() string {
 	return name
 }
 
+// Ping checks the availability of the Open-Meteo API by making a minimal forecast call and returns
+// an error if it fails.
+func (o *OpenMeteo) Ping(ctx context.Context) error {
+	// Open-Meteo does not provide a health or ping endpoint, so we use the minimum forcast call instead
+	query := url.Values{}
+	query.Set("latitude", "0")
+	query.Set("longitude", "0")
+	query.Set("current", "temperature_2m")
+
+	res := new(response)
+	code, err := o.http.GetWithTimeout(ctx, apiEndpoint, res, query, nil, time.Millisecond*500)
+	if err != nil || code != 200 {
+		return apperror.ErrPingRequestFailed
+	}
+	return nil
+}
+
 func (o *OpenMeteo) Fetch(ctx context.Context, coords types.Coordinate) (*weather.Data, error) {
 	res := new(response)
 	data := weather.NewData()

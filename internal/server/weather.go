@@ -5,6 +5,7 @@
 package server
 
 import (
+	"context"
 	"fmt"
 	"log/slog"
 	"strings"
@@ -38,4 +39,16 @@ func (s *Server) selectWeatherProvider() (provider weather.Provider, err error) 
 		return nil, fmt.Errorf("unsupported weather provider: %s", s.conf.Weather.Provider)
 	}
 	return provider, nil
+}
+
+// forceWeatherUpdate triggers an immediate execution of the scheduled weather update job if it exists.
+func (s *Server) forceWeatherUpdate(ctx context.Context) error {
+	for _, job := range s.cron.Jobs() {
+		if job.ID() == s.weatherJobID {
+			if err := job.RunNow(); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }
