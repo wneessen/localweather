@@ -20,11 +20,11 @@ import (
 )
 
 type Formatter struct {
-	conf          *config.Config
-	localizer     *spreak.Localizer
-	humanizer     *humanize.Humanizer
-	printer       *message.Printer
-	forecastHours uint
+	conf      *config.Config
+	localizer *spreak.Localizer
+	humanizer *humanize.Humanizer
+	printer   *message.Printer
+	// forecastHours uint
 }
 
 // Supported languages for humanize
@@ -128,7 +128,7 @@ func (f *Formatter) MoonphaseIconURL(phase string) string {
 	if !ok {
 		return ""
 	}
-	return fmt.Sprintf(moonIconURLFormat, f.conf.Weather.IconSet, fmt.Sprintf("%s", filename))
+	return fmt.Sprintf(moonIconURLFormat, f.conf.Weather.IconSet, filename)
 }
 
 func (f *Formatter) WindDirectionSymbol(deg vartype.VarFloat64) string {

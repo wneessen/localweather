@@ -49,3 +49,11 @@ paths = [
   'builtin$',
   'examples$'
 ]
+
+## We need an new context here, since it will only trigger when the original context is canceled
+[[linters.exclusions.rules]]
+linters = [
+  'contextcheck'
+]
+path = 'internal/server/server.go'
+text = 'Non-inherited new context'

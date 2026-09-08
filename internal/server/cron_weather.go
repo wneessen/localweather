@@ -100,7 +100,6 @@ func (s *Server) cronjobWeatherdataUpdate(ctx context.Context) {
 		currentDB.Condition = s.t.Get(s.fmt.WeatherCondition(val))
 		currentDB.Category = s.fmt.WeatherCategory(val)
 		currentDB.Icon = s.fmt.WeatherSymbol(val, data.Current.IsDay.Value())
-
 	}
 	if data.Current.WindDirection.IsSet() {
 		currentDB.WindDirection = sql.NullFloat64{
