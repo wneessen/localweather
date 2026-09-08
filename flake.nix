@@ -17,12 +17,12 @@
         inherit (pkgs) lib;
 
         go = pkgs.go-bin.versions."1.27.1";
-        version = "0.0.1";
+        version = "0.0.2";
         targets = {
-          x86_64-linux   = { goPlatform = "linux_amd64";  hash = "sha256-JYI3zqsO4DemZT/dRROMEVuSaDWn22Y+jgXyAx0k/WU="; };
-          aarch64-linux  = { goPlatform = "linux_arm64";  hash = "sha256-XFScebHw/GgiGSYNtOR8WJkAGB3fNKjXZvOYMSj6adM="; };
-          x86_64-darwin  = { goPlatform = "darwin_amd64"; hash = "sha256-ZkBWlUj3eRChZmVl1Jv0YvAYBYc1JuS3/3ayPxsZ8WI="; };
-          aarch64-darwin = { goPlatform = "darwin_arm64"; hash = "sha256-zxs0kgp8rgmciisMXg95am6YeJNhIyGVCSMe8wQ+7xw="; };
+          x86_64-linux   = { goPlatform = "linux_amd64";  hash = "sha256-BHn5EsUGps2CrfYjqZBF5B5PZTgvE1Z8lmQQovqJ2Tc="; };
+          aarch64-linux  = { goPlatform = "linux_arm64";  hash = "sha256-07r0kcSfwP9gn2e98w4hHIby85rNf6d+7caZ1NxtVpA="; };
+          x86_64-darwin  = { goPlatform = "darwin_amd64"; hash = "sha256-4JT7sHwknul000mNII+0PdqG2aBq59vZX4fMh3pB1bU="; };
+          aarch64-darwin = { goPlatform = "darwin_arm64"; hash = "sha256-5tELxqkatur+E9CL5PeaysOvDlXmFfFo9GvgrKKknFg="; };
         };
 
         target = targets.${system}
