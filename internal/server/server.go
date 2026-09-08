@@ -112,6 +112,9 @@ func (s *Server) Start(ctx context.Context) error {
 	}
 	s.fmt = form
 
+	s.log.Debug("initializing sleep/resume detection")
+	go s.monitorSleepResume(ctx)
+
 	s.log.Info("starting http backend", "listen_addr", s.conf.ListenAddr())
 	s.httpRoutes(ctx)
 	s.fileServer(s.mux, "/static", http.FS(static.FS))

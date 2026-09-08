@@ -8,6 +8,7 @@ require (
 	github.com/go-chi/httplog/v3 v3.4.0
 	github.com/go-chi/render v1.0.3
 	github.com/go-co-op/gocron/v2 v2.22.0
+	github.com/godbus/dbus/v5 v5.2.2
 	github.com/google/uuid v1.6.0
 	github.com/kkyr/fig v0.5.0
 	github.com/mdlayher/wifi v0.9.0
