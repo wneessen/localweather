@@ -1,21 +1,17 @@
-name: Continous Delivery
+name: CD / Publish Docker Container
 
 permissions:
   contents: read
+  packages: write
+
+on:
+  push:
+    branches:
+      - main
 
 jobs:
   publish:
-    name: Docker publish
     runs-on: ubuntu-latest
-
-    on:
-      push:
-        branches:
-          - main
-
-    permissions:
-      contents: read
-      packages: write
 
     steps:
       - name: Setup QEMU
