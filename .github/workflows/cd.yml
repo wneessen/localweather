@@ -3,15 +3,15 @@ name: Continous Delivery
 permissions:
   contents: read
 
-on:
-  push:
-    branches:
-      - main
-
 jobs:
   publish:
     name: Docker publish
     runs-on: ubuntu-latest
+
+    on:
+      push:
+        branches:
+          - main
 
     permissions:
       contents: read
@@ -47,6 +47,11 @@ jobs:
     
     permissions:
       contents: write
+
+    on:
+      push:
+        tags:
+          - "*"
 
     steps:
       - name: Checkout
