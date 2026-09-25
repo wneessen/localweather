@@ -27,8 +27,6 @@ const (
 	pollTime = time.Minute
 )
 
-var ErrNoCoordinates = fmt.Errorf("no valid city name found in cityname file")
-
 // Provider reads city data from a file and emits updates via a stream.
 // It periodically reads a specified file, parses its data, and updates geolocation results based on changes.
 // Each result includes details about the location, accuracy, confidence, and timestamp of the data.
