@@ -124,7 +124,7 @@ func (b *Service) Publish(r Result) {
 		superseded = true
 	}
 
-	b.log.Debug("a geobus provider published a new geolocation update",
+	b.log.Debug("a geobus provider published a geolocation update",
 		slog.Group("location_details",
 			slog.Float64("accuracy", r.Coordinates.Accuracy.Float64()),
 			slog.Float64("altitude", r.Coordinates.Altitude),
@@ -174,7 +174,10 @@ func (r Result) BetterThan(prev Result) bool {
 	}
 
 	// More accurate?
-	if r.Coordinates.Accuracy < prev.Coordinates.Accuracy-accuracyEpsilon {
+	if r.Coordinates.Accuracy == prev.Coordinates.Accuracy {
+		return true
+	}
+	if r.Coordinates.Accuracy <= prev.Coordinates.Accuracy-accuracyEpsilon {
 		return true
 	}
 	if prev.Coordinates.Accuracy < r.Coordinates.Accuracy-accuracyEpsilon {
