@@ -5,6 +5,7 @@
 package config
 
 import (
+	"log/slog"
 	"testing"
 	"time"
 )
@@ -140,9 +141,84 @@ func TestConfig_ListenAddr(t *testing.T) {
 			t.Fatalf("expected config to be non-nil")
 		}
 		addr := config.ListenAddr()
-		t.Logf("ListenAddr returned: %s", addr)
 		if wantAddr != addr {
 			t.Errorf("expected ListenAddr to return %s, got %s", wantAddr, addr)
 		}
 	})
+}
+
+func TestLogLevel_SLog(t *testing.T) {
+	tests := []struct {
+		name string
+		has  LogLevel
+		want slog.Level
+	}{
+		{name: "trace", has: LevelTrace, want: slog.LevelDebug},
+		{name: "debug", has: LevelDebug, want: slog.LevelDebug},
+		{name: "info", has: LevelInfo, want: slog.LevelInfo},
+		{name: "warn", has: LevelWarn, want: slog.LevelWarn},
+		{name: "error", has: LevelError, want: slog.LevelError},
+		{name: "unknown", has: LevelUnknown, want: slog.LevelInfo},
+		{name: "default", has: -999, want: slog.LevelInfo},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			got := tc.has.SLog()
+			if got != tc.want {
+				t.Errorf("expected slog to return %s, got %s", tc.want, got)
+			}
+		})
+	}
+}
+
+func TestLogLevel_String(t *testing.T) {
+	tests := []struct {
+		has  LogLevel
+		want string
+	}{
+		{want: "trace", has: LevelTrace},
+		{want: "debug", has: LevelDebug},
+		{want: "info", has: LevelInfo},
+		{want: "warn", has: LevelWarn},
+		{want: "error", has: LevelError},
+		{want: "unknown", has: LevelUnknown},
+		{want: "unknown", has: -999},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.want, func(t *testing.T) {
+			got := tc.has.String()
+			if got != tc.want {
+				t.Errorf("expected string to return %s, got %s", tc.want, got)
+			}
+		})
+	}
+}
+
+func TestLogLevel_UnmarshalString(t *testing.T) {
+	tests := []struct {
+		has     string
+		want    LogLevel
+		wantErr bool
+	}{
+		{"trace", LevelTrace, false},
+		{"debug", LevelDebug, false},
+		{"info", LevelInfo, false},
+		{"warn", LevelWarn, false},
+		{"error", LevelError, false},
+		{"unknown", LevelUnknown, true},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.has, func(t *testing.T) {
+			level := new(LogLevel)
+			if err := level.UnmarshalString(tc.has); err != nil && !tc.wantErr {
+				t.Errorf("failed to unmarshal log level string %q: %s", tc.has, err)
+			}
+			if *level != tc.want {
+				t.Errorf("expected unmarshal to return %s, got %s", tc.want, level)
+			}
+		})
+	}
 }
