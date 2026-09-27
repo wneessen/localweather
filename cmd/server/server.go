@@ -33,16 +33,15 @@ func main() {
 
 func start() error {
 	// Read the config
-	confPath := "etc/app.toml"
-	confPathEnv := os.Getenv("APP_CONFIG_PATH")
-	if confPathEnv != "" {
-		confPath = confPathEnv
+	var path, file string
+	confPath := os.Getenv("APP_CONFIG_PATH")
+	if confPath != "" {
+		path = filepath.Dir(confPath)
+		file = filepath.Base(confPath)
 	}
-	path := filepath.Dir(confPath)
-	file := filepath.Base(confPath)
 	conf, err := config.New(path, file)
 	if err != nil {
-		return fmt.Errorf("failed to read/parse config: %w", err)
+		return fmt.Errorf("failed to read or parse config: %w", err)
 	}
 	if err = conf.Validate(); err != nil {
 		return fmt.Errorf("failed to validate config: %w", err)

@@ -20,6 +20,7 @@ func TestApperrors(t *testing.T) {
 			"coordinates: NoCoordinatesFoundForAddressError", &NoCoordinatesFoundForAddressError{},
 			wantType[*NoCoordinatesFoundForAddressError],
 		},
+		{"dbus: ErrDBusSignalChannelClosed", ErrDBusSignalChannelClosed, wantType[*DBusSignalChannelClosedError]},
 		{"geobus: ErrNoGeobusProvider", ErrNoGeobusProvider, wantType[*NoGeobusEnabledError]},
 		{"geobus: ErrNoValidCoordinates", ErrNoValidCoordinates, wantType[*NoValidCoordinatesFoundError]},
 		{"geocoder: ErrGeoCoderRequired", ErrGeoCoderRequired, wantType[*GeoCoderRequiredError]},
@@ -39,6 +40,7 @@ func TestApperrors(t *testing.T) {
 			"weather: ErrCurrentWeatherdataNotFound", ErrCurrentWeatherdataNotFound,
 			wantType[*CurrentWeatherdataNotFoundError],
 		},
+		{"weather: ErrPingRequestFailed", ErrPingRequestFailed, wantType[*PingRequestFailedError]},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
