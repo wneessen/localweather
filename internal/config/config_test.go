@@ -88,4 +88,61 @@ func TestNew(t *testing.T) {
 				conf.Weather.HotThreshold)
 		}
 	})
+	t.Run("New with no config file path uses env variables", func(t *testing.T) {
+		config, err := New("", "")
+		if err != nil {
+			t.Fatalf("failed to create config with no config file path: %s", err)
+		}
+		if config == nil {
+			t.Fatalf("expected config to be non-nil")
+		}
+	})
+	t.Run("New with invalid config file path fails", func(t *testing.T) {
+		_, err := New("invalid", "config.toml")
+		if err == nil {
+			t.Fatalf("expected error when creating config with invalid config file path")
+		}
+	})
+}
+
+func TestConfig_Validate(t *testing.T) {
+	t.Run("Validate sets defaults if not set via config file", func(t *testing.T) {
+		config, err := New("", "")
+		if err != nil {
+			t.Fatalf("failed to create config with no config file path: %s", err)
+		}
+		if config == nil {
+			t.Fatalf("expected config to be non-nil")
+		}
+		if err = config.Validate(); err != nil {
+			t.Errorf("failed to validate config: %s", err)
+		}
+		if config.Geobus.CitynameFile == "" {
+			t.Error("expected validate to set default cityname file path")
+		}
+		if config.Geobus.CoordinatesFile == "" {
+			t.Error("expected validate to set default coordinates file path")
+		}
+		if config.Database.Path == "" {
+			t.Error("expected validate to set default database path")
+		}
+	})
+}
+
+func TestConfig_ListenAddr(t *testing.T) {
+	t.Run("ListenAddr returns a valid server listen address", func(t *testing.T) {
+		wantAddr := "127.0.0.1:10001"
+		config, err := New("", "")
+		if err != nil {
+			t.Fatalf("failed to create config with no config file path: %s", err)
+		}
+		if config == nil {
+			t.Fatalf("expected config to be non-nil")
+		}
+		addr := config.ListenAddr()
+		t.Logf("ListenAddr returned: %s", addr)
+		if wantAddr != addr {
+			t.Errorf("expected ListenAddr to return %s, got %s", wantAddr, addr)
+		}
+	})
 }
