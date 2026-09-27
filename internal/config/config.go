@@ -61,21 +61,22 @@ type Config struct {
 	} `fig:"weather"`
 }
 
-// New creates a new instance of Config by reading and loading configuration values. It takes in the file
-// path and file name of the configuration file as parameters. It returns a pointer to the Config and an
-// error if there was a problem reading or loading the configuration.
+// New initializes and loads a Config object using the specified path and file or defaults if values
+// are empty. If no path or file is provided, it loads the configuration from environment variables.
 func New(path, file string) (*Config, error) {
 	config := Config{}
+
+	if path == "" || file == "" {
+		err := fig.Load(&config, fig.AllowNoFile(), fig.UseEnv("localweather"))
+		return &config, err
+	}
+
 	_, err := os.Stat(fmt.Sprintf("%s/%s", path, file))
 	if err != nil {
-		return &config, fmt.Errorf("failed to read config: %w", err)
+		return &config, fmt.Errorf("failed to read config file: %w", err)
 	}
-
-	if err = fig.Load(&config, fig.Dirs(path), fig.File(file), fig.UseEnv("localweather")); err != nil {
-		return &config, fmt.Errorf("failed to load config: %w", err)
-	}
-
-	return &config, nil
+	err = fig.Load(&config, fig.Dirs(path), fig.File(file), fig.UseEnv("localweather"))
+	return &config, err
 }
 
 // Validate checks and updates the Config object to ensure required fields are set, assigning defaults if necessary.
