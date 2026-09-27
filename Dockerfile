@@ -23,7 +23,6 @@ COPY ["docker-files/group", "/etc/group"]
 COPY --from=gobuilder ["/etc/ssl/certs/ca-certificates.crt", "/etc/ssl/cert.pem"]
 
 WORKDIR /app
-COPY etc/app.toml ./etc/app.toml
 COPY --from=gobuilder /app/server ./
 COPY --from=gobuilder --chown=1000:1000 /out/data ./data
 
