@@ -4,7 +4,7 @@ go 1.27.1
 
 require (
 	github.com/Xuanwo/go-locale v1.1.3
-	github.com/go-chi/chi/v5 v5.3.2
+	github.com/go-chi/chi/v5 v5.4.0
 	github.com/go-chi/httplog/v3 v3.4.0
 	github.com/go-chi/render v1.0.3
 	github.com/go-co-op/gocron/v2 v2.22.0
