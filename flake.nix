@@ -7,8 +7,16 @@
     go-overlay.url = "github:purpleclay/go-overlay";
   };
 
-  outputs = { self, nixpkgs, flake-utils, go-overlay, ... }:
-    flake-utils.lib.eachDefaultSystem (system:
+  outputs =
+    {
+      self,
+      nixpkgs,
+      flake-utils,
+      go-overlay,
+      ...
+    }:
+    flake-utils.lib.eachDefaultSystem (
+      system:
       let
         pkgs = import nixpkgs {
           inherit system;
@@ -16,32 +24,43 @@
         };
         inherit (pkgs) lib;
 
-        go = pkgs.go-bin.versions."1.27.1";
-        version = "0.0.2";
+        go = pkgs.go-bin.versions."1.27.3";
+        version = "0.0.3";
         targets = {
-          x86_64-linux   = { goPlatform = "linux_amd64";  hash = "sha256-BHn5EsUGps2CrfYjqZBF5B5PZTgvE1Z8lmQQovqJ2Tc="; };
-          aarch64-linux  = { goPlatform = "linux_arm64";  hash = "sha256-07r0kcSfwP9gn2e98w4hHIby85rNf6d+7caZ1NxtVpA="; };
-          x86_64-darwin  = { goPlatform = "darwin_amd64"; hash = "sha256-4JT7sHwknul000mNII+0PdqG2aBq59vZX4fMh3pB1bU="; };
-          aarch64-darwin = { goPlatform = "darwin_arm64"; hash = "sha256-5tELxqkatur+E9CL5PeaysOvDlXmFfFo9GvgrKKknFg="; };
+          x86_64-linux = {
+            goPlatform = "linux_amd64";
+            hash = "sha256-BHn5EsUGps2CrfYjqZBF5B5PZTgvE1Z8lmQQovqJ2Tc=";
+          };
+          aarch64-linux = {
+            goPlatform = "linux_arm64";
+            hash = "sha256-07r0kcSfwP9gn2e98w4hHIby85rNf6d+7caZ1NxtVpA=";
+          };
+          x86_64-darwin = {
+            goPlatform = "darwin_amd64";
+            hash = "sha256-4JT7sHwknul000mNII+0PdqG2aBq59vZX4fMh3pB1bU=";
+          };
+          aarch64-darwin = {
+            goPlatform = "darwin_arm64";
+            hash = "sha256-5tELxqkatur+E9CL5PeaysOvDlXmFfFo9GvgrKKknFg=";
+          };
         };
 
-        target = targets.${system}
-          or (throw "localweather: no prebuilt release asset for ${system}");
+        target = targets.${system} or (throw "localweather: no prebuilt release asset for ${system}");
 
         localweather = pkgs.stdenvNoCC.mkDerivation {
           pname = "localweather";
           inherit version;
 
           src = pkgs.fetchurl {
-            url = "https://github.com/wneessen/localweather/releases/download/v${version}"
-                + "/localweather_${version}_${target.goPlatform}.tar.gz";
+            url =
+              "https://github.com/wneessen/localweather/releases/download/v${version}"
+              + "/localweather_${version}_${target.goPlatform}.tar.gz";
             inherit (target) hash;
           };
 
           sourceRoot = ".";
 
-          nativeBuildInputs =
-            lib.optional pkgs.stdenv.hostPlatform.isLinux pkgs.autoPatchelfHook;
+          nativeBuildInputs = lib.optional pkgs.stdenv.hostPlatform.isLinux pkgs.autoPatchelfHook;
 
           installPhase = ''
             runHook preInstall
@@ -61,30 +80,48 @@
             sourceProvenance = [ lib.sourceTypes.binaryNativeCode ];
           };
         };
-      in {
-        packages.default      = localweather;
+      in
+      {
+        packages.default = localweather;
         packages.localweather = localweather;
-        apps.default          = flake-utils.lib.mkApp { drv = localweather; };
+        apps.default = flake-utils.lib.mkApp { drv = localweather; };
 
         devShells.default = pkgs.mkShell {
           packages = [
             go.withDefaultTools
             go-overlay.packages.${system}.govendor
-          ] ++ (with pkgs; [
-            just jq goose air sqlite secretspec sqlc reuse
+          ]
+          ++ (with pkgs; [
+            just
+            jq
+            goose
+            air
+            sqlite
+            secretspec
+            sqlc
+            reuse
           ]);
         };
       }
-    ) // {
-      nixosModules.localweather = { config, lib, pkgs, ... }:
+    )
+    // {
+      nixosModules.localweather =
+        {
+          config,
+          lib,
+          pkgs,
+          ...
+        }:
         let
           cfg = config.services.localweather;
           tomlFormat = pkgs.formats.toml { };
           configFile =
-            if cfg.configFile != null
-            then cfg.configFile
-            else tomlFormat.generate "localweather.toml" cfg.settings;
-        in {
+            if cfg.configFile != null then
+              cfg.configFile
+            else
+              tomlFormat.generate "localweather.toml" cfg.settings;
+        in
+        {
           options.services.localweather = {
             enable = lib.mkEnableOption "localweather";
 
